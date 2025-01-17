@@ -12,7 +12,7 @@ go get github.com/HGV/alpinebits
 
 ## Usage
 
-###  Routing
+### Routing
 
 ```go
 package main
@@ -20,7 +20,7 @@ package main
 import (
     "net/http"
 
-	"github.com/HGV/alpinebits/v_2018_10"
+    "github.com/HGV/alpinebits/v_2018_10"
     "github.com/HGV/alpinebits/v_2020_10"
     "github.com/go-chi/chi/v5"
 )
@@ -41,7 +41,7 @@ func alpinebitsRouter() http.Handler {
 	})
     r.Version(v202010, func(s *Subrouter) {
 		s.Action(v_2020_10.ActionHotelInvCountNotif, pushHotelInvCountNotif, alpinebits.WithCapabilities(
-			v_2020_10.CapabilityHotelInvCountNotifAcceptRooms,
+            v_2020_10.CapabilityHotelInvCountNotifAcceptRooms,
 			v_2020_10.CapabilityHotelInvCountNotifAcceptDeltas,
 			v_2020_10.CapabilityHotelInvCountNotifAcceptOutOfOrder,
 			v_2020_10.CapabilityHotelInvCountNotifAcceptOutOfMarket,
@@ -57,4 +57,19 @@ func pushHotelAvailNotif(r Request) (any, error) {
 func pushHotelInvCountNotif(r Request) (any, error) {
 	return nil, nil
 }
+```
+
+## Testing
+
+> [!IMPORTANT]
+> Ensure `libxml2` and `libxml2-dev` are installed before running the tests. You can install them using:
+
+```sh
+sudo apt install libxml2 libxml2-dev
+```
+
+Run all tests:
+
+```sh
+go test ./...
 ```
