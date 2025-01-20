@@ -4,6 +4,7 @@ type Capability string
 
 const (
 	CapabilityHotelAvailNotifAcceptRooms                             Capability = "OTA_HotelAvailNotif_accept_rooms"
+	CapabilityHotelAvailNotifAcceptCategories                        Capability = "OTA_HotelAvailNotif_accept_categories"
 	CapabilityHotelAvailNotifAcceptDeltas                            Capability = "OTA_HotelAvailNotif_accept_deltas"
 	CapabilityHotelAvailNotifAcceptBookingThreshold                  Capability = "OTA_HotelAvailNotif_accept_BookingThreshold"
 	CapabilityHotelDescriptiveContentNotifInventoryUseRooms          Capability = "OTA_HotelDescriptiveContentNotif_Inventory_use_rooms"

@@ -3,6 +3,7 @@ package v_2018_10
 import (
 	"encoding/xml"
 
+	"github.com/HGV/alpinebits/version"
 	"github.com/HGV/x/timex"
 )
 
@@ -37,6 +38,10 @@ type Error struct {
 	Value  string           `xml:",innerxml"`
 }
 
+func (err Error) Error() string {
+	return err.Value
+}
+
 type response struct {
 	Success  *Success   `xml:"Success"`
 	Warnings *[]Warning `xml:"Warnings>Warning"`
@@ -46,7 +51,7 @@ type response struct {
 type PingRQ struct {
 	XMLName  xml.Name `xml:"http://www.opentravel.org/OTA/2003/05 OTA_PingRQ"`
 	Version  string   `xml:"Version,attr"`
-	EchoData EchoData `xml:"EchoData"`
+	EchoData string   `xml:",innerxml"`
 }
 
 type PingRS struct {
@@ -54,11 +59,7 @@ type PingRS struct {
 	Version  string   `xml:"Version,attr"`
 	Success  Success  `xml:"Success"`
 	Warnings Warning  `xml:"Warnings>Warning"`
-	EchoData EchoData `xml:"EchoData"`
-}
-
-type EchoData struct {
-	Value string `xml:",innerxml"`
+	EchoData string   `xml:",innerxml"`
 }
 
 type UniqueIDType int
@@ -94,6 +95,12 @@ type AvailStatusMessages struct {
 	AvailStatusMessages []AvailStatusMessage `xml:"AvailStatusMessage"`
 }
 
+func (a AvailStatusMessages) IsReset() bool {
+	var zero AvailStatusMessage
+	return len(a.AvailStatusMessages) == 1 &&
+		a.AvailStatusMessages[0] == zero
+}
+
 type BookingLimitMessageType string
 
 const (
@@ -105,6 +112,15 @@ type AvailStatusMessage struct {
 	BookingLimitMessageType  BookingLimitMessageType  `xml:"BookingLimitMessageType,attr"`
 	BookingThreshold         int                      `xml:"BookingThreshold,attr"`
 	StatusApplicationControl StatusApplicationControl `xml:"StatusApplicationControl"`
+}
+
+var _ version.DateRangeProvider = (*AvailStatusMessage)(nil)
+
+func (s AvailStatusMessage) DateRange() timex.DateRange {
+	return timex.DateRange{
+		Start: s.StatusApplicationControl.Start,
+		End:   s.StatusApplicationControl.End,
+	}
 }
 
 type StatusApplicationControl struct {

@@ -3,6 +3,8 @@ package version
 import (
 	"fmt"
 	"regexp"
+
+	"github.com/HGV/x/timex"
 )
 
 type (
@@ -18,6 +20,9 @@ type (
 	}
 	HotelCodeProvider interface {
 		HotelCode() string
+	}
+	DateRangeProvider interface {
+		DateRange() timex.DateRange
 	}
 )
 
