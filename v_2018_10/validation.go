@@ -36,3 +36,16 @@ func validateOverlaps[T version.DateRangeProvider](ranges []T) error {
 
 	return nil
 }
+
+func validateLanguageUniqueness(descs []Description) error {
+	seen := make(map[string]struct{})
+	for _, desc := range descs {
+		lang := strings.TrimSpace(desc.Language)
+		key := lang + "|" + string(desc.TextFormat)
+		if _, exists := seen[key]; exists {
+			return ErrDuplicateLanguage
+		}
+		seen[key] = struct{}{}
+	}
+	return nil
+}

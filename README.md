@@ -32,7 +32,7 @@ func main() {
 }
 
 func alpinebitsRouter() http.Handler {
-    r := NewRouter()
+    r := alpinebits.NewRouter()
 
     v201810, _ := v_2018_10.NewVersion()
     r.Version(v201810, func(s *Subrouter) {
