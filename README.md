@@ -32,31 +32,45 @@ func main() {
 }
 
 func alpinebitsRouter() http.Handler {
-    v201810, _ := v_2018_10.NewVersion()
-    v202010, _ := v_2020_10.NewVersion()
-
     r := NewRouter()
+
+    v201810, _ := v_2018_10.NewVersion()
     r.Version(v201810, func(s *Subrouter) {
-		s.Action(v_2018_10.ActionHotelAvailNotif, pushHotelAvailNotif)
-	})
+        s.Action(v_2018_10.ActionHotelAvailNotif, pushHotelAvailNotif)
+    })
+
+    v202010, _ := v_2020_10.NewVersion()
     r.Version(v202010, func(s *Subrouter) {
-		s.Action(v_2020_10.ActionHotelInvCountNotif, pushHotelInvCountNotif, alpinebits.WithCapabilities(
+        s.Action(v_2020_10.ActionHotelInvCountNotif, pushHotelInvCountNotif, alpinebits.WithCapabilities(
             v_2020_10.CapabilityHotelInvCountNotifAcceptRooms,
-			v_2020_10.CapabilityHotelInvCountNotifAcceptDeltas,
-			v_2020_10.CapabilityHotelInvCountNotifAcceptOutOfOrder,
-			v_2020_10.CapabilityHotelInvCountNotifAcceptOutOfMarket,
-			v_2020_10.CapabilityHotelInvCountNotifAcceptClosingSeasons,
-		))
-	})
+            v_2020_10.CapabilityHotelInvCountNotifAcceptDeltas,
+            v_2020_10.CapabilityHotelInvCountNotifAcceptOutOfOrder,
+            v_2020_10.CapabilityHotelInvCountNotifAcceptOutOfMarket,
+            v_2020_10.CapabilityHotelInvCountNotifAcceptClosingSeasons,
+        ))
+    })
 }
 
 func pushHotelAvailNotif(r Request) (any, error) {
-	return nil, nil
+    return nil, nil
 }
 
 func pushHotelInvCountNotif(r Request) (any, error) {
-	return nil, nil
+    return nil, nil
 }
+```
+
+### Validation
+
+```go
+validator := v_2018_10.NewHotelAvailNotifValidator(
+    WithRooms(true, &map[string]map[string]struct{}{
+        "DZ": {"101": {}, "102": {}},
+    }),
+    WithDeltas(true),
+    WithBookingThreshold(true),
+)
+err := validator.Validate(hotelAvailNotifRQ)
 ```
 
 ## Testing
