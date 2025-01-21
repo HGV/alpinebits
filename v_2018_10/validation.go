@@ -49,3 +49,17 @@ func validateLanguageUniqueness(descs []Description) error {
 	}
 	return nil
 }
+
+func validateString(s string) error {
+	if strings.TrimSpace(s) == "" {
+		return errors.New("string is empty or contains only whitespace")
+	}
+	return nil
+}
+
+func validateNonNilString(s *string) error {
+	if s == nil {
+		return nil
+	}
+	return validateString(*s)
+}

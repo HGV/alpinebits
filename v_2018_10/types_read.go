@@ -1,0 +1,303 @@
+package v_2018_10
+
+import (
+	"encoding/xml"
+	"fmt"
+	"regexp"
+	"strconv"
+	"time"
+
+	"github.com/HGV/x/timex"
+)
+
+type ReadRQ struct {
+	XMLName          xml.Name         `xml:"http://www.opentravel.org/OTA/2003/05 OTA_ReadRQ"`
+	Version          string           `xml:"Version,attr"`
+	HotelReadRequest HotelReadRequest `xml:"ReadRequests>HotelReadRequest"`
+}
+
+type HotelReadRequest struct {
+	HotelCode         string             `xml:"HotelCode,attr"`
+	SelectionCriteria *SelectionCriteria `xml:"SelectionCriteria,omitempty"`
+}
+
+type SelectionCriteria struct {
+	Start time.Time `xml:"Start,attr"`
+}
+
+type ResRetrieveRS struct {
+	XMLName           xml.Name           `xml:"http://www.opentravel.org/OTA/2003/05 OTA_ResRetrieveRS"`
+	Version           string             `xml:"Version,attr"`
+	HotelReservations []HotelReservation `xml:"ReservationsList>HotelReservation"`
+}
+
+type ResStatus string
+
+const (
+	ResStatusRequested ResStatus = "Requested"
+	ResStatusReserved  ResStatus = "Reserved"
+	ResStatusModify    ResStatus = "Modify"
+	ResStatusCancelled ResStatus = "Cancelled"
+)
+
+func (s ResStatus) IsReservation() bool {
+	return s == ResStatusReserved || s == ResStatusModify
+}
+
+type UniqueIDType2 int
+
+const (
+	UniqueIDType2Reservation  UniqueIDType2 = 14
+	UniqueIDType2Cancellation UniqueIDType2 = 15
+)
+
+// TODO: Move to another package or prefix name
+type UniqueID2 struct {
+	Type UniqueIDType2 `xml:"Type,attr"`
+	ID   string        `xml:"ID,attr"`
+}
+
+type HotelReservation struct {
+	CreateDateTime time.Time     `xml:"CreateDateTime,attr"`
+	ResStatus      ResStatus     `xml:"ResStatus,attr"`
+	UniqueID       UniqueID2     `xml:"UniqueID"`
+	RoomStays      []RoomStay    `xml:"RoomStays>RoomStay"`
+	Customer       Customer      `xml:"ResGuests>ResGuest>Profiles>ProfileInfo>Profile>Customer"`
+	ResGlobalInfo  ResGlobalInfo `xml:"ResGlobalInfo"`
+}
+
+type RoomStay struct {
+	RoomType    ResRoomType  `xml:"RoomTypes>RoomType"`
+	RatePlan    ResRatePlan  `xml:"RatePlans>RatePlan"`
+	GuestCounts []GuestCount `xml:"GuestCounts>GuestCount"`
+	TimeSpan    TimeSpan     `xml:"TimeSpan"`
+	Total       *Total       `xml:"Total"`
+}
+
+type ResRoomType struct {
+	RoomTypeCode           string `xml:"RoomTypeCode,attr,omitempty"`
+	RoomClassificationCode int    `xml:"RoomClassificationCode,attr,omitempty"`
+	RoomType               *int   `xml:"RoomType,attr,omitempty"`
+}
+
+type ResRatePlan struct {
+	RatePlanCode  string         `xml:"RatePlanCode,attr,omitempty"`
+	Commission    *Commission    `xml:"Commission"`
+	MealsIncluded *MealsIncluded `xml:"MealsIncluded"`
+}
+
+type Commission struct {
+	Percent                 *int                     `xml:"Percent,attr"`
+	CommissionPayableAmount *CommissionPayableAmount `xml:"CommissionPayableAmount"`
+}
+
+type CommissionPayableAmount struct {
+	Amount       string `xml:"Amount,attr"`
+	CurrencyCode string `xml:"CurrencyCode,attr"`
+}
+
+type MealsIncluded struct {
+	MealPlanIndicator bool `xml:"MealPlanIndicator,attr"`
+	// MealPlanCodes     BoardType `xml:"MealPlanCodes,attr"`
+}
+
+// TODO: BoardType
+
+type GuestCount struct {
+	Count int  `xml:"Count,attr"`
+	Age   *int `xml:"Age,attr"`
+}
+
+type TimeSpan struct {
+	Start           *timex.Date      `xml:"Start,attr"`
+	End             *timex.Date      `xml:"End,attr"`
+	Duration        *Duration        `xml:"Duration,attr"`
+	StartDateWindow *StartDateWindow `xml:"StartDateWindow"`
+}
+
+type Duration struct {
+	Nights int
+}
+
+var regexpDuration = regexp.MustCompile(`^P(P<nights>[0-9]+)N$`)
+
+func ParseDuration(s string) (Duration, error) {
+	var d Duration
+
+	if !regexpDuration.MatchString(s) {
+		return d, fmt.Errorf("invalid duration format: %s, expected format is 'PxN'", s)
+	}
+
+	matches := regexpDuration.FindStringSubmatch(s)
+	for i, name := range regexpDuration.SubexpNames() {
+		switch match := matches[i]; name {
+		case "nights":
+			nights, err := strconv.Atoi(match)
+			if err != nil {
+				return d, err
+			}
+			d.Nights = nights
+		}
+	}
+
+	return d, nil
+}
+
+func (d *Duration) UnmarshalText(data []byte) error {
+	var err error
+	*d, err = ParseDuration(string(data))
+	return err
+}
+
+func (d Duration) MarshalText() ([]byte, error) {
+	return []byte(d.String()), nil
+}
+
+func (d Duration) String() string {
+	return fmt.Sprintf("P%dN", d.Nights)
+}
+
+type StartDateWindow struct {
+	EarliestDate timex.Date `xml:"EarliestDate,attr"`
+	LatestDate   timex.Date `xml:"LatestDate,attr"`
+}
+
+type Total struct {
+	AmountAfterTax string `xml:"AmountAfterTax,attr"`
+	CurrencyCode   string `xml:"CurrencyCode,attr"`
+}
+
+type Gender string
+
+const (
+	GenderMale    Gender = "Male"
+	GenderFemale  Gender = "Female"
+	GenderUnknown Gender = "Unknown"
+)
+
+type Customer struct {
+	Gender     *Gender     `xml:"Gender,attr"`
+	BirthDate  *timex.Date `xml:"BirthDate,attr"`
+	Language   string      `xml:"Language,attr,omitempty"`
+	PersonName PersonName  `xml:"PersonName"`
+	Phones     []Phone     `xml:"Telephone"`
+	Email      *Email      `xml:"Email"`
+	Address    *Address    `xml:"Address"`
+}
+
+type PersonName struct {
+	NamePrefix *string `xml:"NamePrefix"`
+	GivenName  string  `xml:"GivenName"`
+	Surname    string  `xml:"Surname"`
+	NameTitle  *string `xml:"NameTitle"`
+}
+
+type PhoneTechType string
+
+const (
+	PhoneTechTypeVoice  PhoneTechType = "1"
+	PhoneTechTypeFax    PhoneTechType = "3"
+	PhoneTechTypeMobile PhoneTechType = "5"
+)
+
+type Phone struct {
+	PhoneTechType PhoneTechType `xml:"PhoneTechType,attr"`
+	PhoneNumber   string        `xml:"PhoneNumber,attr"`
+}
+
+type Remark string
+
+const (
+	RemarkNewsletterYes Remark = "newsletter:yes"
+	RemarkCatalogYes    Remark = "catalog:yes"
+)
+
+type Email struct {
+	// Type   string `xml:"EmailType,attr,omitempty"`
+	Remark Remark `xml:"Remark,attr,omitempty"`
+	Value  string `xml:",innerxml"`
+}
+
+type Address struct {
+	Language    string       `xml:"Language,attr,omitempty"`
+	Remark      Remark       `xml:"Remark,attr,omitempty"`
+	AddressLine *string      `xml:"AddressLine,omitempty"`
+	CityName    *string      `xml:"CityName,omitempty"`
+	PostalCode  *string      `xml:"PostalCode,omitempty"`
+	StateProv   *StateProv   `xml:"StateProv,omitempty"`
+	CountryName *CountryName `xml:"CountryName,omitempty"`
+}
+
+type StateProv struct {
+	StateCode string `xml:"StateCode,attr"`
+}
+
+type CountryName struct {
+	Code string `xml:"Code,attr"`
+}
+
+type ResGlobalInfo struct {
+	Comments           *[]Comment          `xml:"Comments>Comment"`
+	SpecialRequests    *[]SpecialRequest   `xml:"SpecialRequests>SpecialRequest"`
+	CancelPenalty      *string             `xml:"CancelPenalties>CancelPenalty>PenaltyDescription>Text"`
+	HotelReservationID *HotelReservationID `xml:"HotelReservationIDs>HotelReservationIDs"`
+	Profile            *Profile            `xml:"Profiles>ProfileInfo>Profile"`
+	BasicPropertyInfo  BasicPropertyInfo   `xml:"BasicPropertyInfo"`
+}
+
+type Comment struct {
+	Name      string     `xml:"Name,attr"`
+	ListItems []ListItem `xml:"ListItem,omitempty"`
+	Text      *Text      `xml:"Text,omitempty"`
+}
+
+type ListItem struct {
+	ListItem int    `xml:"ListItem,attr,omitempty"`
+	Language string `xml:"Language,attr,omitempty"`
+	Value    string `xml:",innerxml"`
+}
+
+type Text struct {
+	Value string `xml:",innerxml"`
+}
+
+type SpecialRequest struct {
+	Name string `xml:"Name,attr"`
+	Text *Text  `xml:"Text"`
+}
+
+type HotelReservationID struct {
+	ResIDType          int     `xml:"ResID_Type,attr"`
+	ResIDValue         *string `xml:"ResID_Value,attr"`
+	ResIDSource        *string `xml:"ResID_Source,attr"`
+	ResIDSourceContext *string `xml:"ResID_SourceContext,attr"`
+}
+
+type ProfileType int
+
+const (
+	ProfileTypeTravelAgent = 4
+)
+
+type Profile struct {
+	ProfileType ProfileType `xml:"ProfileType,attr"`
+	CompanyInfo CompanyInfo `xml:"CompanyInfo"`
+}
+
+type CompanyInfo struct {
+	CompanyName   CompanyName `xml:"CompanyName"`
+	AddressInfo   *Address    `xml:"AddressInfo"`
+	TelephoneInfo *Phone      `xml:"TelephoneInfo"`
+	Email         *Email      `xml:"Email"`
+}
+
+type CompanyName struct {
+	Code        string `xml:"Code,attr"`
+	CodeContext string `xml:"CodeContext,attr"`
+	Value       string `xml:",innerxml"`
+}
+
+type BasicPropertyInfo struct {
+	HotelCode string `xml:"HotelCode,attr"`
+	HotelName string `xml:"HotelName,attr,omitempty"`
+}
