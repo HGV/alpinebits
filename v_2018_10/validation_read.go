@@ -3,6 +3,8 @@ package v_2018_10
 import (
 	"net/mail"
 	"strings"
+
+	"github.com/HGV/alpinebits/duration"
 )
 
 type ReadValidator struct{}
@@ -215,7 +217,7 @@ func (v ResRetrieveValidator) validateTimeSpan(timeSpan TimeSpan) error {
 	return nil
 }
 
-func (v ResRetrieveValidator) validateStartDateWindow(w *StartDateWindow, d Duration) error {
+func (v ResRetrieveValidator) validateStartDateWindow(w *StartDateWindow, nights duration.Nights) error {
 	if w == nil {
 		return ErrMissingStartDateWindow
 	}
@@ -224,7 +226,7 @@ func (v ResRetrieveValidator) validateStartDateWindow(w *StartDateWindow, d Dura
 		return ErrEarliestDateAfterLatestDate
 	}
 
-	if d.Nights <= w.LatestDate.DaysSince(w.EarliestDate) {
+	if int(nights) <= w.LatestDate.DaysSince(w.EarliestDate) {
 		return ErrDurationOutOfRange
 	}
 

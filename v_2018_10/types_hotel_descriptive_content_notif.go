@@ -117,4 +117,9 @@ type URL struct {
 	Value string `xml:",innerxml"`
 }
 
-type VideoFormat ImageFormat
+type HotelDescriptiveContentNotifRS struct {
+	response
+
+	XMLName xml.Name `xml:"http://www.opentravel.org/OTA/2003/05 OTA_HotelDescriptiveContentNotifRS"`
+	Version string   `xml:"Version,attr"`
+}

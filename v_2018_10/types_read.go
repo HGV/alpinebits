@@ -2,11 +2,9 @@ package v_2018_10
 
 import (
 	"encoding/xml"
-	"fmt"
-	"regexp"
-	"strconv"
 	"time"
 
+	"github.com/HGV/alpinebits/duration"
 	"github.com/HGV/x/timex"
 )
 
@@ -96,13 +94,6 @@ type CommissionPayableAmount struct {
 	CurrencyCode string `xml:"CurrencyCode,attr"`
 }
 
-type MealsIncluded struct {
-	MealPlanIndicator bool `xml:"MealPlanIndicator,attr"`
-	// MealPlanCodes     BoardType `xml:"MealPlanCodes,attr"`
-}
-
-// TODO: BoardType
-
 type GuestCount struct {
 	Count int  `xml:"Count,attr"`
 	Age   *int `xml:"Age,attr"`
@@ -111,50 +102,8 @@ type GuestCount struct {
 type TimeSpan struct {
 	Start           *timex.Date      `xml:"Start,attr"`
 	End             *timex.Date      `xml:"End,attr"`
-	Duration        *Duration        `xml:"Duration,attr"`
+	Duration        *duration.Nights `xml:"Duration,attr"`
 	StartDateWindow *StartDateWindow `xml:"StartDateWindow"`
-}
-
-type Duration struct {
-	Nights int
-}
-
-var regexpDuration = regexp.MustCompile(`^P(P<nights>[0-9]+)N$`)
-
-func ParseDuration(s string) (Duration, error) {
-	var d Duration
-
-	if !regexpDuration.MatchString(s) {
-		return d, fmt.Errorf("invalid duration format: %s, expected format is 'PxN'", s)
-	}
-
-	matches := regexpDuration.FindStringSubmatch(s)
-	for i, name := range regexpDuration.SubexpNames() {
-		switch match := matches[i]; name {
-		case "nights":
-			nights, err := strconv.Atoi(match)
-			if err != nil {
-				return d, err
-			}
-			d.Nights = nights
-		}
-	}
-
-	return d, nil
-}
-
-func (d *Duration) UnmarshalText(data []byte) error {
-	var err error
-	*d, err = ParseDuration(string(data))
-	return err
-}
-
-func (d Duration) MarshalText() ([]byte, error) {
-	return []byte(d.String()), nil
-}
-
-func (d Duration) String() string {
-	return fmt.Sprintf("P%dN", d.Nights)
 }
 
 type StartDateWindow struct {
