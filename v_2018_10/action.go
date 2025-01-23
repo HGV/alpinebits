@@ -29,6 +29,10 @@ func (a Action) Unmarshal(b []byte) (any, error) {
 		v = new(PingRQ)
 	case ActionHotelAvailNotif:
 		v = new(HotelAvailNotifRQ)
+	case ActionHotelDescriptiveContentNotifInventory:
+		v = new(HotelDescriptiveContentNotifRQ)
+	case ActionHotelRatePlanNotifRatePlans:
+		v = new(HotelRatePlanNotifRQ)
 	default:
 		return nil, fmt.Errorf("unhandled action: %s", a)
 	}
