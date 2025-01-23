@@ -1,6 +1,4 @@
-# AlpineBits
-
-![github.com/HGV/alpinebits-http](./docs/alpine_bits.png)
+# ![github.com/HGV/alpinebits-http](./docs/alpinebits.png)
 
 ![github.com/HGV/alpinebits](https://github.com/HGV/alpinebits/workflows/test/badge.svg)
 
