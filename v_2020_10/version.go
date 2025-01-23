@@ -3,7 +3,7 @@ package v_2020_10
 import (
 	_ "embed"
 
-	"github.com/HGV/alpinebits/schema"
+	"github.com/HGV/alpinebits/internal/schema"
 	"github.com/HGV/alpinebits/version"
 )
 
