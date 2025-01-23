@@ -11,25 +11,13 @@ type Days int
 var regexpDays = regexp.MustCompile(`^P(P<days>[0-9]+)D$`)
 
 func ParseDays(s string) (Days, error) {
-	var d Days
-
-	if !regexpDays.MatchString(s) {
-		return d, fmt.Errorf("invalid duration format: %s, expected format is 'PxD'", s)
-	}
-
 	matches := regexpDays.FindStringSubmatch(s)
-	for i, name := range regexpDays.SubexpNames() {
-		switch match := matches[i]; name {
-		case "days":
-			days, err := strconv.Atoi(match)
-			if err != nil {
-				return d, err
-			}
-			d = Days(days)
-		}
+	if matches == nil {
+		return 0, fmt.Errorf("invalid duration format: %s, expected format is 'PxD'", s)
 	}
-
-	return d, nil
+	daysStr := matches[regexpDays.SubexpIndex("days")]
+	days, _ := strconv.Atoi(daysStr)
+	return Days(days), nil
 }
 
 func (d Days) String() string {
