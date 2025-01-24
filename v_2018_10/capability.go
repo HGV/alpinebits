@@ -13,6 +13,7 @@ const (
 	CapabilityHotelRatePlanNotifAcceptDepartureDOW                   Capability = "OTA_HotelRatePlanNotif_accept_DepartureDOW"
 	CapabilityHotelRatePlanNotifAcceptRatePlanBookingRule            Capability = "OTA_HotelRatePlanNotif_accept_RatePlan_BookingRule"
 	CapabilityHotelRatePlanNotifAcceptRatePlanRoomTypeBookingRule    Capability = "OTA_HotelRatePlanNotif_accept_RatePlan_RoomType_BookingRule"
+	CapabilityHotelRatePlanNotifAcceptRatePlanMixedBookingRule       Capability = "OTA_HotelRatePlanNotif_accept_RatePlan_mixed_BookingRule"
 	CapabilityHotelRatePlanNotifAcceptSupplements                    Capability = "OTA_HotelRatePlanNotif_accept_Supplements"
 	CapabilityHotelRatePlanNotifAcceptFreeNightsOffers               Capability = "OTA_HotelRatePlanNotif_accept_FreeNightsOffers"
 	CapabilityHotelRatePlanNotifAcceptFamilyOffers                   Capability = "OTA_HotelRatePlanNotif_accept_FamilyOffers"

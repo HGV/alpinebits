@@ -1,6 +1,8 @@
 package v_2018_10
 
 import (
+	"math"
+
 	"github.com/HGV/alpinebits/internal"
 	"github.com/HGV/x/slicesx"
 )
@@ -12,10 +14,14 @@ type OccupancyRules struct {
 }
 
 type HotelRatePlanNotifValidator struct {
-	ratePlanMapping      map[string]any
-	supportsRatePlanJoin bool
-	adultOccupancy       OccupancyRules
-	childOccupancy       OccupancyRules
+	ratePlanMapping             map[string]any
+	supportsRatePlanJoin        bool
+	adultOccupancy              OccupancyRules
+	childOccupancy              OccupancyRules
+	supportsOverlay             bool
+	supportsGenericBookingRules bool
+	supportsRoomTypeBokingRules bool
+	roomTypeMapping             map[string]struct{}
 }
 
 var _ Validatable[HotelRatePlanNotifRQ] = (*HotelRatePlanNotifValidator)(nil)
@@ -35,6 +41,25 @@ func WithRatePlanJoin(supports bool) HotelRatePlanNotifValidatorFunc {
 		v.supportsRatePlanJoin = supports
 	}
 }
+
+func WithGenericBookingRules(supports bool) HotelRatePlanNotifValidatorFunc {
+	return func(v *HotelRatePlanNotifValidator) {
+		v.supportsGenericBookingRules = supports
+	}
+}
+
+func WithRoomTypeBookingRules(supports bool) HotelRatePlanNotifValidatorFunc {
+	return func(v *HotelRatePlanNotifValidator) {
+		v.supportsRoomTypeBokingRules = supports
+	}
+}
+
+// func WithRoomTypeCodes(mapping map[string]struct{}) HotelRatePlanNotifValidatorFunc {
+// 	return func(v *HotelRatePlanNotifValidator) {
+// 		v.supportsRoomTypeBokingRules = true
+// 		v.roomTypeMapping = mapping
+// 	}
+// }
 
 func (v HotelRatePlanNotifValidator) Validate(r HotelRatePlanNotifRQ) error {
 	if err := validateHotelCode(r.RatePlans.HotelCode); err != nil {
@@ -103,9 +128,17 @@ func (v HotelRatePlanNotifValidator) validateRatePlanNew(ratePlan RatePlan) erro
 		return err
 	}
 
-	// TODO: br
-	// TODO: rt
-	// TODO: sp
+	if err := v.validateBookingRules(ratePlan.BookingRules); err != nil {
+		return err
+	}
+
+	if err := v.validateRates(ratePlan.Rates); err != nil {
+		return err
+	}
+
+	if err := v.validateSupplements(ratePlan.Supplements); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -157,7 +190,7 @@ func (v HotelRatePlanNotifValidator) validateOfferRuleLengthsOfStay(offerRule *O
 	}
 
 	if maxArrival > 0 && minArrival > maxArrival {
-		return ErrMinArrivalGratherThanMaxStayArrival(minArrival, maxArrival)
+		return ErrMinStayArrivalGratherThanMaxStayArrival(minArrival, maxArrival)
 	}
 
 	return nil
@@ -272,22 +305,223 @@ func (v HotelRatePlanNotifValidator) validateFamilyOffer(offer Offer) error {
 	return nil
 }
 
-// func (v HotelRatePlanNotifValidator) validateBookingRules(bookingRules []BookingRule) error {
-// 	return nil
-// }
+func (v HotelRatePlanNotifValidator) validateBookingRules(bookingRules []BookingRule) error {
+	for _, bookgingRule := range bookingRules {
+		if err := v.validateBookingRule(bookgingRule); err != nil {
+			return err
+		}
+	}
 
-// func (v HotelRatePlanNotifValidator) validateRates(rates []Rate) error {
-// 	return nil
-// }
+	if err := v.validateBookingRuleOverlaps(bookingRules); err != nil {
+		return err
+	}
 
-// func (v HotelRatePlanNotifValidator) validateSupplements(supplements []Supplement) error {
-// 	return nil
-// }
+	return nil
+}
+
+func (v HotelRatePlanNotifValidator) validateBookingRule(bookingRule BookingRule) error {
+	if v.supportsRoomTypeBokingRules {
+		if err := validateString(bookingRule.Code); err != nil {
+			return ErrMissingCode
+		}
+		if _, ok := v.roomTypeMapping[bookingRule.Code]; !ok {
+			return ErrInvTypeCodeNotFound(bookingRule.Code)
+		}
+	} else if v.supportsGenericBookingRules {
+		if bookingRule.Code != "" || bookingRule.CodeContext != "" {
+			return ErrRoomTypeBookingRulesNotSupported
+		}
+	}
+
+	if bookingRule.Start.After(bookingRule.End) {
+		return ErrStartAfterEnd
+	}
+
+	if err := v.validateLengthsOfStay(bookingRule.LengthsOfStay); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (v HotelRatePlanNotifValidator) validateLengthsOfStay(lengthsOfStay []LengthOfStay) error {
+	minArrival, minThrough := 1, 1
+	maxArrival, maxThrough := math.MaxInt32, math.MaxInt32
+
+	for _, lengthOfStay := range lengthsOfStay {
+		switch lengthOfStay.MinMaxMessageType {
+		case StayTypeMinArrival:
+			minArrival = lengthOfStay.Time
+		case StayTypeMaxArrival:
+			maxArrival = lengthOfStay.Time
+		case StayTypeMinThrough:
+			minThrough = lengthOfStay.Time
+		case StayTypeMaxThrough:
+			maxThrough = lengthOfStay.Time
+		}
+	}
+
+	min := int(math.Max(float64(minArrival), float64(minThrough)))
+	max := int(math.Min(float64(maxArrival), float64(maxThrough)))
+	if min > max {
+		return ErrMinStayGratherThanMaxStay(min, max)
+	}
+
+	return nil
+}
+
+func (v HotelRatePlanNotifValidator) validateBookingRuleOverlaps(bookingRules []BookingRule) error {
+	if v.supportsRoomTypeBokingRules {
+		bookingRulesByRoomType := slicesx.GroupByFunc(bookingRules, func(b BookingRule) string {
+			return b.Code
+		})
+		for _, brs := range bookingRulesByRoomType {
+			if err := validateOverlaps(brs); err != nil {
+				return err
+			}
+		}
+	} else if v.supportsGenericBookingRules {
+		if err := validateOverlaps(bookingRules); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (v HotelRatePlanNotifValidator) validateRates(rates []Rate) error {
+	if len(rates) == 0 {
+		return ErrMissingStaticRate
+	}
+
+	if err := v.validateStaticRate(rates[0]); err != nil {
+		return err
+	}
+
+	if err := v.validateDateDependingRates(rates[1:]); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (v HotelRatePlanNotifValidator) validateStaticRate(rate Rate) error {
+	if len(rate.BaseByGuestAmts) != 1 {
+		return ErrMissingBaseByGuestAmt
+	}
+
+	if rate.MealsIncluded == nil {
+		return ErrMissingMealsIncluded
+	}
+
+	return nil
+}
+
+func (v HotelRatePlanNotifValidator) validateDateDependingRates(rates []Rate) error {
+	for _, rate := range rates {
+		if err := v.validateDateDependingRate(rate); err != nil {
+			return err
+		}
+	}
+
+	if err := v.validateDateDependingRateOverlaps(rates); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (v HotelRatePlanNotifValidator) validateDateDependingRate(rate Rate) error {
+	if err := validateString(rate.InvTypeCode); err != nil {
+		return ErrMissingInvTypeCode
+	}
+
+	if _, ok := v.roomTypeMapping[rate.InvTypeCode]; !ok {
+		return ErrInvTypeCodeNotFound(rate.InvTypeCode)
+	}
+
+	if rate.Start == nil {
+		return ErrMissingStart
+	}
+
+	if rate.End == nil {
+		return ErrMissingEnd
+	}
+
+	if rate.Start.After(*rate.End) {
+		return ErrStartAfterEnd
+	}
+
+	if err := v.validateBaseByGuestAmts(rate.BaseByGuestAmts); err != nil {
+		return err
+	}
+
+	if err := v.validateAdditionalGuestAmounts(rate.AdditionalGuestAmounts); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (v HotelRatePlanNotifValidator) validateBaseByGuestAmts(baseByGuestAmts []BaseByGuestAmt) error {
+	// TODO
+	return nil
+}
+
+func (v HotelRatePlanNotifValidator) validateAdditionalGuestAmounts(additionalGuestAmounts []AdditionalGuestAmount) error {
+	// TODO
+	return nil
+}
+
+func (v HotelRatePlanNotifValidator) validateDateDependingRateOverlaps(rates []Rate) error {
+	ratesByInvTypeCode := slicesx.GroupByFunc(rates, func(r Rate) string {
+		return r.InvTypeCode
+	})
+	for _, rates := range ratesByInvTypeCode {
+		if err := validateOverlaps(rates); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (v HotelRatePlanNotifValidator) validateSupplements(supplements []Supplement) error {
+	// TODO
+	return nil
+}
+
+func (v HotelRatePlanNotifValidator) validateStaticSupplements(supplements []Supplement) error {
+	// TODO
+	return nil
+}
+
+func (v HotelRatePlanNotifValidator) validateDateDependingSupplements(supplements []Supplement) error {
+	// TODO
+	return nil
+}
 
 func (v HotelRatePlanNotifValidator) validateRatePlanOverlay(ratePlan RatePlan) error {
+	if !v.supportsOverlay {
+		return ErrDeltasNotSupported
+	}
+
+	if err := v.validateBookingRules(ratePlan.BookingRules); err != nil {
+		return err
+	}
+
+	if err := v.validateDateDependingRates(ratePlan.Rates); err != nil {
+		return err
+	}
+
+	if err := v.validateDateDependingSupplements(ratePlan.Supplements); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (v HotelRatePlanNotifValidator) validateRatePlanRemove(ratePlan RatePlan) error {
+	// TODO
 	return nil
 }

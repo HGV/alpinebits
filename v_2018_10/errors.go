@@ -63,7 +63,10 @@ var (
 	ErrMissingNightsRequired                   = newMissingAttributeError("NightsRequired")
 	ErrMissingNightsDiscounted                 = newMissingAttributeError("NightsDiscounted")
 	ErrInvalidDiscountPattern                  = newError("invalid value for attribute DiscountPattern")
-	ErrInvalidGuestAgeQualifyngCode            = newError("invalid value for attribute DiscountPattern")
+	ErrInvalidGuestAgeQualifyngCode            = newError("invalid value for attribute Guest.AgeQualifyingCode")
+	ErrRoomTypeBookingRulesNotSupported        = newError("room type booking rules not supported")
+	ErrMissingStaticRate                       = newMissingElementError("static Rate")
+	ErrMissingBaseByGuestAmt                   = newMissingElementError("BaseByGuestAmt")
 )
 
 func ErrInvalidBookingLimit(n int) *Error {
@@ -98,8 +101,12 @@ func ErrInvalidUniqueID(status string, uidType int) *Error {
 	return newErrorf("invalid value for attributes ResStatus %s and Type %d", status, uidType)
 }
 
-func ErrMinArrivalGratherThanMaxStayArrival(min, max int) *Error {
+func ErrMinStayArrivalGratherThanMaxStayArrival(min, max int) *Error {
 	return newErrorf("min stay arrival must be ≤ max stay arrival, got %d and %d", min, max)
+}
+
+func ErrMinStayGratherThanMaxStay(min, max int) *Error {
+	return newErrorf("min stay must be ≤ max stay, got %d and %d", min, max)
 }
 
 func newMissingAttributeError(attribute string) *Error {
