@@ -250,6 +250,17 @@ type Offer struct {
 	Guest     *Guest     `xml:"Guests>Guest"`
 }
 
+func (o Offer) IsFreeNightOffer() bool {
+	return o.Discount != nil &&
+		o.Discount.NightsRequired != 0 &&
+		o.Discount.NightsDiscounted != 0
+}
+
+func (o Offer) IsFamilyOffer() bool {
+	return o.Discount != nil &&
+		o.Guest != nil
+}
+
 type OfferRule struct {
 	MinAdvancedBookingOffset *duration.Days `xml:"MinAdvancedBookingOffset,attr,omitempty"`
 	MaxAdvancedBookingOffset *duration.Days `xml:"MaxAdvancedBookingOffset,attr,omitempty"`
@@ -265,6 +276,14 @@ type Occupancy struct {
 	MaxAge            *int              `xml:"MaxAge,attr,omitempty"`
 	MinOccupancy      *int              `xml:"MinOccupancy,attr,omitempty"`
 	MaxOccupancy      *int              `xml:"MaxOccupancy,attr,omitempty"`
+}
+
+func (o Occupancy) isAdult() bool {
+	return o.AgeQualifyingCode == AgeQualifyingCodeAdult
+}
+
+func (o Occupancy) isChild() bool {
+	return o.AgeQualifyingCode == AgeQualifyingCodeChild
 }
 
 type Discount struct {

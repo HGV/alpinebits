@@ -50,6 +50,20 @@ var (
 	ErrInvalidCompanyNameCode                  = newError("invalid value for attribute CompanyName.Code")
 	ErrInvalidCompanyNameValue                 = newError("invalid value for element CompanyName")
 	ErrInvalidEmail                            = newError("invalid value for element Email")
+	ErrMissingCurrencyCode                     = newMissingAttributeError("CurrencyCode")
+	ErrRatePlanJoinNotSupported                = newError("rate plan join not supported")
+	ErrMissingOfferRule                        = newMissingElementError("OfferRule")
+	ErrStayThroughNotAllowedInOfferRule        = newError("invalid value for attribute MinMaxMessageType inside element OfferRule")
+	ErrMissingAdultOccupancy                   = newMissingElementError("Occupancy with attribute AgeQualifyingCode = 10")
+	ErrInvalidMinOccupancy                     = newError("min occupancy must be ≤ 99")
+	ErrInvalidMaxOccupancy                     = newError("max occupancy must be ≤ 99")
+	ErrDuplicateChildOccupancy                 = newError("duplicate element Occupancy with attribute AgeQualifyingCode = 8")
+	ErrDuplicateFreeNightOffer                 = newError("duplicate free night offer")
+	ErrDuplicateFamilyOffer                    = newError("duplicate family offer")
+	ErrMissingNightsRequired                   = newMissingAttributeError("NightsRequired")
+	ErrMissingNightsDiscounted                 = newMissingAttributeError("NightsDiscounted")
+	ErrInvalidDiscountPattern                  = newError("invalid value for attribute DiscountPattern")
+	ErrInvalidGuestAgeQualifyngCode            = newError("invalid value for attribute DiscountPattern")
 )
 
 func ErrInvalidBookingLimit(n int) *Error {
@@ -82,6 +96,10 @@ func ErrInvalidPictureCategoryCode(code int) *Error {
 
 func ErrInvalidUniqueID(status string, uidType int) *Error {
 	return newErrorf("invalid value for attributes ResStatus %s and Type %d", status, uidType)
+}
+
+func ErrMinArrivalGratherThanMaxStayArrival(min, max int) *Error {
+	return newErrorf("min stay arrival must be ≤ max stay arrival, got %d and %d", min, max)
 }
 
 func newMissingAttributeError(attribute string) *Error {
