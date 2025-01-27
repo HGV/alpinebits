@@ -7,21 +7,27 @@ import (
 	"github.com/HGV/x/slicesx"
 )
 
-type OccupancyRules struct {
+type RatePlanOccupancySettings struct {
 	Min    *int
 	Max    *int
 	MinAge *int
 }
 
+type RoomTypeOccupancySettings struct {
+	Min int
+	Std int
+	Max int
+}
+
 type HotelRatePlanNotifValidator struct {
 	ratePlanMapping             map[string]any
 	supportsRatePlanJoin        bool
-	adultOccupancy              OccupancyRules
-	childOccupancy              OccupancyRules
+	adultOccupancy              RatePlanOccupancySettings
+	childOccupancy              RatePlanOccupancySettings
 	supportsOverlay             bool
 	supportsGenericBookingRules bool
 	supportsRoomTypeBokingRules bool
-	roomTypeMapping             map[string]struct{}
+	roomTypeMapping             map[string]RoomTypeOccupancySettings
 }
 
 var _ Validatable[HotelRatePlanNotifRQ] = (*HotelRatePlanNotifValidator)(nil)
@@ -436,7 +442,8 @@ func (v HotelRatePlanNotifValidator) validateDateDependingRate(rate Rate) error 
 		return ErrMissingInvTypeCode
 	}
 
-	if _, ok := v.roomTypeMapping[rate.InvTypeCode]; !ok {
+	roomTypeOccupancySettings, ok := v.roomTypeMapping[rate.InvTypeCode]
+	if !ok {
 		return ErrInvTypeCodeNotFound(rate.InvTypeCode)
 	}
 
@@ -452,7 +459,7 @@ func (v HotelRatePlanNotifValidator) validateDateDependingRate(rate Rate) error 
 		return ErrStartAfterEnd
 	}
 
-	if err := v.validateBaseByGuestAmts(rate.BaseByGuestAmts); err != nil {
+	if err := v.validateBaseByGuestAmts(rate.BaseByGuestAmts, roomTypeOccupancySettings); err != nil {
 		return err
 	}
 
@@ -463,13 +470,91 @@ func (v HotelRatePlanNotifValidator) validateDateDependingRate(rate Rate) error 
 	return nil
 }
 
-func (v HotelRatePlanNotifValidator) validateBaseByGuestAmts(baseByGuestAmts []BaseByGuestAmt) error {
-	// TODO
+func (v HotelRatePlanNotifValidator) validateBaseByGuestAmts(baseByGuestAmts []BaseByGuestAmt, roomTypeOccupancySettings RoomTypeOccupancySettings) error {
+	numberOfGuestSeen := make(map[int]struct{})
+	stdOccupancySeen := false
+	for _, baseByGuestAmt := range baseByGuestAmts {
+		if err := v.validateBaseByGuestAmt(baseByGuestAmt); err != nil {
+			return err
+		}
+
+		numberOfGuests := *baseByGuestAmt.NumberOfGuests
+		if _, exists := numberOfGuestSeen[numberOfGuests]; exists {
+			return ErrDuplicateBaseByGuestAmt(numberOfGuests)
+		}
+		numberOfGuestSeen[numberOfGuests] = struct{}{}
+
+		if numberOfGuests == roomTypeOccupancySettings.Std {
+			stdOccupancySeen = true
+		}
+	}
+
+	if !stdOccupancySeen {
+		return ErrMissingBaseByGuestAmtWithStdOccupancy(roomTypeOccupancySettings.Std)
+	}
+
+	return nil
+}
+
+func (v HotelRatePlanNotifValidator) validateBaseByGuestAmt(baseByGuestAmt BaseByGuestAmt) error {
+	if baseByGuestAmt.NumberOfGuests == nil {
+		return ErrMissingNumberOfGuests
+	}
+
+	if baseByGuestAmt.AgeQualifyingCode == nil {
+		return ErrMissingAgeQualifyingCode
+	}
+
+	if baseByGuestAmt.AmountAfterTax == nil {
+		return ErrMissingAmountAfterTax
+	}
+
 	return nil
 }
 
 func (v HotelRatePlanNotifValidator) validateAdditionalGuestAmounts(additionalGuestAmounts []AdditionalGuestAmount) error {
-	// TODO
+	adults := slicesx.Filter(additionalGuestAmounts, func(a AdditionalGuestAmount) bool {
+		return a.AgeQualifyingCode != nil && *a.AgeQualifyingCode == AgeQualifyingCodeAdult
+	})
+	switch len(adults) {
+	case 0:
+		break
+	case 1:
+		if adults[0].Amount == nil {
+			return ErrMissingAmount
+		}
+	default:
+		return ErrDuplicateAdditionalGuestAmountAdult
+	}
+
+	children := slicesx.Filter(additionalGuestAmounts, func(a AdditionalGuestAmount) bool {
+		return a.AgeQualifyingCode != nil && *a.AgeQualifyingCode == AgeQualifyingCodeChild
+	})
+	if v.childOccupancy.Max == nil && len(children) > 0 {
+		return ErrChildrenNotAllowed
+	}
+	for _, child := range children {
+		if child.MinAge == nil && child.MaxAge == nil {
+			return ErrMissingMinAge
+		}
+
+		if child.MinAge != nil && child.MaxAge != nil && *child.MinAge >= *child.MaxAge {
+			return ErrMinAgeGreaterThanOrEqualsThanMaxAge
+		}
+
+		if v.childOccupancy.MinAge != nil && child.MinAge != nil && *child.MinAge < *v.childOccupancy.MinAge {
+			return ErrMinAgeOutOfRange(*child.MinAge, *v.childOccupancy.Min)
+		}
+
+		if v.adultOccupancy.MinAge != nil && child.MaxAge != nil && *child.MaxAge >= *v.adultOccupancy.MinAge {
+			return ErrMaxAgeOutOfRange(*child.MaxAge, *v.adultOccupancy.MinAge)
+		}
+
+		if child.Amount == nil {
+			return ErrMissingAmount
+		}
+	}
+
 	return nil
 }
 

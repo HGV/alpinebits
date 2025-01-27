@@ -67,6 +67,14 @@ var (
 	ErrRoomTypeBookingRulesNotSupported        = newError("room type booking rules not supported")
 	ErrMissingStaticRate                       = newMissingElementError("static Rate")
 	ErrMissingBaseByGuestAmt                   = newMissingElementError("BaseByGuestAmt")
+	ErrMissingNumberOfGuests                   = newMissingAttributeError("NumberOfGuests")
+	ErrMissingAgeQualifyingCode                = newMissingAttributeError("AgeQualifyingCode")
+	ErrMissingAmountAfterTax                   = newMissingAttributeError("AmountAfterTax")
+	ErrMissingAmount                           = newMissingAttributeError("Amount")
+	ErrDuplicateAdditionalGuestAmountAdult     = newError("duplicate element AdditionalGuestAmount with attribute AgeQualifyingCode = 10")
+	ErrChildrenNotAllowed                      = newError("children not allowed")
+	ErrMissingMinAge                           = newMissingAttributeError("MinAge")
+	ErrMinAgeGreaterThanOrEqualsThanMaxAge     = newError("attribute MinAge must be < attribute MaxAge")
 )
 
 func ErrInvalidBookingLimit(n int) *Error {
@@ -107,6 +115,18 @@ func ErrMinStayArrivalGratherThanMaxStayArrival(min, max int) *Error {
 
 func ErrMinStayGratherThanMaxStay(min, max int) *Error {
 	return newErrorf("min stay must be ≤ max stay, got %d and %d", min, max)
+}
+
+func ErrDuplicateBaseByGuestAmt(numberOfGuests int) *Error {
+	return newErrorf("duplicate element BaseByGuestAmt with attribute NumberOfGuests %d", numberOfGuests)
+}
+
+func ErrMinAgeOutOfRange(childMinAge, ratePlanChildMinAge int) *Error {
+	return newErrorf("child min age must be ≥ rate plan child min age, got %d and %d", childMinAge, ratePlanChildMinAge)
+}
+
+func ErrMaxAgeOutOfRange(childMaxAge, ratePlanAdultMinAge int) *Error {
+	return newErrorf("child max age must be < rate plan adult min age, got %d and %d", childMaxAge, ratePlanAdultMinAge)
 }
 
 func newMissingAttributeError(attribute string) *Error {
