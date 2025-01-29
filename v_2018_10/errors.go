@@ -75,6 +75,11 @@ var (
 	ErrChildrenNotAllowed                      = newError("children not allowed")
 	ErrMissingMinAge                           = newMissingAttributeError("MinAge")
 	ErrMinAgeGreaterThanOrEqualsThanMaxAge     = newError("attribute MinAge must be < attribute MaxAge")
+	ErrSupplementsNotSupported                 = newError("supplements not supported")
+	ErrMissingAddToBasicRateIndicator          = newMissingAttributeError("AddToBasicRateIndicator")
+	ErrMissingMandatoryIndicator               = newMissingAttributeError("MandatoryIndicator")
+	ErrMissingChargeTypeCode                   = newMissingAttributeError("ChargeTypeCode")
+	ErrInvalidDOWString                        = newError("invalid value for attribute InvCode with attribute InvType = ALPINEBITSDOW")
 )
 
 func ErrInvalidBookingLimit(n int) *Error {
@@ -121,12 +126,20 @@ func ErrDuplicateBaseByGuestAmt(numberOfGuests int) *Error {
 	return newErrorf("duplicate element BaseByGuestAmt with attribute NumberOfGuests %d", numberOfGuests)
 }
 
+func ErrMissingBaseByGuestAmtWithStdOccupancy(std int) *Error {
+	return newErrorf("missing element BaseByGuestAmt with attribute NumberOfGuests equal to the standard occupancy %d", std)
+}
+
 func ErrMinAgeOutOfRange(childMinAge, ratePlanChildMinAge int) *Error {
 	return newErrorf("child min age must be ≥ rate plan child min age, got %d and %d", childMinAge, ratePlanChildMinAge)
 }
 
 func ErrMaxAgeOutOfRange(childMaxAge, ratePlanAdultMinAge int) *Error {
 	return newErrorf("child max age must be < rate plan adult min age, got %d and %d", childMaxAge, ratePlanAdultMinAge)
+}
+
+func ErrInvalidInvType(invType string) *Error {
+	return newErrorf("invalid value for attribute InvType %s", invType)
 }
 
 func newMissingAttributeError(attribute string) *Error {

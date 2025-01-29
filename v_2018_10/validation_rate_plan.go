@@ -2,6 +2,7 @@ package v_2018_10
 
 import (
 	"math"
+	"regexp"
 
 	"github.com/HGV/alpinebits/internal"
 	"github.com/HGV/x/slicesx"
@@ -28,6 +29,8 @@ type HotelRatePlanNotifValidator struct {
 	supportsGenericBookingRules bool
 	supportsRoomTypeBokingRules bool
 	roomTypeMapping             map[string]RoomTypeOccupancySettings
+	supplementMapping           map[string]struct{}
+	supportsSupplements         bool
 }
 
 var _ Validatable[HotelRatePlanNotifRQ] = (*HotelRatePlanNotifValidator)(nil)
@@ -66,6 +69,12 @@ func WithRoomTypeBookingRules(supports bool) HotelRatePlanNotifValidatorFunc {
 // 		v.roomTypeMapping = mapping
 // 	}
 // }
+
+func WithSupplements(supports bool) HotelRatePlanNotifValidatorFunc {
+	return func(v *HotelRatePlanNotifValidator) {
+		v.supportsSupplements = supports
+	}
+}
 
 func (v HotelRatePlanNotifValidator) Validate(r HotelRatePlanNotifRQ) error {
 	if err := validateHotelCode(r.RatePlans.HotelCode); err != nil {
@@ -572,17 +581,135 @@ func (v HotelRatePlanNotifValidator) validateDateDependingRateOverlaps(rates []R
 }
 
 func (v HotelRatePlanNotifValidator) validateSupplements(supplements []Supplement) error {
-	// TODO
+	if !v.supportsSupplements && len(supplements) > 0 {
+		return ErrSupplementsNotSupported
+	}
+
+	staticSupplements := slicesx.Filter(supplements, Supplement.isStaticSupplement)
+	if err := v.validateStaticSupplements(staticSupplements); err != nil {
+		return err
+	}
+
+	dateDependingSupplements := slicesx.Filter(supplements, Supplement.isDateDependingSupplement)
+	if err := v.validateDateDependingSupplements(dateDependingSupplements); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (v HotelRatePlanNotifValidator) validateStaticSupplements(supplements []Supplement) error {
-	// TODO
+func (v *HotelRatePlanNotifValidator) validateStaticSupplements(supplements []Supplement) error {
+	for _, supplement := range supplements {
+		if err := v.validateStaticSupplement(supplement); err != nil {
+			return err
+		}
+		v.supplementMapping[supplement.InvCode] = struct{}{}
+	}
+	return nil
+}
+
+func (v HotelRatePlanNotifValidator) validateStaticSupplement(supplement Supplement) error {
+	if supplement.AddToBasicRateIndicator == nil {
+		return ErrMissingAddToBasicRateIndicator
+	}
+
+	if supplement.MandatoryIndicator == nil {
+		return ErrMissingMandatoryIndicator
+	}
+
+	if supplement.ChargeTypeCode == nil {
+		return ErrMissingChargeTypeCode
+	}
+
+	if p := supplement.PrerequisiteInventory; p != nil {
+		switch p.InvType {
+		case PrerequisiteInventoryInvTypeAlpineBitsDOW:
+			match, _ := regexp.MatchString("[0-1]{7}", p.InvCode)
+			if !match {
+				return ErrInvalidDOWString
+			}
+		default:
+			return ErrInvalidInvType(string(p.InvType))
+		}
+	}
+
+	if d := supplement.Descriptions; d != nil {
+		if err := validateLanguageUniqueness(d.Titles); err != nil {
+			return err
+		}
+		if err := validateLanguageUniqueness(d.Intros); err != nil {
+			return err
+		}
+		if err := validateLanguageUniqueness(d.Descriptions); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
 func (v HotelRatePlanNotifValidator) validateDateDependingSupplements(supplements []Supplement) error {
-	// TODO
+	for _, supplement := range supplements {
+		if err := v.validateDateDependingSupplement(supplement); err != nil {
+			return err
+		}
+	}
+
+	if err := v.validateDateDependingSupplementsOverlaps(supplements); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (v HotelRatePlanNotifValidator) validateDateDependingSupplement(supplement Supplement) error {
+	if err := validateString(supplement.InvCode); err != nil {
+		return ErrMissingInvCode
+	}
+
+	if _, ok := v.supplementMapping[supplement.InvCode]; !ok {
+		return ErrInvCodeNotFound(supplement.InvCode)
+	}
+
+	if supplement.Start == nil {
+		return ErrMissingStart
+	}
+
+	if supplement.End == nil {
+		return ErrMissingEnd
+	}
+
+	if supplement.Start.After(*supplement.End) {
+		return ErrStartAfterEnd
+	}
+
+	if p := supplement.PrerequisiteInventory; p != nil {
+		switch p.InvType {
+		case PrerequisiteInventoryInvTypeRoomType:
+			if _, ok := v.roomTypeMapping[p.InvCode]; !ok {
+				return ErrInvCodeNotFound(p.InvCode)
+			}
+		default:
+			return ErrInvalidInvType(string(p.InvType))
+		}
+	}
+
+	return nil
+}
+
+func (v HotelRatePlanNotifValidator) validateDateDependingSupplementsOverlaps(supplements []Supplement) error {
+	supplementsByInvCode := slicesx.GroupByFunc(supplements, func(s Supplement) string {
+		if s.PrerequisiteInventory == nil {
+			return ""
+		}
+		return s.PrerequisiteInventory.InvCode
+	})
+	for _, supplements := range supplementsByInvCode {
+		if err := validateOverlaps(supplements); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 

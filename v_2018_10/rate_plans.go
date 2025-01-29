@@ -229,7 +229,7 @@ func (s Supplement) DateRange() timex.DateRange {
 	}
 }
 
-func (s Supplement) IsStaticRate() bool {
+func (s Supplement) isStaticSupplement() bool {
 	return (s.AddToBasicRateIndicator != nil && *s.AddToBasicRateIndicator) &&
 		s.MandatoryIndicator != nil &&
 		s.ChargeTypeCode != nil &&
@@ -238,10 +238,20 @@ func (s Supplement) IsStaticRate() bool {
 		s.Amount == nil
 }
 
-// TODO: ALPINEBITSDOW static, ROOMTYPE date dependent
-type PrerequisiteInventory []struct {
-	InvType string `xml:"InvType,attr"`
-	InvCode string `xml:"InvCode,attr"`
+func (s Supplement) isDateDependingSupplement() bool {
+	return !s.isStaticSupplement()
+}
+
+type PrerequisiteInventoryInvType string
+
+const (
+	PrerequisiteInventoryInvTypeAlpineBitsDOW PrerequisiteInventoryInvType = "ALPINEBITSDOW"
+	PrerequisiteInventoryInvTypeRoomType      PrerequisiteInventoryInvType = "ROOMTYPE"
+)
+
+type PrerequisiteInventory struct {
+	InvType PrerequisiteInventoryInvType `xml:"InvType,attr"`
+	InvCode string                       `xml:"InvCode,attr"`
 }
 
 type Offer struct {

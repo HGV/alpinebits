@@ -100,7 +100,7 @@ func (v ResRetrieveValidator) validateRoomStays(roomStays []RoomStay) error {
 			return err
 		}
 
-		// validateAlternativeRoomStay...
+		// TODO: validateAlternativeRoomStay...
 	}
 
 	return nil
