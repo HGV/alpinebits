@@ -37,6 +37,27 @@ func (a Action) Unmarshal(b []byte) (any, error) {
 	return v, nil
 }
 
+func (a Action) HandshakeName() string {
+	switch a {
+	case ActionPing:
+		return "action_OTA_Ping"
+	case ActionHotelInvCountNotif:
+		return "action_OTA_HotelInvCountNotif"
+	case ActionReadGuestRequests:
+		return "action_OTA_Read"
+	case ActionNotifReportGuestRequests:
+		return "action_OTA_HotelResNotif_GuestRequests"
+	case ActionHotelDescriptiveContentNotifInventory:
+		return "action_OTA_HotelDescriptiveContentNotif_Inventory"
+	case ActionHotelDescriptiveContentNotifInfo:
+		return "action_OTA_HotelDescriptiveContentNotif_Info"
+	case ActionHotelRatePlanNotifRatePlans:
+		return "action_OTA_HotelRatePlanNotif_RatePlans"
+	default:
+		return ""
+	}
+}
+
 func (a Action) String() string {
 	return string(a)
 }

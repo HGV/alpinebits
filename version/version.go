@@ -16,6 +16,7 @@ type (
 	Action interface {
 		fmt.Stringer
 
+		HandshakeName() string
 		Unmarshal(b []byte) (any, error)
 	}
 	HotelCodeProvider interface {

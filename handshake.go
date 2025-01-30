@@ -1,4 +1,4 @@
-package handshake
+package main
 
 import (
 	"encoding/json"
@@ -15,39 +15,48 @@ type HandshakeData map[string]map[string][]string
 var _ json.Marshaler = (*HandshakeData)(nil)
 var _ json.Unmarshaler = (*HandshakeData)(nil)
 
+func NewHandshakeDataFromRouter(r Router) HandshakeData {
+	handshakeData := make(HandshakeData)
+	for _, version := range r.versionRoutes {
+		actions := make(map[string][]string)
+		for _, action := range version.actionRoutes {
+			actions[action.action.HandshakeName()] = action.capabilities
+		}
+		handshakeData[version.version.String()] = actions
+	}
+	return handshakeData
+}
+
 type (
 	handshakeData struct {
-		Versions []version `json:"versions"`
+		Versions []handshakeVersion `json:"versions"`
 	}
-	version struct {
-		Version string   `json:"version"`
-		Actions []action `json:"actions,omitempty"`
+	handshakeVersion struct {
+		Version string            `json:"version"`
+		Actions []handshakeAction `json:"actions,omitempty"`
 	}
-	action struct {
+	handshakeAction struct {
 		Action       string   `json:"action"`
 		Capabilities []string `json:"supports,omitempty"`
 	}
 )
 
 func (h HandshakeData) MarshalJSON() ([]byte, error) {
-	var versions []version
+	var versions []handshakeVersion
 	for _, versionKey := range slices.SortedFunc(maps.Keys(h), compareVersionsDescending) {
-		var actions []action
+		var actions []handshakeAction
 		for _, actionKey := range slices.Sorted(maps.Keys(h[versionKey])) {
-			actions = append(actions, action{
+			actions = append(actions, handshakeAction{
 				Action:       actionKey,
 				Capabilities: h[versionKey][actionKey],
 			})
 		}
-		versions = append(versions, version{
+		versions = append(versions, handshakeVersion{
 			Version: versionKey,
 			Actions: actions,
 		})
 	}
-	data := handshakeData{
-		Versions: versions,
-	}
-	return json.Marshal(data)
+	return json.Marshal(handshakeData{Versions: versions})
 }
 
 func compareVersionsDescending(v1, v2 string) int {
