@@ -20,6 +20,9 @@ func NewHandshakeDataFromRouter(r Router) HandshakeData {
 	for _, version := range r.versionRoutes {
 		actions := make(map[string][]string)
 		for _, action := range version.actionRoutes {
+			if action.excludeFromHandshake {
+				continue
+			}
 			actions[action.action.HandshakeName()] = action.capabilities
 		}
 		handshakeData[version.version.String()] = actions

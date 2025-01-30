@@ -77,9 +77,10 @@ type Request struct {
 type HandlerFunc func(r Request) (any, error)
 
 type Route struct {
-	action       version.Action
-	handler      HandlerFunc
-	capabilities []string
+	action               version.Action
+	handler              HandlerFunc
+	capabilities         []string
+	excludeFromHandshake bool
 }
 
 type RouteFunc func(*Route)
@@ -89,6 +90,12 @@ func WithCapabilities[C ~string](caps ...C) RouteFunc {
 		for _, c := range caps {
 			r.capabilities = append(r.capabilities, string(c))
 		}
+	}
+}
+
+func WithExcludeFromHandshake() RouteFunc {
+	return func(r *Route) {
+		r.excludeFromHandshake = true
 	}
 }
 

@@ -27,6 +27,7 @@ func TestNewHandshakeDataFromRouter(t *testing.T) {
 	v201810, _ := v_2018_10.NewVersion()
 	r.Version(v201810, func(s *Subrouter) {
 		s.Action(v_2018_10.ActionHotelAvailNotif, nil)
+		s.Action(v_2018_10.ActionReadGuestRequests, nil, WithExcludeFromHandshake())
 	})
 
 	handshakeData := NewHandshakeDataFromRouter(*r)
