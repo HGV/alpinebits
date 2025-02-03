@@ -51,6 +51,31 @@ func TestNewHandshakeDataFromRouter(t *testing.T) {
 	assert.Equal(t, expected, handshakeData)
 }
 
+func TestNegotiatedVersion(t *testing.T) {
+	intersected := HandshakeData{
+		"2020-10": map[string][]string{
+			"action_OTA_Ping": nil,
+			"action_OTA_HotelAvailNotif": {
+				"OTA_HotelAvailNotif_accept_deltas",
+			},
+		},
+		"2018-10": map[string][]string{
+			"action_OTA_Ping": nil,
+		},
+	}
+	negotiatedVersion, negotiatedActions := intersected.NegotiatedVersion()
+
+	var expectedVersion, expectedActions = "2020-10", map[string][]string{
+		"action_OTA_Ping": nil,
+		"action_OTA_HotelAvailNotif": {
+			"OTA_HotelAvailNotif_accept_deltas",
+		},
+	}
+
+	assert.Equal(t, expectedVersion, negotiatedVersion)
+	assert.Equal(t, expectedActions, negotiatedActions)
+}
+
 func TestMarshalJSON(t *testing.T) {
 	handshakeData := HandshakeData{
 		"2022-10": map[string][]string{},

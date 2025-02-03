@@ -30,6 +30,15 @@ func NewHandshakeDataFromRouter(r Router) HandshakeData {
 	return handshakeData
 }
 
+func (h HandshakeData) NegotiatedVersion() (string, map[string][]string) {
+	sortedKeys := slices.SortedFunc(maps.Keys(h), compareVersionsDescending)
+	if len(sortedKeys) > 0 {
+		version := sortedKeys[0]
+		return version, h[version]
+	}
+	return "", nil
+}
+
 type (
 	handshakeData struct {
 		Versions []handshakeVersion `json:"versions"`

@@ -105,6 +105,7 @@ const (
 	RestrictionMaster Restriction = "Master"
 )
 
+// TODO: Rename
 type Status2 string
 
 const (

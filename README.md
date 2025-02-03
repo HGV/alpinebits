@@ -73,6 +73,45 @@ validator := v_2018_10.NewHotelAvailNotifValidator(
 err := validator.Validate(hotelAvailNotifRQ)
 ```
 
+### Handshake
+
+```go
+handshakeConfig := alpinebits.HandshakeClientConfig{
+    // client supported versions, actions and capabilities
+    HandshakeData: HandshakeData{
+        "2020-10": map[string][]string{
+            "action_OTA_Ping": nil,
+            "action_OTA_HotelInvCountNotif": {
+                "OTA_HotelInvCountNotif_accept_rooms",
+                "OTA_HotelInvCountNotif_accept_deltas",
+                "OTA_HotelInvCountNotif_accept_out_of_order",
+                "OTA_HotelInvCountNotif_accept_out_of_market",
+                "OTA_HotelInvCountNotif_accept_closing_seasons",
+            },
+        },
+        "2018-10": map[string][]string{
+            "action_OTA_Ping": nil,
+        },
+    },
+}
+handshakeClient, _ := alpinebits.NewHandshakeClient(handshakeConfig)
+handshakeData, _, _ := handshakeClient.Ping(context.TODO())
+
+// Use one of the versions specified in `handshakeData` as needed.
+// `NegotiatedVersion()` selects the highest version supported by both
+// the client and server.
+switch version, actions := handshakeData.NegotiatedVersion(); version {
+case "2020-10":
+    client, _ := v_2020_10.NewClient(v_2020_10.ClientConfig{
+        NegotiatedVersion: actions,
+    })
+case "2018-10":
+    client, _ := v_2018_10.NewClient(v_2018_10.ClientConfig{
+        NegotiatedVersion: actions,
+    })
+}
+```
+
 ## Testing
 
 > [!IMPORTANT]
