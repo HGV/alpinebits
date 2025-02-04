@@ -21,6 +21,8 @@ type RoomTypeOccupancySettings struct {
 }
 
 type HotelRatePlanNotifValidator struct {
+	supportsArrivalDOW             bool
+	supportsDepartureDOW           bool
 	ratePlanMapping                map[string]any
 	supportsRatePlanJoin           bool
 	adultOccupancy                 RatePlanOccupancySettings
@@ -47,6 +49,18 @@ func NewHotelRatePlanNotifValidator(opts ...HotelRatePlanNotifValidatorFunc) Hot
 		opt(&v)
 	}
 	return v
+}
+
+func WithArrivalDOW(supports bool) HotelRatePlanNotifValidatorFunc {
+	return func(v *HotelRatePlanNotifValidator) {
+		v.supportsArrivalDOW = supports
+	}
+}
+
+func WithDepartureDOW(supports bool) HotelRatePlanNotifValidatorFunc {
+	return func(v *HotelRatePlanNotifValidator) {
+		v.supportsDepartureDOW = supports
+	}
 }
 
 func WithRatePlanJoin(supports bool) HotelRatePlanNotifValidatorFunc {
@@ -442,6 +456,14 @@ func (v HotelRatePlanNotifValidator) validateBookingRule(bookingRule BookingRule
 
 	if err := v.validateLengthsOfStay(bookingRule.LengthsOfStay); err != nil {
 		return err
+	}
+
+	if !v.supportsArrivalDOW && bookingRule.ArrivalDaysOfWeek != nil {
+		return ErrArrivalDOWNotSupported
+	}
+
+	if !v.supportsDepartureDOW && bookingRule.DepartureDaysOfWeek != nil {
+		return ErrDepartureDOWNotSupported
 	}
 
 	return nil

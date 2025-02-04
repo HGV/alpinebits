@@ -69,6 +69,8 @@ var (
 	ErrFamilyOfferNotSupported                 = newError("free night offer not supported")
 	ErrInvalidGuestAgeQualifyngCode            = newError("invalid value for attribute Guest.AgeQualifyingCode")
 	ErrRoomTypeBookingRulesNotSupported        = newError("room type booking rules not supported")
+	ErrArrivalDOWNotSupported                  = newError("arrival days of week not supported")
+	ErrDepartureDOWNotSupported                = newError("departure days of week not supported")
 	ErrMissingStaticRate                       = newMissingElementError("static Rate")
 	ErrInvalidRateTimeUnit                     = newError("invalid value for attribute RateTimeUnit")
 	ErrMissingBaseByGuestAmt                   = newMissingElementError("BaseByGuestAmt")
