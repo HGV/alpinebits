@@ -53,6 +53,8 @@ var (
 	ErrMissingCurrencyCode                     = newMissingAttributeError("CurrencyCode")
 	ErrRatePlanJoinNotSupported                = newError("rate plan join not supported")
 	ErrMissingOfferRule                        = newMissingElementError("OfferRule")
+	ErrOfferRuleBookingOffsetNotSupported      = newError("offer rule booking offset not supported")
+	ErrOfferRuleDOWLOSNotSupported             = newError("offer rule days of week and lengths of stay not supported")
 	ErrStayThroughNotAllowedInOfferRule        = newError("invalid value for attribute MinMaxMessageType inside element OfferRule")
 	ErrMissingAdultOccupancy                   = newMissingElementError("Occupancy with attribute AgeQualifyingCode = 10")
 	ErrInvalidMinOccupancy                     = newError("min occupancy must be ≤ 99")
@@ -60,13 +62,17 @@ var (
 	ErrDuplicateChildOccupancy                 = newError("duplicate element Occupancy with attribute AgeQualifyingCode = 8")
 	ErrDuplicateFreeNightOffer                 = newError("duplicate free night offer")
 	ErrDuplicateFamilyOffer                    = newError("duplicate family offer")
+	ErrFreeNightOfferNotSupported              = newError("free night offer not supported")
 	ErrMissingNightsRequired                   = newMissingAttributeError("NightsRequired")
 	ErrMissingNightsDiscounted                 = newMissingAttributeError("NightsDiscounted")
 	ErrInvalidDiscountPattern                  = newError("invalid value for attribute DiscountPattern")
+	ErrFamilyOfferNotSupported                 = newError("free night offer not supported")
 	ErrInvalidGuestAgeQualifyngCode            = newError("invalid value for attribute Guest.AgeQualifyingCode")
 	ErrRoomTypeBookingRulesNotSupported        = newError("room type booking rules not supported")
 	ErrMissingStaticRate                       = newMissingElementError("static Rate")
+	ErrInvalidRateTimeUnit                     = newError("invalid value for attribute RateTimeUnit")
 	ErrMissingBaseByGuestAmt                   = newMissingElementError("BaseByGuestAmt")
+	ErrMissingUnitMultiplier                   = newMissingAttributeError("UnitMultiplier")
 	ErrMissingNumberOfGuests                   = newMissingAttributeError("NumberOfGuests")
 	ErrMissingAgeQualifyingCode                = newMissingAttributeError("AgeQualifyingCode")
 	ErrMissingAmountAfterTax                   = newMissingAttributeError("AmountAfterTax")
@@ -80,6 +86,31 @@ var (
 	ErrMissingMandatoryIndicator               = newMissingAttributeError("MandatoryIndicator")
 	ErrMissingChargeTypeCode                   = newMissingAttributeError("ChargeTypeCode")
 	ErrInvalidDOWString                        = newError("invalid value for attribute InvCode with attribute InvType = ALPINEBITSDOW")
+	ErrUnexpectedOffers                        = newUnexpectedElementError("Offers")
+	ErrUnexpectedDescription                   = newUnexpectedElementError("Description")
+	ErrUnexpectedBookingRules                  = newUnexpectedElementError("BookingRules")
+	ErrUnexpectedRates                         = newUnexpectedElementError("Rates")
+	ErrUnexpectedSupplements                   = newUnexpectedElementError("Supplements")
+	ErrUnexpectedGuest                         = newUnexpectedElementError("Guest")
+	ErrUnexpectedNightsRequired                = newUnexpectedAttributeError("NightsRequired")
+	ErrUnexpectedNightsDiscounted              = newUnexpectedAttributeError("NightsDiscounted")
+	ErrUnexpectedDiscountPattern               = newUnexpectedAttributeError("DiscountPattern")
+	ErrUnexpectedInvTypeCode                   = newUnexpectedAttributeError("InvTypeCode")
+	ErrUnexpectedStart                         = newUnexpectedAttributeError("Start")
+	ErrUnexpectedEnd                           = newUnexpectedAttributeError("End")
+	ErrUnexpectedNumberOfGuests                = newUnexpectedAttributeError("NumberOfGuests")
+	ErrUnexpectedAgeQualifyingCode             = newUnexpectedAttributeError("AgeQualifyingCode")
+	ErrUnexpectedAmountAfterTax                = newUnexpectedAttributeError("AmountAfterTax")
+	ErrUnexpectedBaseByGuestAmt                = newError("static rates can contain only one element BaseByGuestAmt")
+	ErrUnexpectedAdditionalGuestAmounts        = newUnexpectedElementError("AdditionalGuestAmounts")
+	ErrUnexpectedRateTimeUnit                  = newUnexpectedAttributeError("RateTimeUnit")
+	ErrUnexpectedUnitMultiplier                = newUnexpectedAttributeError("UnitMultiplier")
+	ErrUnexpectedMealsIncluded                 = newUnexpectedElementError("MealsIncluded")
+	ErrUnexpectedType                          = newUnexpectedAttributeError("Type")
+	ErrUnexpectedAmount                        = newUnexpectedAttributeError("Amount")
+	ErrUnexpectedAddToBasicRateIndicator       = newUnexpectedAttributeError("AddToBasicRateIndicator")
+	ErrUnexpectedMandatoryIndicator            = newUnexpectedAttributeError("MandatoryIndicator")
+	ErrUnexpectedChargeTypeCode                = newUnexpectedAttributeError("ChargeTypeCode")
 )
 
 func ErrInvalidBookingLimit(n int) *Error {
@@ -148,6 +179,14 @@ func newMissingAttributeError(attribute string) *Error {
 
 func newMissingElementError(element string) *Error {
 	return newErrorf("missing required element %s", element)
+}
+
+func newUnexpectedAttributeError(attribute string) *Error {
+	return newErrorf("unexpected attribute found %s", attribute)
+}
+
+func newUnexpectedElementError(element string) *Error {
+	return newErrorf("unexpected element found %s", element)
 }
 
 func newErrorf(message string, a ...any) *Error {

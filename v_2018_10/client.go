@@ -68,6 +68,10 @@ func (c *ClientConfig) validate() error {
 		return errors.New("c.ClientID is empty")
 	}
 
+	if c.Version != nil {
+		return errors.New("c.Version is empty")
+	}
+
 	if err := version.ValidateVersionString(c.Version.String()); err != nil {
 		return err
 	}

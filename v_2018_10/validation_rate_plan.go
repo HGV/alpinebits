@@ -21,16 +21,20 @@ type RoomTypeOccupancySettings struct {
 }
 
 type HotelRatePlanNotifValidator struct {
-	ratePlanMapping             map[string]any
-	supportsRatePlanJoin        bool
-	adultOccupancy              RatePlanOccupancySettings
-	childOccupancy              RatePlanOccupancySettings
-	supportsOverlay             bool
-	supportsGenericBookingRules bool
-	supportsRoomTypeBokingRules bool
-	roomTypeMapping             map[string]RoomTypeOccupancySettings
-	supplementMapping           map[string]struct{}
-	supportsSupplements         bool
+	ratePlanMapping                map[string]any
+	supportsRatePlanJoin           bool
+	adultOccupancy                 RatePlanOccupancySettings
+	childOccupancy                 RatePlanOccupancySettings
+	supportsOverlay                bool
+	supportsGenericBookingRules    bool
+	supportsRoomTypeBokingRules    bool
+	roomTypeMapping                map[string]RoomTypeOccupancySettings
+	supplementMapping              map[string]struct{}
+	supportsSupplements            bool
+	supportsFreeNightOffer         bool
+	supportsFamilyOffer            bool
+	supportsOfferRuleBookingOffset bool
+	supportsOfferRuleDOWLOS        bool
 }
 
 var _ Validatable[HotelRatePlanNotifRQ] = (*HotelRatePlanNotifValidator)(nil)
@@ -76,12 +80,34 @@ func WithSupplements(supports bool) HotelRatePlanNotifValidatorFunc {
 	}
 }
 
+func WithFreeNightOffer(supports bool) HotelRatePlanNotifValidatorFunc {
+	return func(v *HotelRatePlanNotifValidator) {
+		v.supportsFreeNightOffer = supports
+	}
+}
+
+func WithFamilyOffer(supports bool) HotelRatePlanNotifValidatorFunc {
+	return func(v *HotelRatePlanNotifValidator) {
+		v.supportsFamilyOffer = supports
+	}
+}
+
+func WithOfferRuleBookingOffset(supports bool) HotelRatePlanNotifValidatorFunc {
+	return func(v *HotelRatePlanNotifValidator) {
+		v.supportsOfferRuleBookingOffset = supports
+	}
+}
+
+func WithOfferRuleDOWLOS(supports bool) HotelRatePlanNotifValidatorFunc {
+	return func(v *HotelRatePlanNotifValidator) {
+		v.supportsOfferRuleDOWLOS = supports
+	}
+}
+
 func (v HotelRatePlanNotifValidator) Validate(r HotelRatePlanNotifRQ) error {
 	if err := validateHotelCode(r.RatePlans.HotelCode); err != nil {
 		return err
 	}
-
-	// TODO: uniqueid?
 
 	if err := v.validateRatePlans(r.RatePlans.RatePlans); err != nil {
 		return err
@@ -143,6 +169,10 @@ func (v HotelRatePlanNotifValidator) validateRatePlanNew(ratePlan RatePlan) erro
 		return err
 	}
 
+	if err := v.validateDescriptions(ratePlan.Descriptions); err != nil {
+		return err
+	}
+
 	if err := v.validateBookingRules(ratePlan.BookingRules); err != nil {
 		return err
 	}
@@ -177,6 +207,17 @@ func (v HotelRatePlanNotifValidator) validateOffers(offers []Offer) error {
 func (v HotelRatePlanNotifValidator) validateOfferRule(offerRule *OfferRule) error {
 	if offerRule == nil {
 		return ErrMissingOfferRule
+	}
+
+	if !v.supportsOfferRuleBookingOffset &&
+		(offerRule.MinAdvancedBookingOffset != nil || offerRule.MaxAdvancedBookingOffset != nil) {
+		return ErrOfferRuleBookingOffsetNotSupported
+	}
+
+	if len(offerRule.LengthsOfStay) > 0 ||
+		offerRule.ArrivalDaysOfWeek != nil ||
+		offerRule.DepartureDaysOfWeek != nil {
+		return ErrOfferRuleDOWLOSNotSupported
 	}
 
 	if err := v.validateOfferRuleLengthsOfStay(offerRule); err != nil {
@@ -292,6 +333,10 @@ func (v HotelRatePlanNotifValidator) validateAdditionalOffers(offers []Offer) er
 }
 
 func (v HotelRatePlanNotifValidator) validateFreeNightOffer(offer Offer) error {
+	if !v.supportsFreeNightOffer {
+		return ErrFreeNightOfferNotSupported
+	}
+
 	if offer.Discount.NightsRequired == 0 {
 		return ErrMissingNightsRequired
 	}
@@ -310,13 +355,56 @@ func (v HotelRatePlanNotifValidator) validateFreeNightOffer(offer Offer) error {
 		}
 	}
 
+	if offer.Guest != nil {
+		return ErrUnexpectedGuest
+	}
+
 	return nil
 }
 
 func (v HotelRatePlanNotifValidator) validateFamilyOffer(offer Offer) error {
+	if !v.supportsFamilyOffer {
+		return ErrFamilyOfferNotSupported
+	}
+
 	if offer.Guest.AgeQualifyingCode != AgeQualifyingCodeChild {
 		return ErrInvalidGuestAgeQualifyngCode
 	}
+
+	if offer.Discount.NightsRequired > 0 {
+		return ErrUnexpectedNightsRequired
+	}
+
+	if offer.Discount.NightsDiscounted > 0 {
+		return ErrUnexpectedNightsDiscounted
+	}
+
+	if offer.Discount.DiscountPattern != "" {
+		return ErrUnexpectedDiscountPattern
+	}
+
+	return nil
+}
+
+func (v HotelRatePlanNotifValidator) validateDescriptions(d RatePlanDescription) error {
+	if err := validateLanguageUniqueness(d.Titles); err != nil {
+		return err
+	}
+
+	if err := validateLanguageUniqueness(d.Intros); err != nil {
+		return err
+	}
+
+	if err := validateLanguageUniqueness(d.Descriptions); err != nil {
+		return err
+	}
+
+	for _, item := range d.Gallery {
+		if err := validateLanguageUniqueness(item.Descriptions); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -421,12 +509,50 @@ func (v HotelRatePlanNotifValidator) validateRates(rates []Rate) error {
 }
 
 func (v HotelRatePlanNotifValidator) validateStaticRate(rate Rate) error {
-	if len(rate.BaseByGuestAmts) != 1 {
+	if rate.RateTimeUnit != TimeUnitDay {
+		return ErrInvalidRateTimeUnit
+	}
+
+	if rate.UnitMultiplier == 0 {
+		return ErrMissingUnitMultiplier
+	}
+
+	switch len(rate.BaseByGuestAmts) {
+	case 0:
 		return ErrMissingBaseByGuestAmt
+	case 1:
+		b := rate.BaseByGuestAmts[0]
+		if b.NumberOfGuests != nil {
+			return ErrUnexpectedNumberOfGuests
+		}
+		if b.AgeQualifyingCode != nil {
+			return ErrUnexpectedAgeQualifyingCode
+		}
+		if b.AmountAfterTax != nil {
+			return ErrUnexpectedAmountAfterTax
+		}
+	default:
+		return ErrUnexpectedBaseByGuestAmt
 	}
 
 	if rate.MealsIncluded == nil {
 		return ErrMissingMealsIncluded
+	}
+
+	if rate.InvTypeCode != "" {
+		return ErrUnexpectedInvTypeCode
+	}
+
+	if rate.Start != nil {
+		return ErrUnexpectedStart
+	}
+
+	if rate.End != nil {
+		return ErrUnexpectedEnd
+	}
+
+	if len(rate.AdditionalGuestAmounts) > 0 {
+		return ErrUnexpectedAdditionalGuestAmounts
 	}
 
 	return nil
@@ -476,6 +602,18 @@ func (v HotelRatePlanNotifValidator) validateDateDependingRate(rate Rate) error 
 		return err
 	}
 
+	if rate.RateTimeUnit != "" {
+		return ErrUnexpectedRateTimeUnit
+	}
+
+	if rate.UnitMultiplier > 0 {
+		return ErrUnexpectedUnitMultiplier
+	}
+
+	if rate.MealsIncluded != nil {
+		return ErrUnexpectedMealsIncluded
+	}
+
 	return nil
 }
 
@@ -516,6 +654,10 @@ func (v HotelRatePlanNotifValidator) validateBaseByGuestAmt(baseByGuestAmt BaseB
 
 	if baseByGuestAmt.AmountAfterTax == nil {
 		return ErrMissingAmountAfterTax
+	}
+
+	if baseByGuestAmt.Type != nil {
+		return ErrUnexpectedType
 	}
 
 	return nil
@@ -634,15 +776,21 @@ func (v HotelRatePlanNotifValidator) validateStaticSupplement(supplement Supplem
 	}
 
 	if d := supplement.Descriptions; d != nil {
-		if err := validateLanguageUniqueness(d.Titles); err != nil {
+		if err := v.validateDescriptions(*d); err != nil {
 			return err
 		}
-		if err := validateLanguageUniqueness(d.Intros); err != nil {
-			return err
-		}
-		if err := validateLanguageUniqueness(d.Descriptions); err != nil {
-			return err
-		}
+	}
+
+	if supplement.Amount != nil {
+		return ErrUnexpectedAmount
+	}
+
+	if supplement.Start != nil {
+		return ErrUnexpectedStart
+	}
+
+	if supplement.End != nil {
+		return ErrUnexpectedEnd
 	}
 
 	return nil
@@ -694,6 +842,18 @@ func (v HotelRatePlanNotifValidator) validateDateDependingSupplement(supplement 
 		}
 	}
 
+	if supplement.AddToBasicRateIndicator != nil {
+		return ErrUnexpectedAddToBasicRateIndicator
+	}
+
+	if supplement.MandatoryIndicator != nil {
+		return ErrUnexpectedAddToBasicRateIndicator
+	}
+
+	if supplement.ChargeTypeCode != nil {
+		return ErrUnexpectedAddToBasicRateIndicator
+	}
+
 	return nil
 }
 
@@ -730,10 +890,37 @@ func (v HotelRatePlanNotifValidator) validateRatePlanOverlay(ratePlan RatePlan) 
 		return err
 	}
 
+	if len(ratePlan.Offers) == 0 {
+		return ErrUnexpectedOffers
+	}
+
+	if !ratePlan.Descriptions.isZero() {
+		return ErrUnexpectedDescription
+	}
+
 	return nil
 }
 
 func (v HotelRatePlanNotifValidator) validateRatePlanRemove(ratePlan RatePlan) error {
-	// TODO
+	if len(ratePlan.Offers) == 0 {
+		return ErrUnexpectedOffers
+	}
+
+	if !ratePlan.Descriptions.isZero() {
+		return ErrUnexpectedDescription
+	}
+
+	if len(ratePlan.BookingRules) > 0 {
+		return ErrUnexpectedBookingRules
+	}
+
+	if len(ratePlan.Rates) > 0 {
+		return ErrUnexpectedRates
+	}
+
+	if len(ratePlan.Supplements) > 0 {
+		return ErrUnexpectedSupplements
+	}
+
 	return nil
 }

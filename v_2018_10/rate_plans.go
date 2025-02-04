@@ -2,6 +2,8 @@ package v_2018_10
 
 import (
 	"encoding/xml"
+	"io"
+	"strings"
 
 	"github.com/HGV/alpinebits/duration"
 	"github.com/HGV/alpinebits/version"
@@ -316,11 +318,139 @@ type RatePlanDescription struct {
 	Titles       []Description
 	Intros       []Description
 	Descriptions []Description
-	Codelist     []ListItem
+	Themes       []ListItem2
 	Gallery      []GalleryItem
 }
 
-// TODO: Custom Unmarshal
+func (d *RatePlanDescription) isZero() bool {
+	return len(d.Titles) == 0 &&
+		len(d.Intros) == 0 &&
+		len(d.Descriptions) == 0 &&
+		len(d.Themes) == 0 &&
+		len(d.Gallery) == 0
+}
+
+func (rd *RatePlanDescription) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	var err error
+	switch strings.ToLower(start.Attr[0].Value) {
+	case "title":
+		if err = rd.decodeTitle(d, start); err != nil {
+			return err
+		}
+	case "intro":
+		if err = rd.decodeIntro(d, start); err != nil {
+			return err
+		}
+	case "description":
+		if err = rd.decodeDescription(d, start); err != nil {
+			return err
+		}
+	case "codelist":
+		if err = rd.decodeCodeList(d, start); err != nil {
+			return err
+		}
+	case "gallery":
+		if err = rd.decodeGallery(d); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (rd *RatePlanDescription) decodeTitle(d *xml.Decoder, start xml.StartElement) error {
+	var t struct {
+		Texts []Description `xml:"Text"`
+	}
+	if err := d.DecodeElement(&t, &start); err != nil {
+		return err
+	}
+	rd.Titles = t.Texts
+	return nil
+}
+
+func (rd *RatePlanDescription) decodeIntro(d *xml.Decoder, start xml.StartElement) error {
+	var t struct {
+		Texts []Description `xml:"Text"`
+	}
+	if err := d.DecodeElement(&t, &start); err != nil {
+		return err
+	}
+	rd.Intros = t.Texts
+	return nil
+}
+
+func (rd *RatePlanDescription) decodeDescription(d *xml.Decoder, start xml.StartElement) error {
+	var t struct {
+		Texts []Description `xml:"Text"`
+	}
+	if err := d.DecodeElement(&t, &start); err != nil {
+		return err
+	}
+	rd.Intros = t.Texts
+	return nil
+}
+
+func (rd *RatePlanDescription) decodeCodeList(d *xml.Decoder, start xml.StartElement) error {
+	var l struct {
+		ListItems []ListItem2 `xml:"ListItem"`
+	}
+	if err := d.DecodeElement(&l, &start); err != nil {
+		return err
+	}
+	rd.Themes = l.ListItems
+	return nil
+}
+
+func (rd *RatePlanDescription) decodeGallery(d *xml.Decoder) error {
+	var gallery []GalleryItem
+	var currentItem *GalleryItem
+	for {
+		t, err := d.Token()
+		if err != nil {
+			if err != io.EOF {
+				return err
+			}
+			gallery = append(gallery, *currentItem)
+			break
+		}
+		if se, ok := t.(xml.StartElement); ok {
+			switch strings.ToLower(se.Name.Local) {
+			case "image":
+				if currentItem != nil {
+					gallery = append(gallery, *currentItem)
+				}
+				var url URL
+				if err = d.DecodeElement(&url, &se); err != nil {
+					return err
+				}
+				currentItem = &GalleryItem{Image: url}
+			case "text":
+				var text Description
+				if err = d.DecodeElement(&text, &se); err != nil {
+					return err
+				}
+				if text.Language != "" {
+					currentItem.Descriptions = append(currentItem.Descriptions, text)
+				} else {
+					currentItem.CopyrightNotice = text.Value
+				}
+			case "url":
+				var url URL
+				if err = d.DecodeElement(&url, &se); err != nil {
+					return err
+				}
+				currentItem.Attribution = url
+			}
+		}
+	}
+	rd.Gallery = gallery
+	return nil
+}
+
+// TODO: Rename
+type ListItem2 struct {
+	Value string `xml:",innerxml"`
+}
 
 type GalleryItem struct {
 	Image           URL
@@ -330,6 +460,8 @@ type GalleryItem struct {
 }
 
 type HotelRatePlanNotifRS struct {
+	response
+
 	XMLName xml.Name `xml:"http://www.opentravel.org/OTA/2003/05 OTA_HotelRatePlanNotifRS"`
 	Version string   `xml:"Version,attr"`
 }

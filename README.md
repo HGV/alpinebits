@@ -73,7 +73,7 @@ validator := v_2018_10.NewHotelAvailNotifValidator(
 err := validator.Validate(hotelAvailNotifRQ)
 ```
 
-### Handshake
+### Handshake & Client Request
 
 ```go
 handshakeConfig := alpinebits.HandshakeClientConfig{
