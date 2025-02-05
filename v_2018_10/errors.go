@@ -147,6 +147,10 @@ func ErrInvalidUniqueID(status string, uidType int) *Error {
 	return newErrorf("invalid value for attributes ResStatus %s and Type %d", status, uidType)
 }
 
+func ErrRatePlanNotFound(code string) *Error {
+	return newErrorf("rate plan not found %s", code)
+}
+
 func ErrMinStayArrivalGratherThanMaxStayArrival(min, max int) *Error {
 	return newErrorf("min stay arrival must be ≤ max stay arrival, got %d and %d", min, max)
 }

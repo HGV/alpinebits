@@ -1,6 +1,7 @@
 package v_2018_10
 
 import (
+	"cmp"
 	"math"
 	"regexp"
 
@@ -179,6 +180,13 @@ func (v HotelRatePlanNotifValidator) validateCurrencyCode(code string) error {
 }
 
 func (v HotelRatePlanNotifValidator) validateRatePlanNew(ratePlan RatePlan) error {
+	if ratePlan.isMaster() {
+		return v.validateRatePlanNewMaster(ratePlan)
+	}
+	return v.validateRatePlanNewDerived(ratePlan)
+}
+
+func (v HotelRatePlanNotifValidator) validateRatePlanNewMaster(ratePlan RatePlan) error {
 	if err := v.validateOffers(ratePlan.Offers); err != nil {
 		return err
 	}
@@ -197,6 +205,35 @@ func (v HotelRatePlanNotifValidator) validateRatePlanNew(ratePlan RatePlan) erro
 
 	if err := v.validateSupplements(ratePlan.Supplements); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (v HotelRatePlanNotifValidator) validateRatePlanNewDerived(ratePlan RatePlan) error {
+	code := cmp.Or(ratePlan.RatePlanID, ratePlan.RatePlanCode)
+	if _, ok := v.ratePlanMapping[code]; !ok {
+		return ErrRatePlanNotFound(code)
+	}
+
+	if err := v.validateBookingRules(ratePlan.BookingRules); err != nil {
+		return err
+	}
+
+	if err := v.validateRates(ratePlan.Rates); err != nil {
+		return err
+	}
+
+	if err := v.validateDateDependingSupplements(ratePlan.Supplements); err != nil {
+		return err
+	}
+
+	if len(ratePlan.Offers) == 0 {
+		return ErrUnexpectedOffers
+	}
+
+	if !ratePlan.Descriptions.isZero() {
+		return ErrUnexpectedDescription
 	}
 
 	return nil

@@ -44,6 +44,10 @@ type RatePlan struct {
 	Descriptions      RatePlanDescription `xml:"Description"`
 }
 
+func (r RatePlan) isMaster() bool {
+	return r.RatePlanQualifier && r.RatePlanID != ""
+}
+
 type CodeContext string
 
 const (
