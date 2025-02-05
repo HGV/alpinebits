@@ -40,3 +40,21 @@ type response struct {
 	Warnings *[]Warning `xml:"Warnings>Warning"`
 	Errors   *[]Error   `xml:"Errors>Error"`
 }
+
+func (r *response) SetSuccess() {
+	r.Success = &Success{}
+}
+
+func (r *response) AppendWarning(w Warning) {
+	if r.Warnings == nil {
+		r.Warnings = &[]Warning{}
+	}
+	*r.Warnings = append(*r.Warnings, w)
+}
+
+func (r *response) AppendError(e Error) {
+	if r.Errors == nil {
+		r.Errors = &[]Error{}
+	}
+	*r.Errors = append(*r.Errors, e)
+}

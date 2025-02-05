@@ -24,6 +24,8 @@ type SelectionCriteria struct {
 }
 
 type ResRetrieveRS struct {
+	response
+
 	XMLName           xml.Name           `xml:"http://www.opentravel.org/OTA/2003/05 OTA_ResRetrieveRS"`
 	Version           string             `xml:"Version,attr"`
 	HotelReservations []HotelReservation `xml:"ReservationsList>HotelReservation"`
