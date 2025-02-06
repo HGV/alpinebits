@@ -72,6 +72,15 @@ type Request struct {
 	ClientID     string
 	Data         any
 	Capabilities []string
+
+	handshakeDataFromRouter func() HandshakeData
+}
+
+func (r Request) HandshakeData() HandshakeData {
+	if rctx, ok := RouteContextFrom(r.Context); ok {
+		return r.handshakeDataFromRouter().Intersect(rctx.HandshakeDataOverride)
+	}
+	return r.handshakeDataFromRouter()
 }
 
 type HandlerFunc func(r Request) (any, error)
@@ -125,10 +134,21 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		supportedVersions := slices.Collect(maps.Keys(router.versionRoutes))
 		preconditionError(w,
-			fmt.Sprintf("your current alpinebits version of '%s' does not match one of the servers' supported versions: %s",
+			fmt.Sprintf("your current version of '%s' does not match one of the servers' supported versions: %s",
 				requestedVersion,
 				strings.Join(supportedVersions, ", ")),
 		)
+		return
+	}
+
+	rctx, hasRouteCtx := RouteContextFrom(r.Context())
+
+	if hasRouteCtx {
+		// Check if the requested version is disabled by a handshake override
+		if _, ok := rctx.HandshakeDataOverride[requestedVersion]; !ok {
+			preconditionError(w, "your current version of '%s' was not included in the handshake agreement. Please retry the handshake to ensure compatibility.")
+			return
+		}
 	}
 
 	if err := r.ParseMultipartForm(1 << 20); err != nil {
@@ -141,6 +161,14 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		preconditionError(w, "unknown or missing action")
 		return
+	}
+
+	if hasRouteCtx {
+		// Check if the action is disabled by a handshake override
+		if _, ok := rctx.HandshakeDataOverride[requestedVersion][route.action.HandshakeName()]; !ok {
+			preconditionError(w, "unknown or missing action")
+			return
+		}
 	}
 
 	payload := r.Form.Get("request")
@@ -163,6 +191,9 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ClientID:     clientID,
 		Data:         data,
 		Capabilities: route.capabilities,
+		handshakeDataFromRouter: func() HandshakeData {
+			return NewHandshakeDataFromRouter(*router)
+		},
 	}
 	resp, err := route.handler(req)
 	if err != nil {
@@ -191,4 +222,19 @@ func preconditionError(w http.ResponseWriter, msg string) {
 func internalServerError(w http.ResponseWriter, r *http.Request, err error) {
 	slog.ErrorContext(r.Context(), err.Error())
 	http.Error(w, "", http.StatusInternalServerError)
+}
+
+type RouteContext struct {
+	HandshakeDataOverride HandshakeData
+}
+
+type routeContextKey struct{}
+
+func WithRouteContext(ctx context.Context, rctx RouteContext) context.Context {
+	return context.WithValue(ctx, routeContextKey{}, rctx)
+}
+
+func RouteContextFrom(ctx context.Context) (RouteContext, bool) {
+	rctx, ok := ctx.Value(routeContextKey{}).(RouteContext)
+	return rctx, ok
 }
