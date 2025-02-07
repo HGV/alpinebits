@@ -165,7 +165,6 @@ const (
 )
 
 type Email struct {
-	// Type   string `xml:"EmailType,attr,omitempty"`
 	Remark Remark `xml:"Remark,attr,omitempty"`
 	Value  string `xml:",innerxml"`
 }
