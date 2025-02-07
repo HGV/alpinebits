@@ -12,6 +12,11 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/HGV/alpinebits/v_2018_10/common"
+	"github.com/HGV/alpinebits/v_2018_10/freerooms"
+	"github.com/HGV/alpinebits/v_2018_10/guestrequests"
+	"github.com/HGV/alpinebits/v_2018_10/inventory"
+	"github.com/HGV/alpinebits/v_2018_10/rateplans"
 	"github.com/HGV/alpinebits/version"
 	"github.com/HGV/x"
 )
@@ -83,24 +88,24 @@ func (c *ClientConfig) validate() error {
 	return nil
 }
 
-func (c *Client) PushHotelAvailNotif(ctx context.Context, r HotelAvailNotifRQ) (*ClientResponse[HotelAvailNotifRS], error) {
-	return sendRequest[HotelAvailNotifRS](ctx, c, ActionHotelAvailNotif, r)
+func (c *Client) PushHotelAvailNotif(ctx context.Context, r freerooms.HotelAvailNotifRQ) (*ClientResponse[freerooms.HotelAvailNotifRS], error) {
+	return sendRequest[freerooms.HotelAvailNotifRS](ctx, c, ActionHotelAvailNotif, r)
 }
 
-func (c *Client) PullGuestRequests(ctx context.Context, r ReadRQ) (*ClientResponse[ResRetrieveRS], error) {
-	return sendRequest[ResRetrieveRS](ctx, c, ActionReadGuestRequests, r)
+func (c *Client) PullGuestRequests(ctx context.Context, r guestrequests.ReadRQ) (*ClientResponse[guestrequests.ResRetrieveRS], error) {
+	return sendRequest[guestrequests.ResRetrieveRS](ctx, c, ActionReadGuestRequests, r)
 }
 
-func (c *Client) PushAcknowledgement(ctx context.Context, r NotifReportRQ) (*ClientResponse[NotifReportRS], error) {
-	return sendRequest[NotifReportRS](ctx, c, ActionNotifReportGuestRequests, r)
+func (c *Client) PushAcknowledgement(ctx context.Context, r guestrequests.NotifReportRQ) (*ClientResponse[guestrequests.NotifReportRS], error) {
+	return sendRequest[guestrequests.NotifReportRS](ctx, c, ActionNotifReportGuestRequests, r)
 }
 
-func (c *Client) PushHotelDescriptiveContentNotif(ctx context.Context, r HotelDescriptiveContentNotifRQ) (*ClientResponse[HotelDescriptiveContentNotifRS], error) {
-	return sendRequest[HotelDescriptiveContentNotifRS](ctx, c, ActionHotelDescriptiveContentNotifInventory, r)
+func (c *Client) PushHotelDescriptiveContentNotif(ctx context.Context, r inventory.HotelDescriptiveContentNotifRQ) (*ClientResponse[inventory.HotelDescriptiveContentNotifRS], error) {
+	return sendRequest[inventory.HotelDescriptiveContentNotifRS](ctx, c, ActionHotelDescriptiveContentNotifInventory, r)
 }
 
-func (c *Client) PushRatePlans(ctx context.Context, r HotelRatePlanNotifRQ) (*ClientResponse[HotelRatePlanNotifRS], error) {
-	return sendRequest[HotelRatePlanNotifRS](ctx, c, ActionHotelRatePlanNotifRatePlans, r)
+func (c *Client) PushRatePlans(ctx context.Context, r rateplans.HotelRatePlanNotifRQ) (*ClientResponse[rateplans.HotelRatePlanNotifRS], error) {
+	return sendRequest[rateplans.HotelRatePlanNotifRS](ctx, c, ActionHotelRatePlanNotifRatePlans, r)
 }
 
 func sendRequest[RS any, RQ any](ctx context.Context, c *Client, action Action, rq RQ) (*ClientResponse[RS], error) {
@@ -192,8 +197,8 @@ func newClientResponse[T any](r *http.Response, v *T) (*ClientResponse[T], error
 }
 
 func (r *ClientResponse[T]) populateCompleteSetRequests(v any) {
-	if rs, ok := v.(response); ok {
-		var statuses []Status
+	if rs, ok := v.(common.Response); ok {
+		var statuses []common.Status
 
 		if rs.Errors != nil {
 			for _, e := range *rs.Errors {
@@ -209,11 +214,11 @@ func (r *ClientResponse[T]) populateCompleteSetRequests(v any) {
 
 		for _, status := range statuses {
 			switch status {
-			case StatusSendInventory:
+			case common.StatusSendInventory:
 				r.SendInventory = true
-			case StatusSendFreeRooms:
+			case common.StatusSendFreeRooms:
 				r.SendFreeRooms = true
-			case StatusSendRatePlans:
+			case common.StatusSendRatePlans:
 				r.SendRatePlans = true
 			}
 		}

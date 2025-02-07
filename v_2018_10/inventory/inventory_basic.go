@@ -1,9 +1,10 @@
-package v_2018_10
+package inventory
 
 import (
 	"encoding/xml"
 
 	"github.com/HGV/alpinebits/internal"
+	"github.com/HGV/alpinebits/v_2018_10/common"
 )
 
 type HotelDescriptiveContentNotifRQ struct {
@@ -48,7 +49,7 @@ type Amenity struct {
 
 type MultimediaDescriptions []MultimediaDescription
 
-func (mds MultimediaDescriptions) LongNames() []Description {
+func (mds MultimediaDescriptions) LongNames() []common.Description {
 	for _, md := range mds {
 		if md.InfoCode == InformationTypeLongName {
 			return *md.TextItems
@@ -57,7 +58,7 @@ func (mds MultimediaDescriptions) LongNames() []Description {
 	return nil
 }
 
-func (mds MultimediaDescriptions) Descriptions() []Description {
+func (mds MultimediaDescriptions) Descriptions() []common.Description {
 	for _, md := range mds {
 		if md.InfoCode == InformationTypeDescription {
 			return *md.TextItems
@@ -76,9 +77,9 @@ func (mds MultimediaDescriptions) Pictures() []ImageItem {
 }
 
 type MultimediaDescription struct {
-	InfoCode   InformationType `xml:"InfoCode,attr"`
-	TextItems  *[]Description  `xml:"TextItems>TextItem>Description"`
-	ImageItems *[]ImageItem    `xml:"ImageItems>ImageItem"`
+	InfoCode   InformationType       `xml:"InfoCode,attr"`
+	TextItems  *[]common.Description `xml:"TextItems>TextItem>Description"`
+	ImageItems *[]ImageItem          `xml:"ImageItems>ImageItem"`
 }
 
 type InformationType int
@@ -89,36 +90,19 @@ const (
 	InformationTypeLongName    InformationType = 25
 )
 
-type Description struct {
-	TextFormat TextFormat `xml:"TextFormat,attr"`
-	Language   string     `xml:"Language,attr"`
-	Value      string     `xml:",innerxml"`
-}
-
-type TextFormat string
-
-const (
-	TextFormatPlainText = "PlainText"
-	TextFormatHTML      = "HTML"
-)
-
 type ImageItem struct {
-	Category     int           `xml:"Category,attr"`
-	ImageFormat  ImageFormat   `xml:"ImageFormat"`
-	Descriptions []Description `xml:"Description,omitempty"`
+	Category     int                  `xml:"Category,attr"`
+	ImageFormat  ImageFormat          `xml:"ImageFormat"`
+	Descriptions []common.Description `xml:"Description,omitempty"`
 }
 
 type ImageFormat struct {
-	CopyrightNotice string `xml:"CopyrightNotice,attr,omitempty"`
-	URL             URL    `xml:"URL"`
-}
-
-type URL struct {
-	Value string `xml:",innerxml"`
+	CopyrightNotice string     `xml:"CopyrightNotice,attr,omitempty"`
+	URL             common.URL `xml:"URL"`
 }
 
 type HotelDescriptiveContentNotifRS struct {
-	response
+	common.Response
 
 	XMLName xml.Name `xml:"http://www.opentravel.org/OTA/2003/05 OTA_HotelDescriptiveContentNotifRS"`
 	Version string   `xml:"Version,attr"`

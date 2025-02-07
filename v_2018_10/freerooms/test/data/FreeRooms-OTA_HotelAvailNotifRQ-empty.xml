@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+     AlpineBits 2014-04
+     http://www.alpinebits.org/
+
+     sample message file
+
+     changelog:
+     v. 2014-04 1.0
+-->
+
+<OTA_HotelAvailNotifRQ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                       xmlns="http://www.opentravel.org/OTA/2003/05" 
+                       Version="3.000" 
+                       xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_HotelAvailNotifRQ.xsd">
+  <UniqueID Type="16" ID="1" Instance="CompleteSet"/>
+  <AvailStatusMessages HotelCode="...">
+    <AvailStatusMessage/>
+  </AvailStatusMessages>
+</OTA_HotelAvailNotifRQ>

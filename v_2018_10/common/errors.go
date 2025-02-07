@@ -1,4 +1,4 @@
-package v_2018_10
+package common
 
 import "fmt"
 
@@ -16,6 +16,7 @@ var (
 	ErrMaxOccLowerThanStdOcc                   = newError("max occupancy must be ≥ standard occupancy")
 	ErrMissingLongName                         = newMissingElementError("MultimediaDescription with attribute InfoCode = 25 (Long name)")
 	ErrDuplicateLanguage                       = newError("duplicate language found for element Description")
+	ErrRoomsNotSupported                       = newError("rooms not supported")
 	ErrMissingRoomID                           = newMissingAttributeError("RoomID")
 	ErrMissingID                               = newMissingAttributeError("UniqueID.ID")
 	ErrMissingRoomStay                         = newMissingElementError("RoomStay")

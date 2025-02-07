@@ -1,10 +1,12 @@
-package v_2018_10
+package guestrequests
 
 import (
 	"encoding/xml"
 	"time"
 
 	"github.com/HGV/alpinebits/duration"
+	"github.com/HGV/alpinebits/v_2018_10/common"
+	"github.com/HGV/alpinebits/v_2018_10/rateplans"
 	"github.com/HGV/x/timex"
 )
 
@@ -24,7 +26,7 @@ type SelectionCriteria struct {
 }
 
 type ResRetrieveRS struct {
-	response
+	common.Response
 
 	XMLName           xml.Name           `xml:"http://www.opentravel.org/OTA/2003/05 OTA_ResRetrieveRS"`
 	Version           string             `xml:"Version,attr"`
@@ -44,23 +46,22 @@ func (s ResStatus) IsReservation() bool {
 	return s == ResStatusReserved || s == ResStatusModify
 }
 
-type UniqueIDType2 int
+type UniqueIDType int
 
 const (
-	UniqueIDType2Reservation  UniqueIDType2 = 14
-	UniqueIDType2Cancellation UniqueIDType2 = 15
+	UniqueIDTypeReservation  UniqueIDType = 14
+	UniqueIDTypeCancellation UniqueIDType = 15
 )
 
-// TODO: Move to another package or prefix name
-type UniqueID2 struct {
-	Type UniqueIDType2 `xml:"Type,attr"`
-	ID   string        `xml:"ID,attr"`
+type UniqueID struct {
+	Type UniqueIDType `xml:"Type,attr"`
+	ID   string       `xml:"ID,attr"`
 }
 
 type HotelReservation struct {
 	CreateDateTime time.Time     `xml:"CreateDateTime,attr"`
 	ResStatus      ResStatus     `xml:"ResStatus,attr"`
-	UniqueID       UniqueID2     `xml:"UniqueID"`
+	UniqueID       UniqueID      `xml:"UniqueID"`
 	RoomStays      []RoomStay    `xml:"RoomStays>RoomStay"`
 	Customer       Customer      `xml:"ResGuests>ResGuest>Profiles>ProfileInfo>Profile>Customer"`
 	ResGlobalInfo  ResGlobalInfo `xml:"ResGlobalInfo"`
@@ -81,9 +82,9 @@ type ResRoomType struct {
 }
 
 type ResRatePlan struct {
-	RatePlanCode  string         `xml:"RatePlanCode,attr,omitempty"`
-	Commission    *Commission    `xml:"Commission"`
-	MealsIncluded *MealsIncluded `xml:"MealsIncluded"`
+	RatePlanCode  string                   `xml:"RatePlanCode,attr,omitempty"`
+	Commission    *Commission              `xml:"Commission"`
+	MealsIncluded *rateplans.MealsIncluded `xml:"MealsIncluded"`
 }
 
 type Commission struct {

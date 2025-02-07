@@ -1,4 +1,4 @@
-package v_2018_10
+package common
 
 import (
 	"testing"
@@ -9,8 +9,8 @@ import (
 )
 
 func TestValidateHotelCode(t *testing.T) {
-	assert.ErrorIs(t, validateHotelCode(" "), ErrMissingHotelCode)
-	assert.Nil(t, validateHotelCode("9000"), ErrMissingHotelCode)
+	assert.ErrorIs(t, ValidateHotelCode(" "), ErrMissingHotelCode)
+	assert.Nil(t, ValidateHotelCode("9000"), ErrMissingHotelCode)
 }
 
 type mockRange struct {
@@ -84,7 +84,7 @@ func TestValidateOverlaps(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validateOverlaps(tt.ranges)
+			err := ValidateOverlaps(tt.ranges)
 			if tt.expectError {
 				assert.Error(t, err, "expected an error")
 			} else {

@@ -1,4 +1,4 @@
-package v_2018_10
+package common
 
 import (
 	"errors"
@@ -12,14 +12,14 @@ type Validatable[T any] interface {
 	Validate(v T) error
 }
 
-func validateHotelCode(hotelCode string) error {
+func ValidateHotelCode(hotelCode string) error {
 	if strings.TrimSpace(hotelCode) == "" {
 		return ErrMissingHotelCode
 	}
 	return nil
 }
 
-func validateOverlaps[T version.DateRangeProvider](ranges []T) error {
+func ValidateOverlaps[T version.DateRangeProvider](ranges []T) error {
 	if len(ranges) <= 1 {
 		return nil
 	}
@@ -37,7 +37,7 @@ func validateOverlaps[T version.DateRangeProvider](ranges []T) error {
 	return nil
 }
 
-func validateLanguageUniqueness(descs []Description) error {
+func ValidateLanguageUniqueness(descs []Description) error {
 	seen := make(map[string]struct{})
 	for _, desc := range descs {
 		lang := strings.TrimSpace(desc.Language)
@@ -50,16 +50,16 @@ func validateLanguageUniqueness(descs []Description) error {
 	return nil
 }
 
-func validateString(s string) error {
+func ValidateString(s string) error {
 	if strings.TrimSpace(s) == "" {
 		return errors.New("string is empty or contains only whitespace")
 	}
 	return nil
 }
 
-func validateNonNilString(s *string) error {
+func ValidateNonNilString(s *string) error {
 	if s == nil {
 		return nil
 	}
-	return validateString(*s)
+	return ValidateString(*s)
 }

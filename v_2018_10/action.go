@@ -4,6 +4,10 @@ import (
 	"encoding/xml"
 	"fmt"
 
+	"github.com/HGV/alpinebits/v_2018_10/freerooms"
+	"github.com/HGV/alpinebits/v_2018_10/handshake"
+	"github.com/HGV/alpinebits/v_2018_10/inventory"
+	"github.com/HGV/alpinebits/v_2018_10/rateplans"
 	"github.com/HGV/alpinebits/version"
 )
 
@@ -26,13 +30,13 @@ func (a Action) Unmarshal(b []byte) (any, error) {
 
 	switch a {
 	case ActionPing:
-		v = new(PingRQ)
+		v = new(handshake.PingRQ)
 	case ActionHotelAvailNotif:
-		v = new(HotelAvailNotifRQ)
+		v = new(freerooms.HotelAvailNotifRQ)
 	case ActionHotelDescriptiveContentNotifInventory:
-		v = new(HotelDescriptiveContentNotifRQ)
+		v = new(inventory.HotelDescriptiveContentNotifRQ)
 	case ActionHotelRatePlanNotifRatePlans:
-		v = new(HotelRatePlanNotifRQ)
+		v = new(rateplans.HotelRatePlanNotifRQ)
 	default:
 		return nil, fmt.Errorf("unhandled action: %s", a)
 	}

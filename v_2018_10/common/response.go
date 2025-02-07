@@ -1,4 +1,4 @@
-package v_2018_10
+package common
 
 type ErrorWarningType int
 
@@ -35,24 +35,24 @@ func (err Error) Error() string {
 	return err.Value
 }
 
-type response struct {
+type Response struct {
 	Success  *Success   `xml:"Success"`
 	Warnings *[]Warning `xml:"Warnings>Warning"`
 	Errors   *[]Error   `xml:"Errors>Error"`
 }
 
-func (r *response) SetSuccess() {
+func (r *Response) SetSuccess() {
 	r.Success = &Success{}
 }
 
-func (r *response) AppendWarning(w Warning) {
+func (r *Response) AppendWarning(w Warning) {
 	if r.Warnings == nil {
 		r.Warnings = &[]Warning{}
 	}
 	*r.Warnings = append(*r.Warnings, w)
 }
 
-func (r *response) AppendError(e Error) {
+func (r *Response) AppendError(e Error) {
 	if r.Errors == nil {
 		r.Errors = &[]Error{}
 	}

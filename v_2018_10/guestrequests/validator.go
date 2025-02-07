@@ -1,18 +1,21 @@
-package v_2018_10
+package guestrequests
 
 import (
 	"net/mail"
+	"reflect"
 	"strings"
 
 	"github.com/HGV/alpinebits/duration"
+	"github.com/HGV/alpinebits/v_2018_10/common"
+	"github.com/HGV/alpinebits/v_2018_10/rateplans"
 )
 
 type ReadValidator struct{}
 
-var _ Validatable[ReadRQ] = (*ReadValidator)(nil)
+var _ common.Validatable[ReadRQ] = (*ReadValidator)(nil)
 
 func (v ReadValidator) Validate(r ReadRQ) error {
-	if err := validateHotelCode(r.HotelReadRequest.HotelCode); err != nil {
+	if err := common.ValidateHotelCode(r.HotelReadRequest.HotelCode); err != nil {
 		return err
 	}
 	return nil
@@ -23,7 +26,7 @@ type ResRetrieveValidator struct {
 	guestRequests []ResStatus // TODO: Naming
 }
 
-var _ Validatable[ResRetrieveRS] = (*ResRetrieveValidator)(nil)
+var _ common.Validatable[ResRetrieveRS] = (*ResRetrieveValidator)(nil)
 
 type ResRetrieveValidatorFunc func(*ResRetrieveValidator)
 
@@ -71,28 +74,28 @@ func (v ResRetrieveValidator) validateHotelReservation(h HotelReservation) error
 	return nil
 }
 
-func (v ResRetrieveValidator) validateUniqueID(uid UniqueID2, resStatus ResStatus) error {
+func (v ResRetrieveValidator) validateUniqueID(uid UniqueID, resStatus ResStatus) error {
 	switch resStatus {
 	case ResStatusRequested, ResStatusReserved, ResStatusModify:
-		if uid.Type != UniqueIDType2Reservation {
-			return ErrInvalidUniqueID(string(resStatus), int(uid.Type))
+		if uid.Type != UniqueIDTypeReservation {
+			return common.ErrInvalidUniqueID(string(resStatus), int(uid.Type))
 		}
 	case ResStatusCancelled:
-		if uid.Type != UniqueIDType2Cancellation {
-			return ErrInvalidUniqueID(string(resStatus), int(uid.Type))
+		if uid.Type != UniqueIDTypeCancellation {
+			return common.ErrInvalidUniqueID(string(resStatus), int(uid.Type))
 		}
 	}
 
 	if strings.TrimSpace(uid.ID) == "" {
-		return ErrMissingID
+		return common.ErrMissingID
 	}
 
 	return nil
 }
 
 func (v ResRetrieveValidator) validateRoomStays(roomStays []RoomStay) error {
-	if len(roomStays) == 0 {
-		return ErrMissingRoomStay
+	if len(roomStays) == 0 && !v.isCancellation() {
+		return common.ErrMissingRoomStay
 	}
 
 	for _, roomStay := range roomStays {
@@ -132,12 +135,12 @@ func (v ResRetrieveValidator) validateRoomStay(roomStay RoomStay) error {
 
 func (v ResRetrieveValidator) validateRoomType(roomType ResRoomType) error {
 	if strings.TrimSpace(roomType.RoomTypeCode) == "" {
-		return ErrMissingRoomTypeCode
+		return common.ErrMissingRoomTypeCode
 	}
 
-	if v.roomTypeCodes != nil { // TODO: oder len()>0
+	if v.roomTypeCodes != nil {
 		if _, ok := v.roomTypeCodes[roomType.RoomTypeCode]; !ok {
-			return ErrInvCodeNotFound(roomType.RoomTypeCode)
+			return common.ErrInvCodeNotFound(roomType.RoomTypeCode)
 		}
 	}
 
@@ -146,7 +149,7 @@ func (v ResRetrieveValidator) validateRoomType(roomType ResRoomType) error {
 
 func (v ResRetrieveValidator) validateRatePlan(ratePlan ResRatePlan) error {
 	if strings.TrimSpace(ratePlan.RatePlanCode) == "" {
-		return ErrMissingRatePlanCode
+		return common.ErrMissingRatePlanCode
 	}
 
 	if c := ratePlan.Commission; c != nil {
@@ -165,29 +168,29 @@ func (v ResRetrieveValidator) validateRatePlan(ratePlan ResRatePlan) error {
 func (v ResRetrieveValidator) validateCommission(commission Commission) error {
 	if commission.Percent != nil {
 		if *commission.Percent > 100 {
-			return ErrInvalidPercent
+			return common.ErrInvalidPercent
 		}
 	}
 
 	return nil
 }
 
-func (v ResRetrieveValidator) validateMealsIncluded(mealsIncluded *MealsIncluded) error {
+func (v ResRetrieveValidator) validateMealsIncluded(mealsIncluded *rateplans.MealsIncluded) error {
 	if v.isReservation() && mealsIncluded == nil {
-		return ErrMissingMealsIncluded
+		return common.ErrMissingMealsIncluded
 	}
 	return nil
 }
 
 func (v ResRetrieveValidator) validateGuestCounts(guestCounts []GuestCount) error {
 	if len(guestCounts) == 0 {
-		return ErrMissingGuestCount
+		return common.ErrMissingGuestCount
 	}
 
 	adultSeen := false
 	for _, guestCount := range guestCounts {
 		if guestCount.Age == nil && adultSeen {
-			return ErrDuplicateAdultGuestCount
+			return common.ErrDuplicateAdultGuestCount
 		}
 		adultSeen = adultSeen || guestCount.Age == nil
 	}
@@ -198,17 +201,17 @@ func (v ResRetrieveValidator) validateGuestCounts(guestCounts []GuestCount) erro
 func (v ResRetrieveValidator) validateTimeSpan(timeSpan TimeSpan) error {
 	if v.isReservation() {
 		if timeSpan.Start == nil {
-			return ErrMissingStart
+			return common.ErrMissingStart
 		}
 		if timeSpan.End == nil {
-			return ErrMissingEnd
+			return common.ErrMissingEnd
 		}
 		if timeSpan.Start.After(*timeSpan.End) {
-			return ErrStartAfterEnd
+			return common.ErrStartAfterEnd
 		}
 	} else {
 		if timeSpan.Duration == nil {
-			return ErrMissingDuration
+			return common.ErrMissingDuration
 		}
 		if err := v.validateStartDateWindow(timeSpan.StartDateWindow, *timeSpan.Duration); err != nil {
 			return err
@@ -219,15 +222,15 @@ func (v ResRetrieveValidator) validateTimeSpan(timeSpan TimeSpan) error {
 
 func (v ResRetrieveValidator) validateStartDateWindow(w *StartDateWindow, nights duration.Nights) error {
 	if w == nil {
-		return ErrMissingStartDateWindow
+		return common.ErrMissingStartDateWindow
 	}
 
 	if w.EarliestDate.After(w.LatestDate) {
-		return ErrEarliestDateAfterLatestDate
+		return common.ErrEarliestDateAfterLatestDate
 	}
 
 	if int(nights) <= w.LatestDate.DaysSince(w.EarliestDate) {
-		return ErrDurationOutOfRange
+		return common.ErrDurationOutOfRange
 	}
 
 	return nil
@@ -235,12 +238,16 @@ func (v ResRetrieveValidator) validateStartDateWindow(w *StartDateWindow, nights
 
 func (v ResRetrieveValidator) validateTotal(total *Total) error {
 	if v.isReservation() && total == nil {
-		return ErrMissingTotal
+		return common.ErrMissingTotal
 	}
 	return nil
 }
 
 func (v ResRetrieveValidator) validateCustomer(customer Customer) error {
+	if reflect.DeepEqual(customer, Customer{}) && v.isCancellation() {
+		return nil
+	}
+
 	if err := v.validatePersonName(customer.PersonName); err != nil {
 		return err
 	}
@@ -262,19 +269,19 @@ func (v ResRetrieveValidator) validateCustomer(customer Customer) error {
 
 func (v ResRetrieveValidator) validatePersonName(personName PersonName) error {
 	if personName.NamePrefix != nil && strings.TrimSpace(*personName.NamePrefix) == "" {
-		return ErrInvalidNamePrefix
+		return common.ErrInvalidNamePrefix
 	}
 
 	if strings.TrimSpace(personName.GivenName) == "" {
-		return ErrMissingGivenName
+		return common.ErrMissingGivenName
 	}
 
 	if strings.TrimSpace(personName.Surname) == "" {
-		return ErrMissingSurname
+		return common.ErrMissingSurname
 	}
 
 	if personName.NameTitle != nil && strings.TrimSpace(*personName.NameTitle) == "" {
-		return ErrInvalidNameTitle
+		return common.ErrInvalidNameTitle
 	}
 
 	return nil
@@ -286,20 +293,20 @@ func (v ResRetrieveValidator) validateEmail(email Email) error {
 }
 
 func (v ResRetrieveValidator) validateAddress(address Address) error {
-	if err := validateNonNilString(address.AddressLine); err != nil {
-		return ErrInvalidAddressLine
+	if err := common.ValidateNonNilString(address.AddressLine); err != nil {
+		return common.ErrInvalidAddressLine
 	}
 
-	if err := validateNonNilString(address.CityName); err != nil {
-		return ErrInvalidCityName
+	if err := common.ValidateNonNilString(address.CityName); err != nil {
+		return common.ErrInvalidCityName
 	}
 
-	if err := validateNonNilString(address.PostalCode); err != nil {
-		return ErrInvalidPostalCode
+	if err := common.ValidateNonNilString(address.PostalCode); err != nil {
+		return common.ErrInvalidPostalCode
 	}
 
 	if err := v.validateCountryName(address.CountryName); err != nil {
-		return ErrInvalidCountryNameCode
+		return common.ErrInvalidCountryNameCode
 	}
 
 	return nil
@@ -309,7 +316,7 @@ func (v ResRetrieveValidator) validateCountryName(countryName *CountryName) erro
 	if countryName == nil {
 		return nil
 	}
-	return validateString(countryName.Code)
+	return common.ValidateString(countryName.Code)
 }
 
 func (v ResRetrieveValidator) validateResGlobalInfo(globalInfo ResGlobalInfo) error {
@@ -318,8 +325,8 @@ func (v ResRetrieveValidator) validateResGlobalInfo(globalInfo ResGlobalInfo) er
 	}
 
 	if v.isReservation() {
-		if err := validateNonNilString(globalInfo.CancelPenalty); err != nil {
-			return ErrInvalidPenaltyDescriptionText
+		if err := common.ValidateNonNilString(globalInfo.CancelPenalty); err != nil {
+			return common.ErrInvalidPenaltyDescriptionText
 		}
 	}
 
@@ -333,7 +340,7 @@ func (v ResRetrieveValidator) validateResGlobalInfo(globalInfo ResGlobalInfo) er
 		}
 	}
 
-	if err := validateHotelCode(globalInfo.BasicPropertyInfo.HotelCode); err != nil {
+	if err := common.ValidateHotelCode(globalInfo.BasicPropertyInfo.HotelCode); err != nil && !v.isCancellation() {
 		return err
 	}
 
@@ -347,13 +354,13 @@ func (v ResRetrieveValidator) validateComments(comments *[]Comment) error {
 
 	for _, comment := range *comments {
 		for _, listItem := range comment.ListItems {
-			if err := validateString(listItem.Value); err != nil {
-				return ErrInvalidListItem
+			if err := common.ValidateString(listItem.Value); err != nil {
+				return common.ErrInvalidListItem
 			}
 		}
 		if comment.Text != nil {
-			if err := validateString(comment.Text.Value); err != nil {
-				return ErrInvalidCommentText
+			if err := common.ValidateString(comment.Text.Value); err != nil {
+				return common.ErrInvalidCommentText
 			}
 		}
 	}
@@ -366,16 +373,16 @@ func (v ResRetrieveValidator) validateHotelReservationID(id *HotelReservationID)
 		return nil
 	}
 
-	if err := validateNonNilString(id.ResIDValue); err != nil {
-		return ErrInvalidResIDValue
+	if err := common.ValidateNonNilString(id.ResIDValue); err != nil {
+		return common.ErrInvalidResIDValue
 	}
 
-	if err := validateNonNilString(id.ResIDSource); err != nil {
-		return ErrInvalidResIDSource
+	if err := common.ValidateNonNilString(id.ResIDSource); err != nil {
+		return common.ErrInvalidResIDSource
 	}
 
-	if err := validateNonNilString(id.ResIDSourceContext); err != nil {
-		return ErrInvalidResIDSourceContext
+	if err := common.ValidateNonNilString(id.ResIDSourceContext); err != nil {
+		return common.ErrInvalidResIDSourceContext
 	}
 
 	return nil
@@ -394,7 +401,7 @@ func (v ResRetrieveValidator) validateCompanyInfo(companyInfo CompanyInfo) error
 
 	if companyInfo.Email != nil {
 		if err := v.validateEmail(*companyInfo.Email); err != nil {
-			return ErrInvalidEmail
+			return common.ErrInvalidEmail
 		}
 	}
 
@@ -402,12 +409,12 @@ func (v ResRetrieveValidator) validateCompanyInfo(companyInfo CompanyInfo) error
 }
 
 func (v ResRetrieveValidator) validateCompanyName(companyName CompanyName) error {
-	if err := validateString(companyName.Code); err != nil {
-		return ErrInvalidCompanyNameCode
+	if err := common.ValidateString(companyName.Code); err != nil {
+		return common.ErrInvalidCompanyNameCode
 	}
 
-	if err := validateString(companyName.Value); err != nil {
-		return ErrInvalidCompanyNameValue
+	if err := common.ValidateString(companyName.Value); err != nil {
+		return common.ErrInvalidCompanyNameValue
 	}
 
 	return nil
@@ -417,4 +424,10 @@ func (v ResRetrieveValidator) validateCompanyName(companyName CompanyName) error
 func (v ResRetrieveValidator) isReservation() bool {
 	status := v.guestRequests[len(v.guestRequests)-1]
 	return status.IsReservation()
+}
+
+// Returns true if the current guest request being validated is a cancellation.
+func (v ResRetrieveValidator) isCancellation() bool {
+	status := v.guestRequests[len(v.guestRequests)-1]
+	return status == ResStatusCancelled
 }

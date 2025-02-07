@@ -1,8 +1,9 @@
-package v_2018_10
+package inventory
 
 import (
 	"strings"
 
+	"github.com/HGV/alpinebits/v_2018_10/common"
 	"github.com/HGV/x/slicesx"
 )
 
@@ -11,7 +12,7 @@ type HotelDescriptiveContentNotifValidator struct {
 	supportsOccupancyChildren bool
 }
 
-var _ Validatable[HotelDescriptiveContentNotifRQ] = (*HotelDescriptiveContentNotifValidator)(nil)
+var _ common.Validatable[HotelDescriptiveContentNotifRQ] = (*HotelDescriptiveContentNotifValidator)(nil)
 
 type HotelDescriptiveContentNotifValidatorFunc func(*HotelDescriptiveContentNotifValidator)
 
@@ -36,7 +37,7 @@ func WithHotelDescriptiveContentNotifOccupancyChildren(supports bool) HotelDescr
 }
 
 func (v HotelDescriptiveContentNotifValidator) Validate(r HotelDescriptiveContentNotifRQ) error {
-	if err := validateHotelCode(r.HotelDescriptiveContent.HotelCode); err != nil {
+	if err := common.ValidateHotelCode(r.HotelDescriptiveContent.HotelCode); err != nil {
 		return err
 	}
 
@@ -62,7 +63,7 @@ func (v HotelDescriptiveContentNotifValidator) validateGuestRooms(guestRooms []G
 func (v HotelDescriptiveContentNotifValidator) validateGuestRoom(guestRooms []GuestRoom) error {
 	headGuestRoom := guestRooms[0]
 	if strings.TrimSpace(headGuestRoom.Code) == "" {
-		return ErrMissingCode
+		return common.ErrMissingCode
 	}
 
 	if err := v.validateOccupancies(headGuestRoom); err != nil {
@@ -96,19 +97,19 @@ func (v HotelDescriptiveContentNotifValidator) validateOccupancies(guestRoom Gue
 	mco := guestRoom.MaxChildOccupancy
 
 	if !v.supportsOccupancyChildren && mco > 0 {
-		return ErrChildOccupancyNotSupported
+		return common.ErrChildOccupancyNotSupported
 	}
 
 	if mco > max {
-		return ErrMaxChildOccGreaterThanMaxOcc
+		return common.ErrMaxChildOccGreaterThanMaxOcc
 	}
 
 	if std < min {
-		return ErrStdOccLowerThanMinOcc
+		return common.ErrStdOccLowerThanMinOcc
 	}
 
 	if max < std {
-		return ErrMaxOccLowerThanStdOcc
+		return common.ErrMaxOccLowerThanStdOcc
 	}
 
 	return nil
@@ -116,7 +117,7 @@ func (v HotelDescriptiveContentNotifValidator) validateOccupancies(guestRoom Gue
 
 func (v *HotelDescriptiveContentNotifValidator) validateTypeRoom(typeRoom TypeRoom) error {
 	if typeRoom.RoomClassificationCode < 1 || typeRoom.RoomClassificationCode > 83 {
-		return ErrInvalidRoomClassificationCode(typeRoom.RoomClassificationCode)
+		return common.ErrInvalidRoomClassificationCode(typeRoom.RoomClassificationCode)
 	}
 
 	if typeRoom.RoomType > 0 {
@@ -133,10 +134,10 @@ func (v *HotelDescriptiveContentNotifValidator) validateTypeRoom(typeRoom TypeRo
 		}
 		rcc, ok := allowed[typeRoom.RoomType]
 		if !ok {
-			return ErrInvalidRoomType(typeRoom.RoomType)
+			return common.ErrInvalidRoomType(typeRoom.RoomType)
 		}
 		if typeRoom.RoomClassificationCode != rcc {
-			return ErrInvalidRoomClassificationCode(typeRoom.RoomClassificationCode)
+			return common.ErrInvalidRoomClassificationCode(typeRoom.RoomClassificationCode)
 		}
 	}
 
@@ -150,7 +151,7 @@ func (v *HotelDescriptiveContentNotifValidator) validateAmenities(amenities *[]A
 
 	for _, amenity := range *amenities {
 		if code := amenity.RoomAmenityCode; code < 1 || code > 293 {
-			return ErrInvalidRoomAmenityType(code)
+			return common.ErrInvalidRoomAmenityType(code)
 		}
 	}
 
@@ -160,17 +161,17 @@ func (v *HotelDescriptiveContentNotifValidator) validateAmenities(amenities *[]A
 func (v *HotelDescriptiveContentNotifValidator) validateMultimediaDescriptions(mds MultimediaDescriptions) error {
 	longNames := mds.LongNames()
 	if len(longNames) == 0 {
-		return ErrMissingLongName
+		return common.ErrMissingLongName
 	}
 
 	for _, md := range mds {
 		switch md.InfoCode {
 		case InformationTypeLongName:
-			if err := validateLanguageUniqueness(*md.TextItems); err != nil {
+			if err := common.ValidateLanguageUniqueness(*md.TextItems); err != nil {
 				return err
 			}
 		case InformationTypeDescription:
-			if err := validateLanguageUniqueness(*md.TextItems); err != nil {
+			if err := common.ValidateLanguageUniqueness(*md.TextItems); err != nil {
 				return err
 			}
 		case InformationTypePictures:
@@ -186,9 +187,9 @@ func (v *HotelDescriptiveContentNotifValidator) validateMultimediaDescriptions(m
 func (v *HotelDescriptiveContentNotifValidator) validateImages(images []ImageItem) error {
 	for _, image := range images {
 		if category := image.Category; category < 1 || category > 23 {
-			return ErrInvalidPictureCategoryCode(category)
+			return common.ErrInvalidPictureCategoryCode(category)
 		}
-		if err := validateLanguageUniqueness(image.Descriptions); err != nil {
+		if err := common.ValidateLanguageUniqueness(image.Descriptions); err != nil {
 			return err
 		}
 	}
@@ -196,10 +197,15 @@ func (v *HotelDescriptiveContentNotifValidator) validateImages(images []ImageIte
 }
 
 func (v *HotelDescriptiveContentNotifValidator) validateRooms(rooms []GuestRoom) error {
+	if !v.supportsRooms && len(rooms) > 0 {
+		return common.ErrRoomsNotSupported
+	}
+
 	for _, room := range rooms {
 		if strings.TrimSpace(room.TypeRoom.RoomID) == "" {
-			return ErrMissingRoomID
+			return common.ErrMissingRoomID
 		}
 	}
+
 	return nil
 }

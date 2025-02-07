@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+     AlpineBits 2018-10
+     http://www.alpinebits.org/
+
+     sample message file
+
+     changelog:
+     v. 2018-10 1.0
+-->
+
+<OTA_ResRetrieveRS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.opentravel.org/OTA/2003/05"
+                   xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_ResRetrieveRS.xsd"
+                   Version="7.000">
+
+    <Success/>
+
+    <ReservationsList>
+
+        <HotelReservation CreateDateTime="2017-09-03T19:47:50+01:00" ResStatus="Requested">
+
+            <UniqueID Type="14" ID="6b34fe24ac2ff811"/>
+
+            <RoomStays>
+
+                <RoomStay>
+
+                    <RoomTypes>
+                        <!-- RoomType 8 and RoomClassificationCode 5 means "camping ground/pitch" (see section 4.4) --> 
+                        <RoomType RoomTypeCode="A" RoomClassificationCode="5" RoomType="8"/>
+                    </RoomTypes>
+
+                    <GuestCounts>
+                        <GuestCount Count="1" ></GuestCount>
+                    </GuestCounts>
+
+                    <TimeSpan>
+                        <StartDateWindow EarliestDate="2017-10-03" LatestDate="2017-10-08"/>
+                    </TimeSpan>
+
+                </RoomStay>
+
+            </RoomStays>
+
+            <ResGuests>
+                <ResGuest>
+                    <Profiles>
+                        <ProfileInfo>
+                            <Profile>
+                                <Customer Language="de" Gender="Unknown">
+                                    <PersonName>
+                                        <GivenName>Otto</GivenName>
+                                        <Surname>Mustermann</Surname>
+                                    </PersonName>
+                                    <Address>
+                                        <CountryName Code="DE"/>
+                                    </Address>
+                                </Customer>
+                            </Profile>
+                        </ProfileInfo>
+                    </Profiles>
+                </ResGuest>
+            </ResGuests>
+
+            <ResGlobalInfo>
+                <HotelReservationIDs>
+                    <HotelReservationID ResID_Type="13" ResID_SourceContext="cnt" ResID_Value="res" ResID_Source="www.example.com"/>
+                </HotelReservationIDs>
+                <BasicPropertyInfo HotelCode="123" HotelName="Frangart Inn"/>
+            </ResGlobalInfo>
+
+        </HotelReservation>
+
+    </ReservationsList>
+
+</OTA_ResRetrieveRS>

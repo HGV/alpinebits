@@ -1,4 +1,4 @@
-package v_2018_10
+package rateplans
 
 import (
 	"encoding/xml"
@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/HGV/alpinebits/duration"
+	"github.com/HGV/alpinebits/v_2018_10/common"
 	"github.com/HGV/alpinebits/version"
 	"github.com/HGV/x/timex"
 )
@@ -14,6 +15,22 @@ type HotelRatePlanNotifRQ struct {
 	XMLName   xml.Name  `xml:"http://www.opentravel.org/OTA/2003/05 OTA_HotelRatePlanNotifRQ"`
 	UniqueID  *UniqueID `xml:"UniqueID,omitempty"`
 	RatePlans RatePlans `xml:"RatePlans"`
+}
+
+type UniqueIDType int
+
+const UniqueIDTypeReference UniqueIDType = 16
+
+type Instance string
+
+const (
+	InstanceCompleteSet Instance = "CompleteSet"
+)
+
+type UniqueID struct {
+	Type     UniqueIDType `xml:"Type,attr"`
+	ID       string       `xml:"ID,attr"`
+	Instance Instance     `xml:"Instance,attr"`
 }
 
 type RatePlans struct {
@@ -30,13 +47,17 @@ const (
 	RatePlanNotifTypeRemove  RatePlanNotifType = "Remove"
 )
 
+type RatePlanType int
+
+const RatePlanTypePromotional RatePlanType = 12
+
 type RatePlan struct {
 	RatePlanNotifType RatePlanNotifType   `xml:"RatePlanNotifType,attr"`
-	RatePlanType      int                 `xml:"RatePlanType,attr,omitempty"` //12 promotional
+	RatePlanType      RatePlanType        `xml:"RatePlanType,attr,omitempty"`
 	CurrencyCode      string              `xml:"CurrencyCode,attr"`
 	RatePlanCode      string              `xml:"RatePlanCode,attr"`
 	RatePlanID        string              `xml:"RatePlanID,attr,omitempty"`
-	RatePlanQualifier bool                `xml:"RatePlanQualifier,attr,omitempty"`
+	RatePlanQualifier *bool               `xml:"RatePlanQualifier,attr,omitempty"`
 	BookingRules      []BookingRule       `xml:"BookingRules>BookingRule"`
 	Rates             []Rate              `xml:"Rates>Rate"`
 	Supplements       []Supplement        `xml:"Supplements>Supplement"`
@@ -45,7 +66,8 @@ type RatePlan struct {
 }
 
 func (r RatePlan) isMaster() bool {
-	return r.RatePlanQualifier && r.RatePlanID != ""
+	return (r.RatePlanQualifier == nil && r.RatePlanID == "") ||
+		(*r.RatePlanQualifier && r.RatePlanID != "")
 }
 
 type CodeContext string
@@ -111,17 +133,16 @@ const (
 	RestrictionMaster Restriction = "Master"
 )
 
-// TODO: Rename
-type Status2 string
+type Status string
 
 const (
-	Status2Open  Status2 = "Open"
-	Status2Close Status2 = "Close"
+	StatusOpen  Status = "Open"
+	StatusClose Status = "Close"
 )
 
 type RestrictionStatus struct {
 	Restriction Restriction `xml:"Restriction,attr"`
-	Status      Status2     `xml:"Status,attr"`
+	Status      Status      `xml:"Status,attr"`
 }
 
 type Rate struct {
@@ -319,10 +340,10 @@ type Guest struct {
 }
 
 type RatePlanDescription struct {
-	Titles       []Description
-	Intros       []Description
-	Descriptions []Description
-	Themes       []ListItem2
+	Titles       []common.Description
+	Intros       []common.Description
+	Descriptions []common.Description
+	Themes       []ListItem
 	Gallery      []GalleryItem
 }
 
@@ -363,7 +384,7 @@ func (rd *RatePlanDescription) UnmarshalXML(d *xml.Decoder, start xml.StartEleme
 
 func (rd *RatePlanDescription) decodeTitle(d *xml.Decoder, start xml.StartElement) error {
 	var t struct {
-		Texts []Description `xml:"Text"`
+		Texts []common.Description `xml:"Text"`
 	}
 	if err := d.DecodeElement(&t, &start); err != nil {
 		return err
@@ -374,7 +395,7 @@ func (rd *RatePlanDescription) decodeTitle(d *xml.Decoder, start xml.StartElemen
 
 func (rd *RatePlanDescription) decodeIntro(d *xml.Decoder, start xml.StartElement) error {
 	var t struct {
-		Texts []Description `xml:"Text"`
+		Texts []common.Description `xml:"Text"`
 	}
 	if err := d.DecodeElement(&t, &start); err != nil {
 		return err
@@ -385,7 +406,7 @@ func (rd *RatePlanDescription) decodeIntro(d *xml.Decoder, start xml.StartElemen
 
 func (rd *RatePlanDescription) decodeDescription(d *xml.Decoder, start xml.StartElement) error {
 	var t struct {
-		Texts []Description `xml:"Text"`
+		Texts []common.Description `xml:"Text"`
 	}
 	if err := d.DecodeElement(&t, &start); err != nil {
 		return err
@@ -396,7 +417,7 @@ func (rd *RatePlanDescription) decodeDescription(d *xml.Decoder, start xml.Start
 
 func (rd *RatePlanDescription) decodeCodeList(d *xml.Decoder, start xml.StartElement) error {
 	var l struct {
-		ListItems []ListItem2 `xml:"ListItem"`
+		ListItems []ListItem `xml:"ListItem"`
 	}
 	if err := d.DecodeElement(&l, &start); err != nil {
 		return err
@@ -423,13 +444,13 @@ func (rd *RatePlanDescription) decodeGallery(d *xml.Decoder) error {
 				if currentItem != nil {
 					gallery = append(gallery, *currentItem)
 				}
-				var url URL
+				var url common.URL
 				if err = d.DecodeElement(&url, &se); err != nil {
 					return err
 				}
 				currentItem = &GalleryItem{Image: url}
 			case "text":
-				var text Description
+				var text common.Description
 				if err = d.DecodeElement(&text, &se); err != nil {
 					return err
 				}
@@ -439,7 +460,7 @@ func (rd *RatePlanDescription) decodeGallery(d *xml.Decoder) error {
 					currentItem.CopyrightNotice = text.Value
 				}
 			case "url":
-				var url URL
+				var url common.URL
 				if err = d.DecodeElement(&url, &se); err != nil {
 					return err
 				}
@@ -451,20 +472,19 @@ func (rd *RatePlanDescription) decodeGallery(d *xml.Decoder) error {
 	return nil
 }
 
-// TODO: Rename
-type ListItem2 struct {
+type ListItem struct {
 	Value string `xml:",innerxml"`
 }
 
 type GalleryItem struct {
-	Image           URL
-	Descriptions    []Description
+	Image           common.URL
+	Descriptions    []common.Description
 	CopyrightNotice string
-	Attribution     URL
+	Attribution     common.URL
 }
 
 type HotelRatePlanNotifRS struct {
-	response
+	common.Response
 
 	XMLName xml.Name `xml:"http://www.opentravel.org/OTA/2003/05 OTA_HotelRatePlanNotifRS"`
 	Version string   `xml:"Version,attr"`

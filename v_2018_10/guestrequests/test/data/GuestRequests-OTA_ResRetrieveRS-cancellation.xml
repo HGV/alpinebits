@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+     AlpineBits 2014-04
+     http://www.alpinebits.org/
+
+     sample message file
+
+     changelog:
+     v. 2015-07b 1.0
+     v. 2014-04  1.0
+-->
+
+<OTA_ResRetrieveRS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.opentravel.org/OTA/2003/05"
+                   xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_ResRetrieveRS.xsd"
+                   Version="7.000">
+
+    <Success/>
+
+    <ReservationsList>
+
+        <HotelReservation CreateDateTime="2012-03-21T15:00:00+01:00" ResStatus="Cancelled">
+
+              <!-- Type 15 -> Cancellation -->
+            <UniqueID Type="15" ID="c24e8b15ca469388"/>
+
+             <!-- the following are optional for cancellations: -->
+             <!--
+             <RoomStays>     ...  </RoomStays>
+             <ResGuests>     ...  </ResGuests>
+             <ResGlobalInfo> ...  </ResGlobalInfo>
+             -->
+
+        </HotelReservation>
+
+    </ReservationsList>
+
+</OTA_ResRetrieveRS>

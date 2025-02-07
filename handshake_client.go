@@ -31,10 +31,10 @@ type (
 type pingRQ struct {
 	XMLName  xml.Name `xml:"http://www.opentravel.org/OTA/2003/05 OTA_PingRQ"`
 	Version  string   `xml:"Version,attr"`
-	EchoData EchoData `xml:"EchoData"`
+	EchoData echoData `xml:"EchoData"`
 }
 
-type EchoData struct {
+type echoData struct {
 	Value string `xml:",innerxml"`
 }
 
@@ -43,7 +43,7 @@ type pingRS struct {
 	Version  string   `xml:"Version,attr"`
 	Success  success  `xml:"Success"`
 	Warning  warning  `xml:"Warnings>Warning"`
-	EchoData EchoData `xml:"EchoData"`
+	EchoData echoData `xml:"EchoData"`
 }
 
 type success struct{}
@@ -94,14 +94,14 @@ func NewHandshakeClient(config HandshakeClientConfig) (*HandshakeClient, error) 
 }
 
 func (c *HandshakeClient) Ping(ctx context.Context) (HandshakeData, *http.Response, error) {
-	echoData, err := json.Marshal(c.config.HandshakeData)
+	b, err := json.Marshal(c.config.HandshakeData)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	pingRQ := pingRQ{
 		Version:  "1.0",
-		EchoData: EchoData{string(echoData)},
+		EchoData: echoData{string(b)},
 	}
 
 	req, err := c.newRequest(ctx, "OTA_Ping:Handshaking", pingRQ)

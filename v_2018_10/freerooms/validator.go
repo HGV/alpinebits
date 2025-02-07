@@ -1,8 +1,9 @@
-package v_2018_10
+package freerooms
 
 import (
 	"strings"
 
+	"github.com/HGV/alpinebits/v_2018_10/common"
 	"github.com/HGV/x/slicesx"
 )
 
@@ -15,7 +16,7 @@ type HotelAvailNotifValidator struct {
 	supportsBookingThreshold bool
 }
 
-var _ Validatable[HotelAvailNotifRQ] = (*HotelAvailNotifValidator)(nil)
+var _ common.Validatable[HotelAvailNotifRQ] = (*HotelAvailNotifValidator)(nil)
 
 type HotelAvailNotifValidatorFunc func(*HotelAvailNotifValidator)
 
@@ -54,7 +55,7 @@ func WithBookingThreshold(supports bool) HotelAvailNotifValidatorFunc {
 }
 
 func (v HotelAvailNotifValidator) Validate(r HotelAvailNotifRQ) error {
-	if err := validateHotelCode(r.AvailStatusMessages.HotelCode); err != nil {
+	if err := common.ValidateHotelCode(r.AvailStatusMessages.HotelCode); err != nil {
 		return err
 	}
 
@@ -79,7 +80,7 @@ func (v HotelAvailNotifValidator) Validate(r HotelAvailNotifRQ) error {
 
 func (v HotelAvailNotifValidator) validateUniqueID(uid *UniqueID) error {
 	if uid == nil && !v.supportsDeltas {
-		return ErrDeltasNotSupported
+		return common.ErrDeltasNotSupported
 	}
 	return nil
 }
@@ -96,15 +97,15 @@ func (v HotelAvailNotifValidator) validateAvailStatusMessages(msgs []AvailStatus
 func (v HotelAvailNotifValidator) validateAvailStatusMessage(msg AvailStatusMessage) error {
 	availableRooms := msg.BookingLimit
 	if availableRooms > 1 && v.supportsRooms {
-		return ErrInvalidBookingLimit(availableRooms)
+		return common.ErrInvalidBookingLimit(availableRooms)
 	}
 
 	if !v.supportsBookingThreshold && msg.BookingThreshold > 0 {
-		return ErrBookingThresholdNotSupported
+		return common.ErrBookingThresholdNotSupported
 	}
 
 	if msg.BookingThreshold > availableRooms {
-		return ErrBookingThresholdGreaterThanBookingLimit
+		return common.ErrBookingThresholdGreaterThanBookingLimit
 	}
 
 	if err := v.validateStatusApplicationControl(msg.StatusApplicationControl); err != nil {
@@ -116,22 +117,22 @@ func (v HotelAvailNotifValidator) validateAvailStatusMessage(msg AvailStatusMess
 
 func (v HotelAvailNotifValidator) validateStatusApplicationControl(s StatusApplicationControl) error {
 	if strings.TrimSpace(s.InvTypeCode) == "" {
-		return ErrMissingInvTypeCode
+		return common.ErrMissingInvTypeCode
 	}
 
 	if v.supportsRooms {
 		if strings.TrimSpace(s.InvCode) == "" {
-			return ErrMissingInvCode
+			return common.ErrMissingInvCode
 		}
 		if v.roomMapping != nil {
 			if _, ok := (*v.roomMapping)[s.InvTypeCode][s.InvCode]; !ok {
-				return ErrInvCodeNotFound(s.InvCode)
+				return common.ErrInvCodeNotFound(s.InvCode)
 			}
 		}
 	} else if v.supportsCategories {
 		if v.categoriesMapping != nil {
 			if _, ok := (*v.categoriesMapping)[s.InvTypeCode]; !ok {
-				return ErrInvTypeCodeNotFound(s.InvTypeCode)
+				return common.ErrInvTypeCodeNotFound(s.InvTypeCode)
 			}
 		}
 	}
@@ -152,7 +153,7 @@ func (v HotelAvailNotifValidator) validateOverlaps(msgs []AvailStatusMessage) er
 	})
 
 	for _, avails := range availsBy {
-		if err := validateOverlaps(avails); err != nil {
+		if err := common.ValidateOverlaps(avails); err != nil {
 			return err
 		}
 	}

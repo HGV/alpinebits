@@ -1,8 +1,9 @@
-package v_2018_10
+package freerooms
 
 import (
 	"encoding/xml"
 
+	"github.com/HGV/alpinebits/v_2018_10/common"
 	"github.com/HGV/alpinebits/version"
 	"github.com/HGV/x/timex"
 )
@@ -16,9 +17,7 @@ type HotelAvailNotifRQ struct {
 type UniqueIDType int
 
 const (
-	// UniqueIDTypeReservation           UniqueIDType = 14
-	// UniqueIDTypeCancellation          UniqueIDType = 15
-	// UniqueIDTypeReference             UniqueIDType = 16
+	UniqueIDTypeReference             UniqueIDType = 16
 	UniqueIDTypePurgedMasterReference UniqueIDType = 35
 )
 
@@ -31,7 +30,7 @@ const (
 type UniqueID struct {
 	Type     UniqueIDType `xml:"Type,attr"`
 	ID       string       `xml:"ID,attr"`
-	Instance Instance     `xml:"Instance,attr,omitempty"`
+	Instance Instance     `xml:"Instance,attr"`
 }
 
 type AvailStatusMessages struct {
@@ -76,7 +75,7 @@ type StatusApplicationControl struct {
 }
 
 type HotelAvailNotifRS struct {
-	response
+	common.Response
 
 	XMLName xml.Name `xml:"http://www.opentravel.org/OTA/2003/05 OTA_HotelAvailNotifRS"`
 	Version string   `xml:"Version,attr"`
