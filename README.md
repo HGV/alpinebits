@@ -63,7 +63,9 @@ func pushHotelInvCountNotif(r Request) (any, error) {
 ### Validation
 
 ```go
-validator := v_2018_10.NewHotelAvailNotifValidator(
+import "github.com/HGV/alpinebits/v_2018_10/freerooms"
+
+validator := freerooms.NewHotelAvailNotifValidator(
     WithRooms(true, &map[string]map[string]struct{}{
         "DZ": {"101": {}, "102": {}},
     }),
