@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+     AlpineBits 2017-10
+     http://www.alpinebits.org/
+
+     sample message file
+
+     changelog:
+     v. 2017-10 1.0 adapted for static rates
+     v. 2015-07 1.0 LengthOfStay -> Time set to 5 for SetMaxLOS
+                    BaseByGuestAmt -> AmountAfterTax corrected to be consistent with the choice of Type="7" (per person)
+     v. 2014-04 1.2 removed third example Offer element (only at most two Offer elements are allowed)
+     v. 2014-04 1.1 Description: fixed Name="Short Description" -> Name="title" and added example content
+     v. 2014-04 1.0
+-->
+
+<OTA_HotelRatePlanNotifRQ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                          xmlns="http://www.opentravel.org/OTA/2003/05"
+                          xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_HotelRatePlanNotifRQ.xsd"
+                          Version="1.000">
+
+    <RatePlans HotelCode="123" HotelName="Frangart Inn">
+
+        <RatePlan RatePlanNotifType="New" CurrencyCode="EUR" RatePlanCode="Rate1-4-HB">
+
+            <BookingRules>
+
+                <BookingRule Start="2014-03-03" End="2014-04-17">
+
+                    <LengthsOfStay>
+                        <LengthOfStay Time="5" TimeUnit="Day" MinMaxMessageType="SetMinLOS"/>
+                        <LengthOfStay Time="5" TimeUnit="Day" MinMaxMessageType="SetMaxLOS"/>
+                    </LengthsOfStay>
+
+                    <DOW_Restrictions>
+                        <ArrivalDaysOfWeek   Mon="1" Tue="1" Weds="1" Thur="1" Fri="1" Sat="1" Sun="1"/>
+                        <DepartureDaysOfWeek Mon="1" Tue="1" Weds="1" Thur="1" Fri="1" Sat="1" Sun="1"/>
+                    </DOW_Restrictions>
+
+                    <RestrictionStatus Restriction="Master" Status="Open"/>
+
+                </BookingRule>
+
+            </BookingRules>
+
+            <Rates>
+
+                <!-- first in list: the static rate - values apply to every rate in the rate plan -->
+
+                <Rate RateTimeUnit="Day" UnitMultiplier="1">
+                    <BaseByGuestAmts>
+                        <BaseByGuestAmt Type="7"/>
+                    </BaseByGuestAmts>
+                    <MealsIncluded MealPlanIndicator="true" MealPlanCodes="12"/>
+                </Rate>
+
+                <!-- following: "normal" rates ... -->
+
+                <Rate InvTypeCode="double" Start="2014-03-03" End="2014-03-08">
+                    <BaseByGuestAmts>
+                        <BaseByGuestAmt NumberOfGuests="1" AgeQualifyingCode="10" AmountAfterTax="106"/>
+                        <BaseByGuestAmt NumberOfGuests="2" AgeQualifyingCode="10" AmountAfterTax="96"/>
+                    </BaseByGuestAmts>
+                    <AdditionalGuestAmounts>
+                        <AdditionalGuestAmount AgeQualifyingCode="10" Amount="76.8"/>
+                        <AdditionalGuestAmount AgeQualifyingCode="8"              MaxAge="3" Amount="0"    />
+                        <AdditionalGuestAmount AgeQualifyingCode="8"  MinAge="3"  MaxAge="6" Amount="38.4" />
+                        <AdditionalGuestAmount AgeQualifyingCode="8"  MinAge="6"  MaxAge="10" Amount="48"  />
+                        <AdditionalGuestAmount AgeQualifyingCode="8"  MinAge="10" MaxAge="16" Amount="67.2"/>
+                    </AdditionalGuestAmounts>
+                </Rate>
+
+            </Rates>
+
+            <Supplements>
+
+                <Supplement InvType="EXTRA" InvCode="0x539" AddToBasicRateIndicator="true" MandatoryIndicator="true" ChargeTypeCode="18">
+                    <Description Name="title">
+                        <Text TextFormat="PlainText" Language="de">Endreinigung</Text>
+                        <Text TextFormat="PlainText" Language="it">Pulizia finale</Text>
+                        <!-- more languages ... -->
+                    </Description>
+                    <Description Name="intro">
+                        <Text TextFormat="PlainText" Language="de">Die Endreinigung lorem ipsum dolor sit amet.</Text>
+                        <Text TextFormat="PlainText" Language="it">La pulizia finale lorem ipsum dolor sit amet.</Text>
+                        <!-- more languages ... -->
+                    </Description>
+                </Supplement>
+
+                <Supplement InvType="EXTRA" InvCode="0x539" Amount="20" Start="2014-10-01" End="2014-10-11"/>
+
+            </Supplements>
+
+            <Offers>
+                <Offer>
+                    <OfferRules>
+                        <OfferRule>
+                            <Occupancy AgeQualifyingCode="10" MinAge="16"/>
+                            <Occupancy AgeQualifyingCode="8"/>
+                        </OfferRule>
+                    </OfferRules>
+                </Offer>
+            </Offers>
+
+            <Description Name="title">
+                <Text TextFormat="PlainText" Language="en">Lorem ipsum.</Text>
+                <Text TextFormat="PlainText" Language="it">Lorem ipsum.</Text>
+                <!-- more languages ... -->
+            </Description>
+
+            <Description Name="intro">
+                <Text TextFormat="PlainText" Language="en">Lorem ipsum dolor sit amet.</Text>
+                <Text TextFormat="PlainText" Language="it">Lorem ipsum dolor sit amet.</Text>
+                <!-- more languages ... -->
+            </Description>
+
+        </RatePlan>
+
+    </RatePlans>
+
+</OTA_HotelRatePlanNotifRQ>

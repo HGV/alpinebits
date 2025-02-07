@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+     AlpineBits 2020-10
+     https://www.alpinebits.org/
+
+     sample message file
+
+     changelog:
+     v. 2020-10 1.0
+-->
+
+<OTA_HotelInvCountNotifRQ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                       xmlns="http://www.opentravel.org/OTA/2003/05"
+							  Version="4"
+                       xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_HotelInvCountNotifRQ.xsd">
+
+    <UniqueID Type="16" ID="1" Instance="CompleteSet"/>
+
+    <Inventories HotelCode="123" HotelName="Frangart Inn">
+
+        <Inventory>
+            <StatusApplicationControl Start="2020-08-01" End="2020-08-10" InvTypeCode="DOUBLE" />
+				<InvCounts>
+					<InvCount CountType="2" Count="3" />
+				</InvCounts>
+        </Inventory>
+
+        <Inventory>
+            <StatusApplicationControl Start="2020-08-11" End="2020-08-20" InvTypeCode="DOUBLE" />
+        </Inventory>
+
+		  <Inventory>
+            <StatusApplicationControl Start="2020-08-21" End="2020-08-30" InvTypeCode="DOUBLE" />
+				<InvCounts>
+					<InvCount CountType="2" Count="1" />
+				</InvCounts>
+        </Inventory>
+
+    </Inventories>
+
+</OTA_HotelInvCountNotifRQ>

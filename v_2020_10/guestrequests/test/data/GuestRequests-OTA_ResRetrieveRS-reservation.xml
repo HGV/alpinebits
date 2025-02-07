@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+     AlpineBits 2014-04
+     http://www.alpinebits.org/
+
+     sample message file
+
+     changelog:
+     v. 2015-07 1.0 updated to 2015-07
+     v. 2014-04 1.0
+-->
+
+<OTA_ResRetrieveRS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.opentravel.org/OTA/2003/05"
+                   xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_ResRetrieveRS.xsd"
+                   Version="7.000">
+
+    <Success/>
+
+    <ReservationsList>
+
+        <HotelReservation CreateDateTime="2012-03-21T15:00:00+01:00" ResStatus="Reserved">
+
+              <!-- Type 14 -> Reservation -->
+            <UniqueID Type="14" ID="6b34fe24ac2ff810"/>
+
+            <RoomStays>
+
+                <RoomStay>
+
+                    <RoomTypes>
+                        <RoomType RoomTypeCode="bigsuite" RoomClassificationCode="42"/>
+                    </RoomTypes>
+
+                    <RatePlans>
+                        <RatePlan RatePlanCode="123456-xyz">
+                            <Commission Percent="15"/>
+                            <!-- Code 1 -> All inclusive -->
+                            <MealsIncluded MealPlanIndicator="true" MealPlanCodes="1"/>
+                        </RatePlan>
+                    </RatePlans>
+
+                    <!-- 2 adults + 1 child + 1 child = 4 guests -->
+                    <GuestCounts>
+                        <!-- 2 adults -->
+                        <GuestCount Count="2"/>
+                        <!-- 1 child -->
+                        <GuestCount Count="1" Age="9"/>
+                        <!-- 1 child -->
+                        <GuestCount Count="1" Age="3"/>
+                    </GuestCounts>
+
+                    <TimeSpan Start="2012-01-01" End="2012-01-12"/>
+
+                    <Guarantee>
+                        <GuaranteesAccepted>
+                            <GuaranteeAccepted>
+                                <PaymentCard CardCode="VI" ExpireDate="1216">
+                                    <CardHolderName>Otto Mustermann</CardHolderName>
+                                    <CardNumber>
+                                        <PlainText>4444333322221111
+                                        </PlainText>
+                                    </CardNumber>
+                                </PaymentCard>
+                            </GuaranteeAccepted>
+                        </GuaranteesAccepted>
+                    </Guarantee>
+
+                    <Total AmountAfterTax="299" CurrencyCode="EUR"/>
+
+                </RoomStay>
+
+            </RoomStays>
+
+            <ResGuests>
+                <ResGuest>
+                    <Profiles>
+                        <ProfileInfo>
+                            <Profile>
+
+                                <Customer Gender="Male" BirthDate="1980-01-01" Language="de">
+
+                                    <PersonName>
+                                        <NamePrefix>Herr</NamePrefix>
+                                        <GivenName>Otto</GivenName>
+                                        <Surname>Mustermann</Surname>
+                                        <NameTitle>Dr</NameTitle>
+                                    </PersonName>
+
+                                    <!-- Code 1 -> Voice -->
+                                    <Telephone PhoneTechType="1" PhoneNumber="+4934567891"/>
+                                    <!-- Code 3 -> Fax -->
+                                    <Telephone PhoneTechType="3" PhoneNumber="+4934567892"/>
+                                    <!-- Code 5 -> Mobile -->
+                                    <Telephone PhoneTechType="5" PhoneNumber="+4934567893"/>
+
+                                    <Email Remark="newsletter:yes">otto.mustermann@example.com</Email>
+
+                                    <Address Remark="catalog:yes">
+
+                                        <AddressLine>Musterstraße 1</AddressLine>
+                                        <CityName>Musterstadt</CityName>
+                                        <PostalCode>1234</PostalCode>
+                                        <CountryName Code="DE"/>
+
+                                    </Address>
+
+                                </Customer>
+
+                            </Profile>
+                        </ProfileInfo>
+                    </Profiles>
+                </ResGuest>
+            </ResGuests>
+
+            <ResGlobalInfo>
+
+                <Comments>
+
+                    <Comment Name="included services">
+                        <ListItem ListItem="1" Language="de">Parkplatz</ListItem>
+                        <ListItem ListItem="2" Language="de">Schwimmbad</ListItem>
+                        <ListItem ListItem="3" Language="de">Skipass</ListItem>
+                    </Comment>
+
+                    <Comment Name="customer comment">
+                        <Text>
+                            Sind Hunde erlaubt?
+
+                            Mfg.
+                            Otto Mustermann.
+                        </Text>
+                    </Comment>
+
+                </Comments>
+
+                <CancelPenalties>
+                    <CancelPenalty>
+                        <PenaltyDescription>
+                            <Text>
+                            Cancellation is handled by hotel.
+                            Penalty is 50%, if canceled within 3 days before show, 100% otherwise.
+                            </Text>
+                        </PenaltyDescription>
+                    </CancelPenalty>
+                </CancelPenalties>
+
+                <HotelReservationIDs>
+                    <!-- ResID_Type 13 -> Internet Broker -->
+                    <HotelReservationID ResID_Type="13"
+                                        ResID_Value="Slogan"
+                                        ResID_Source="www.example.com"
+                                        ResID_SourceContext="top banner" />
+                </HotelReservationIDs>
+
+                <Profiles>
+                    <ProfileInfo>
+                        <!-- ProfileType 4 -> Travel Agent --> 
+                        <Profile ProfileType="4">
+                            <CompanyInfo>
+                                <CompanyName Code="123" CodeContext="ABC">ACME Travel Agency</CompanyName>
+                                <!-- Code 1 -> Voice -->
+                                <AddressInfo>
+                                    <AddressLine>Musterstraße 1</AddressLine>
+                                    <CityName>Flaneid</CityName>
+                                    <PostalCode>12345</PostalCode>
+                                    <CountryName Code="IT"/>
+                                </AddressInfo>
+                                <TelephoneInfo PhoneTechType="1" PhoneNumber="+391234567890"/>
+                                <Email>info@example.com</Email>
+                            </CompanyInfo>
+                        </Profile>
+                    </ProfileInfo>
+                </Profiles>
+
+               <BasicPropertyInfo HotelCode="123" HotelName="Frangart Inn"/>
+
+            </ResGlobalInfo>
+
+        </HotelReservation>
+
+    </ReservationsList>
+
+</OTA_ResRetrieveRS>
