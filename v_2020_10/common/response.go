@@ -31,6 +31,10 @@ type Error struct {
 	Value  string           `xml:",innerxml"`
 }
 
+func (err Error) Error() string {
+	return err.Value
+}
+
 type Response struct {
 	Success  *Success   `xml:"Success"`
 	Warnings *[]Warning `xml:"Warnings>Warning"`

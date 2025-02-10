@@ -4,12 +4,16 @@ import (
 	"encoding/xml"
 
 	"github.com/HGV/alpinebits/v_2020_10/common"
+	"github.com/HGV/alpinebits/version"
 	"github.com/HGV/x/timex"
 )
 
 type UniqueIDType int
 
-const UniqueIDTypePurgedMasterReference UniqueIDType = 35
+const (
+	UniqueIDTypeReference             UniqueIDType = 16
+	UniqueIDTypePurgedMasterReference UniqueIDType = 35
+)
 
 type UniqueIDInstance string
 
@@ -34,9 +38,32 @@ type Inventories struct {
 	Inventories []Inventory `xml:"Inventory"`
 }
 
+func (i Inventories) IsReset() bool {
+	var zero Inventory
+	return len(i.Inventories) == 1 &&
+		i.Inventories[0] == zero
+}
+
 type Inventory struct {
 	StatusApplicationControl *StatusApplicationControl `xml:"StatusApplicationControl,omitempty"`
 	InvCounts                *[]InvCount               `xml:"InvCounts>InvCount"`
+}
+
+var _ version.DateRangeProvider = (*Inventory)(nil)
+
+func (i Inventory) DateRange() timex.DateRange {
+	return timex.DateRange{
+		Start: i.StatusApplicationControl.Start,
+		End:   i.StatusApplicationControl.End,
+	}
+}
+
+func (i Inventory) isAvailability() bool {
+	return !i.StatusApplicationControl.AllInvCode
+}
+
+func (i Inventory) isClosingSeason() bool {
+	return i.StatusApplicationControl.AllInvCode
 }
 
 type StatusApplicationControl struct {
