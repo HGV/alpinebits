@@ -21,10 +21,10 @@ func TestResRetrieveValidator_Validate(t *testing.T) {
 			file:      "test/data/GuestRequests-OTA_ResRetrieveRS-error.xml",
 			validator: NewResRetrieveValidator(),
 		},
-		// {
-		// 	file:      "test/data/GuestRequests-OTA_ResRetrieveRS-request-with-roomtype.xml",
-		// 	validator: NewResRetrieveValidator(),
-		// },
+		{
+			file:      "test/data/GuestRequests-OTA_ResRetrieveRS-request-with-roomtype.xml",
+			validator: NewResRetrieveValidator(),
+		},
 		{
 			file:      "test/data/GuestRequests-OTA_ResRetrieveRS-reservation-empty.xml",
 			validator: NewResRetrieveValidator(),

@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/HGV/alpinebits/duration"
 	"github.com/HGV/alpinebits/v_2018_10/common"
 	"github.com/HGV/alpinebits/v_2018_10/rateplans"
 )
@@ -133,7 +132,14 @@ func (v ResRetrieveValidator) validateRoomStay(roomStay RoomStay) error {
 	return nil
 }
 
-func (v ResRetrieveValidator) validateRoomType(roomType ResRoomType) error {
+func (v ResRetrieveValidator) validateRoomType(roomType *ResRoomType) error {
+	if roomType == nil {
+		if v.isReservation() {
+			return common.ErrMissingRoomType
+		}
+		return nil
+	}
+
 	if strings.TrimSpace(roomType.RoomTypeCode) == "" {
 		return common.ErrMissingRoomTypeCode
 	}
@@ -147,7 +153,14 @@ func (v ResRetrieveValidator) validateRoomType(roomType ResRoomType) error {
 	return nil
 }
 
-func (v ResRetrieveValidator) validateRatePlan(ratePlan ResRatePlan) error {
+func (v ResRetrieveValidator) validateRatePlan(ratePlan *ResRatePlan) error {
+	if ratePlan == nil {
+		if v.isReservation() {
+			return common.ErrMissingRatePlan
+		}
+		return nil
+	}
+
 	if strings.TrimSpace(ratePlan.RatePlanCode) == "" {
 		return common.ErrMissingRatePlanCode
 	}
@@ -200,27 +213,59 @@ func (v ResRetrieveValidator) validateGuestCounts(guestCounts []GuestCount) erro
 
 func (v ResRetrieveValidator) validateTimeSpan(timeSpan TimeSpan) error {
 	if v.isReservation() {
-		if timeSpan.Start == nil {
-			return common.ErrMissingStart
-		}
-		if timeSpan.End == nil {
-			return common.ErrMissingEnd
-		}
-		if timeSpan.Start.After(*timeSpan.End) {
-			return common.ErrStartAfterEnd
-		}
-	} else {
-		if timeSpan.Duration == nil {
-			return common.ErrMissingDuration
-		}
-		if err := v.validateStartDateWindow(timeSpan.StartDateWindow, *timeSpan.Duration); err != nil {
+		if err := v.validateTimeSpanFixedPeriod(timeSpan); err != nil {
 			return err
 		}
+	} else {
+		hasFixedPeriod := timeSpan.Start != nil && timeSpan.End != nil
+		hasWindowedPeriod := timeSpan.StartDateWindow != nil && timeSpan.Duration != nil
+
+		if !hasFixedPeriod && !hasWindowedPeriod {
+			return common.ErrMissingTimeSpan
+		}
+
+		if hasFixedPeriod {
+			if err := v.validateTimeSpanFixedPeriod(timeSpan); err != nil {
+				return err
+			}
+		}
+
+		if hasWindowedPeriod {
+			if err := v.validateTimeSpanWindowedPeriod(timeSpan); err != nil {
+				return err
+			}
+		}
 	}
+
 	return nil
 }
 
-func (v ResRetrieveValidator) validateStartDateWindow(w *StartDateWindow, nights duration.Nights) error {
+func (v ResRetrieveValidator) validateTimeSpanFixedPeriod(timeSpan TimeSpan) error {
+	if timeSpan.Start == nil {
+		return common.ErrMissingStart
+	}
+
+	if timeSpan.End == nil {
+		return common.ErrMissingEnd
+	}
+
+	if timeSpan.Start.After(*timeSpan.End) {
+		return common.ErrStartAfterEnd
+	}
+
+	if timeSpan.StartDateWindow != nil {
+		return common.ErrUnexpectedStartDateWindow
+	}
+
+	if timeSpan.Duration != nil {
+		return common.ErrUnexpectedDuration
+	}
+
+	return nil
+}
+
+func (v ResRetrieveValidator) validateTimeSpanWindowedPeriod(timeSpan TimeSpan) error {
+	w := timeSpan.StartDateWindow
 	if w == nil {
 		return common.ErrMissingStartDateWindow
 	}
@@ -229,8 +274,21 @@ func (v ResRetrieveValidator) validateStartDateWindow(w *StartDateWindow, nights
 		return common.ErrEarliestDateAfterLatestDate
 	}
 
-	if int(nights) <= w.LatestDate.DaysSince(w.EarliestDate) {
+	nights := timeSpan.Duration
+	if nights == nil {
+		return common.ErrMissingDuration
+	}
+
+	if int(*nights) >= w.LatestDate.DaysSince(w.EarliestDate) {
 		return common.ErrDurationOutOfRange
+	}
+
+	if timeSpan.Start != nil {
+		return common.ErrUnexpectedStart
+	}
+
+	if timeSpan.End != nil {
+		return common.ErrUnexpectedEnd
 	}
 
 	return nil

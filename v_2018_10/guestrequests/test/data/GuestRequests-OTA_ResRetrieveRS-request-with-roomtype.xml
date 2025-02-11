@@ -36,7 +36,7 @@
                         <GuestCount Count="1" ></GuestCount>
                     </GuestCounts>
 
-                    <TimeSpan>
+                    <TimeSpan Duration="P4N">
                         <StartDateWindow EarliestDate="2017-10-03" LatestDate="2017-10-08"/>
                     </TimeSpan>
 

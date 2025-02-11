@@ -68,8 +68,8 @@ type HotelReservation struct {
 }
 
 type RoomStay struct {
-	RoomType    ResRoomType  `xml:"RoomTypes>RoomType"`
-	RatePlan    ResRatePlan  `xml:"RatePlans>RatePlan"`
+	RoomType    *ResRoomType `xml:"RoomTypes>RoomType"`
+	RatePlan    *ResRatePlan `xml:"RatePlans>RatePlan"`
 	GuestCounts []GuestCount `xml:"GuestCounts>GuestCount"`
 	TimeSpan    TimeSpan     `xml:"TimeSpan"`
 	Total       *Total       `xml:"Total"`

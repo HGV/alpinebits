@@ -8,7 +8,7 @@ import (
 
 type Days int
 
-var regexpDays = regexp.MustCompile(`^P(P<days>[0-9]+)D$`)
+var regexpDays = regexp.MustCompile(`^P(?P<days>[0-9]+)D$`)
 
 func ParseDays(s string) (Days, error) {
 	matches := regexpDays.FindStringSubmatch(s)

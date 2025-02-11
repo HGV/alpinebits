@@ -8,7 +8,7 @@ import (
 
 type Nights int
 
-var regexpNights = regexp.MustCompile(`^P(P<nights>[0-9]+)N$`)
+var regexpNights = regexp.MustCompile(`^P(?P<nights>[0-9]+)N$`)
 
 func ParseNights(s string) (Nights, error) {
 	matches := regexpNights.FindStringSubmatch(s)
