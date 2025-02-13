@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/HGV/alpinebits/duration"
-	"github.com/HGV/alpinebits/v_2018_10/common"
+	"github.com/HGV/alpinebits/v_2020_10/common"
 	"github.com/HGV/alpinebits/version"
 	"github.com/HGV/x/timex"
 )

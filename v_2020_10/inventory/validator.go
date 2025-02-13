@@ -3,7 +3,7 @@ package inventory
 import (
 	"strings"
 
-	"github.com/HGV/alpinebits/v_2018_10/common"
+	"github.com/HGV/alpinebits/v_2020_10/common"
 	"github.com/HGV/x/slicesx"
 )
 

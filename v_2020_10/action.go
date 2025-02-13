@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/HGV/alpinebits/v_2020_10/freerooms"
+	"github.com/HGV/alpinebits/v_2020_10/guestrequests"
 	"github.com/HGV/alpinebits/v_2020_10/handshake"
 	"github.com/HGV/alpinebits/v_2020_10/inventory"
 	"github.com/HGV/alpinebits/v_2020_10/rateplans"
@@ -33,6 +34,10 @@ func (a Action) Unmarshal(b []byte) (any, error) {
 		v = new(handshake.PingRQ)
 	case ActionHotelInvCountNotif:
 		v = new(freerooms.HotelInvCountNotifRQ)
+	case ActionReadGuestRequests:
+		v = new(guestrequests.ReadRQ)
+	case ActionNotifReportGuestRequests:
+		v = new(guestrequests.NotifReportRQ)
 	case ActionHotelDescriptiveContentNotifInventory:
 		v = new(inventory.HotelDescriptiveContentNotifRQ)
 	case ActionHotelRatePlanNotifRatePlans:
