@@ -19,7 +19,7 @@
 
     <ReservationsList>
 
-        <HotelReservation CreateDateTime="2017-09-03T19:47:50" ResStatus="Requested">
+        <HotelReservation CreateDateTime="2017-09-03T19:47:50+01:00" ResStatus="Requested">
 
             <UniqueID Type="14" ID="6b34fe24ac2ff811"/>
 
@@ -36,7 +36,7 @@
                         <GuestCount Count="1" ></GuestCount>
                     </GuestCounts>
 
-                    <TimeSpan>
+                    <TimeSpan Duration="P4N">
                         <StartDateWindow EarliestDate="2017-10-03" LatestDate="2017-10-08"/>
                     </TimeSpan>
 
