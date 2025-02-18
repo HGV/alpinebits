@@ -1,5 +1,6 @@
 # ![github.com/HGV/alpinebits-http](./docs/alpinebits.png)
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/HGV/alpinebits.svg)](https://pkg.go.dev/github.com/HGV/alpinebits)
 ![github.com/HGV/alpinebits](https://github.com/HGV/alpinebits/workflows/test/badge.svg)
 
 A Go library that supports all modern versions of the AlpineBits standard, providing seamless integration and interoperability.
