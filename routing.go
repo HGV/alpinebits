@@ -110,19 +110,19 @@ func WithExcludeFromHandshake() RouteFunc {
 
 func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		preconditionError(w, fmt.Sprintf("expected http method POST, got %s", r.Method))
+		preconditionErrorf(w, "expected http method POST, got %s", r.Method)
 		return
 	}
 
 	clientID := r.Header.Get(HeaderClientID)
 	if clientID == "" {
-		preconditionError(w, fmt.Sprintf("missing http header: %s", HeaderClientID))
+		preconditionErrorf(w, "missing http header: %s", HeaderClientID)
 		return
 	}
 
 	requestedVersion := r.Header.Get(HeaderClientProtocolVersion)
 	if requestedVersion == "" {
-		preconditionError(w, fmt.Sprintf("missing http header: %s", HeaderClientProtocolVersion))
+		preconditionErrorf(w, "missing http header: %s", HeaderClientProtocolVersion)
 		return
 	}
 	if err := version.ValidateVersionString(requestedVersion); err != nil {
@@ -133,11 +133,10 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	routes, ok := router.versionRoutes[requestedVersion]
 	if !ok {
 		supportedVersions := slices.Collect(maps.Keys(router.versionRoutes))
-		preconditionError(w,
-			fmt.Sprintf("your current version of '%s' does not match one of the servers' supported versions: %s",
-				requestedVersion,
-				strings.Join(supportedVersions, ", ")),
-		)
+		preconditionErrorf(w,
+			"your current version of '%s' does not match one of the servers' supported versions: %s",
+			requestedVersion,
+			strings.Join(supportedVersions, ", "))
 		return
 	}
 
@@ -146,7 +145,9 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if hasRouteCtx {
 		// Check if the requested version is disabled by a handshake override
 		if _, ok := rctx.HandshakeDataOverride[requestedVersion]; !ok {
-			preconditionError(w, "your current version of '%s' was not included in the handshake agreement. Please retry the handshake to ensure compatibility.")
+			preconditionErrorf(w,
+				"your current version of '%s' was not included in the handshake agreement. Please retry the handshake to ensure compatibility.",
+				requestedVersion)
 			return
 		}
 	}
@@ -173,10 +174,10 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	payload := r.Form.Get("request")
 	if err := routes.version.ValidateXML(payload); err != nil {
-		preconditionError(w,
-			fmt.Sprintf("XML validation error for action %s\n\n%s",
-				requestedAction,
-				err.Error()))
+		preconditionErrorf(w,
+			"XML validation error for action %s\n\n%s",
+			requestedAction,
+			err.Error())
 		return
 	}
 
@@ -217,6 +218,10 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func preconditionError(w http.ResponseWriter, msg string) {
 	http.Error(w, fmt.Sprintf("ERROR: %s", msg), http.StatusBadRequest)
+}
+
+func preconditionErrorf(w http.ResponseWriter, msg string, a ...any) {
+	preconditionError(w, fmt.Sprintf(msg, a...))
 }
 
 func internalServerError(w http.ResponseWriter, r *http.Request, err error) {
