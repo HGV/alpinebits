@@ -17,6 +17,12 @@ type HotelRatePlanNotifRQ struct {
 	RatePlans RatePlans `xml:"RatePlans"`
 }
 
+var _ version.HotelCodeProvider = (*HotelRatePlanNotifRQ)(nil)
+
+func (h HotelRatePlanNotifRQ) HotelCode() string {
+	return h.RatePlans.HotelCode
+}
+
 type UniqueIDType int
 
 const UniqueIDTypeReference UniqueIDType = 16

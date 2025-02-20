@@ -7,6 +7,7 @@ import (
 	"github.com/HGV/alpinebits/duration"
 	"github.com/HGV/alpinebits/v_2018_10/common"
 	"github.com/HGV/alpinebits/v_2018_10/rateplans"
+	"github.com/HGV/alpinebits/version"
 	"github.com/HGV/x/timex"
 )
 
@@ -14,6 +15,12 @@ type ReadRQ struct {
 	XMLName          xml.Name         `xml:"http://www.opentravel.org/OTA/2003/05 OTA_ReadRQ"`
 	Version          string           `xml:"Version,attr"`
 	HotelReadRequest HotelReadRequest `xml:"ReadRequests>HotelReadRequest"`
+}
+
+var _ version.HotelCodeProvider = (*ReadRQ)(nil)
+
+func (r ReadRQ) HotelCode() string {
+	return r.HotelReadRequest.HotelCode
 }
 
 type HotelReadRequest struct {

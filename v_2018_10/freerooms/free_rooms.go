@@ -14,6 +14,12 @@ type HotelAvailNotifRQ struct {
 	AvailStatusMessages AvailStatusMessages `xml:"AvailStatusMessages"`
 }
 
+var _ version.HotelCodeProvider = (*HotelAvailNotifRQ)(nil)
+
+func (h HotelAvailNotifRQ) HotelCode() string {
+	return h.AvailStatusMessages.HotelCode
+}
+
 type UniqueIDType int
 
 const (

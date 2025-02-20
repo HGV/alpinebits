@@ -5,12 +5,19 @@ import (
 
 	"github.com/HGV/alpinebits/internal"
 	"github.com/HGV/alpinebits/v_2020_10/common"
+	"github.com/HGV/alpinebits/version"
 )
 
 type HotelDescriptiveContentNotifRQ struct {
 	XMLName                 xml.Name                `xml:"http://www.opentravel.org/OTA/2003/05 OTA_HotelDescriptiveContentNotifRQ"`
 	Version                 string                  `xml:"Version,attr"`
 	HotelDescriptiveContent HotelDescriptiveContent `xml:"HotelDescriptiveContents>HotelDescriptiveContent"`
+}
+
+var _ version.HotelCodeProvider = (*HotelDescriptiveContentNotifRQ)(nil)
+
+func (h HotelDescriptiveContentNotifRQ) HotelCode() string {
+	return h.HotelDescriptiveContent.HotelCode
 }
 
 type HotelDescriptiveContent struct {

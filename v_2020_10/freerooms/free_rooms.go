@@ -32,6 +32,12 @@ type HotelInvCountNotifRQ struct {
 	Inventories Inventories `xml:"Inventories"`
 }
 
+var _ version.HotelCodeProvider = (*HotelInvCountNotifRQ)(nil)
+
+func (h HotelInvCountNotifRQ) HotelCode() string {
+	return h.Inventories.HotelCode
+}
+
 type Inventories struct {
 	HotelCode   string      `xml:"HotelCode,attr"`
 	HotelName   string      `xml:"HotelName,attr"`
