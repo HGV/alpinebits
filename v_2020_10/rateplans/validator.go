@@ -56,15 +56,15 @@ func NewHotelRatePlanNotifValidator(opts ...HotelRatePlanNotifValidatorFunc) Hot
 	return v
 }
 
-func WithArrivalDOW(supports bool) HotelRatePlanNotifValidatorFunc {
+func WithArrivalDOW() HotelRatePlanNotifValidatorFunc {
 	return func(v *HotelRatePlanNotifValidator) {
-		v.supportsArrivalDOW = supports
+		v.supportsArrivalDOW = true
 	}
 }
 
-func WithDepartureDOW(supports bool) HotelRatePlanNotifValidatorFunc {
+func WithDepartureDOW() HotelRatePlanNotifValidatorFunc {
 	return func(v *HotelRatePlanNotifValidator) {
-		v.supportsDepartureDOW = supports
+		v.supportsDepartureDOW = true
 	}
 }
 
@@ -74,21 +74,27 @@ func WithRatePlanMapping(mapping map[string]struct{}) HotelRatePlanNotifValidato
 	}
 }
 
-func WithRatePlanJoin(supports bool) HotelRatePlanNotifValidatorFunc {
+func WithRatePlanJoin() HotelRatePlanNotifValidatorFunc {
 	return func(v *HotelRatePlanNotifValidator) {
-		v.supportsRatePlanJoin = supports
+		v.supportsRatePlanJoin = true
 	}
 }
 
-func WithGenericBookingRules(supports bool) HotelRatePlanNotifValidatorFunc {
+func WithOverlay() HotelRatePlanNotifValidatorFunc {
 	return func(v *HotelRatePlanNotifValidator) {
-		v.supportsGenericBookingRules = supports
+		v.supportsOverlay = true
 	}
 }
 
-func WithRoomTypeBookingRules(supports bool) HotelRatePlanNotifValidatorFunc {
+func WithGenericBookingRules() HotelRatePlanNotifValidatorFunc {
 	return func(v *HotelRatePlanNotifValidator) {
-		v.supportsRoomTypeBokingRules = supports
+		v.supportsGenericBookingRules = true
+	}
+}
+
+func WithRoomTypeBookingRules() HotelRatePlanNotifValidatorFunc {
+	return func(v *HotelRatePlanNotifValidator) {
+		v.supportsRoomTypeBokingRules = true
 	}
 }
 
@@ -98,33 +104,33 @@ func WithRoomTypeCodes(mapping map[string]RoomTypeOccupancySettings) HotelRatePl
 	}
 }
 
-func WithSupplements(supports bool) HotelRatePlanNotifValidatorFunc {
+func WithSupplements() HotelRatePlanNotifValidatorFunc {
 	return func(v *HotelRatePlanNotifValidator) {
-		v.supportsSupplements = supports
+		v.supportsSupplements = true
 	}
 }
 
-func WithFreeNightOffer(supports bool) HotelRatePlanNotifValidatorFunc {
+func WithFreeNightOffer() HotelRatePlanNotifValidatorFunc {
 	return func(v *HotelRatePlanNotifValidator) {
-		v.supportsFreeNightOffer = supports
+		v.supportsFreeNightOffer = true
 	}
 }
 
-func WithFamilyOffer(supports bool) HotelRatePlanNotifValidatorFunc {
+func WithFamilyOffer() HotelRatePlanNotifValidatorFunc {
 	return func(v *HotelRatePlanNotifValidator) {
-		v.supportsFamilyOffer = supports
+		v.supportsFamilyOffer = true
 	}
 }
 
-func WithOfferRuleBookingOffset(supports bool) HotelRatePlanNotifValidatorFunc {
+func WithOfferRuleBookingOffset() HotelRatePlanNotifValidatorFunc {
 	return func(v *HotelRatePlanNotifValidator) {
-		v.supportsOfferRuleBookingOffset = supports
+		v.supportsOfferRuleBookingOffset = true
 	}
 }
 
-func WithOfferRuleDOWLOS(supports bool) HotelRatePlanNotifValidatorFunc {
+func WithOfferRuleDOWLOS() HotelRatePlanNotifValidatorFunc {
 	return func(v *HotelRatePlanNotifValidator) {
-		v.supportsOfferRuleDOWLOS = supports
+		v.supportsOfferRuleDOWLOS = true
 	}
 }
 
@@ -158,7 +164,7 @@ func (v *HotelRatePlanNotifValidator) validateRatePlan(ratePlan RatePlan) error 
 		return err
 	}
 
-	if !v.supportsRatePlanJoin && !ratePlan.isMaster() {
+	if !v.supportsRatePlanJoin && !ratePlan.IsMaster() {
 		return common.ErrRatePlanJoinNotSupported
 	}
 
@@ -189,7 +195,7 @@ func (v *HotelRatePlanNotifValidator) validateCurrencyCode(code string) error {
 }
 
 func (v *HotelRatePlanNotifValidator) validateRatePlanNew(ratePlan RatePlan) error {
-	if ratePlan.isMaster() {
+	if ratePlan.IsMaster() {
 		return v.validateRatePlanNewMaster(ratePlan)
 	}
 	return v.validateRatePlanNewDerived(ratePlan)

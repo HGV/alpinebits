@@ -158,7 +158,7 @@ func (v *HotelRatePlanNotifValidator) validateRatePlan(ratePlan RatePlan) error 
 		return err
 	}
 
-	if !v.supportsRatePlanJoin && !ratePlan.isMaster() {
+	if !v.supportsRatePlanJoin && !ratePlan.IsMaster() {
 		return common.ErrRatePlanJoinNotSupported
 	}
 
@@ -189,7 +189,7 @@ func (v *HotelRatePlanNotifValidator) validateCurrencyCode(code string) error {
 }
 
 func (v *HotelRatePlanNotifValidator) validateRatePlanNew(ratePlan RatePlan) error {
-	if ratePlan.isMaster() {
+	if ratePlan.IsMaster() {
 		return v.validateRatePlanNewMaster(ratePlan)
 	}
 	return v.validateRatePlanNewDerived(ratePlan)

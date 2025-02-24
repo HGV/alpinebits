@@ -16,13 +16,13 @@ func TestHotelInvCountNotifValidator_Validate(t *testing.T) {
 		{
 			file: "test/data/FreeRooms-OTA_HotelInvCountNotifRQ-closing_seasons.xml",
 			validator: NewHotelInvCountNotifValidator(
-				WithClosingSeasons(true),
+				WithClosingSeasons(),
 			),
 		},
 		{
 			file: "test/data/FreeRooms-OTA_HotelInvCountNotifRQ-delta.xml",
 			validator: NewHotelInvCountNotifValidator(
-				WithDeltas(true),
+				WithDeltas(),
 			),
 		},
 		{

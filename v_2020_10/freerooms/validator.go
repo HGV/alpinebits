@@ -32,41 +32,51 @@ func NewHotelInvCountNotifValidator(opts ...HotelInvCountNotifValidatorFunc) Hot
 	return v
 }
 
-func WithRooms(supports bool, mapping *map[string]map[string]struct{}) HotelInvCountNotifValidatorFunc {
+func WithRooms() HotelInvCountNotifValidatorFunc {
 	return func(v *HotelInvCountNotifValidator) {
-		v.supportsRooms = supports
-		v.roomMapping = mapping
+		v.supportsRooms = true
 	}
 }
 
-func WithCategories(supports bool, mapping *map[string]struct{}) HotelInvCountNotifValidatorFunc {
+func WithRoomMapping(mapping map[string]map[string]struct{}) HotelInvCountNotifValidatorFunc {
 	return func(v *HotelInvCountNotifValidator) {
-		v.supportsCategories = supports
-		v.categoriesMapping = mapping
+		v.roomMapping = &mapping
 	}
 }
 
-func WithDeltas(supports bool) HotelInvCountNotifValidatorFunc {
+func WithCategories() HotelInvCountNotifValidatorFunc {
 	return func(v *HotelInvCountNotifValidator) {
-		v.supportsDeltas = supports
+		v.supportsCategories = true
 	}
 }
 
-func WithOutOfOrder(supports bool) HotelInvCountNotifValidatorFunc {
+func WithCategoriesMapping(mapping map[string]struct{}) HotelInvCountNotifValidatorFunc {
 	return func(v *HotelInvCountNotifValidator) {
-		v.supportsOutOfOrder = supports
+		v.categoriesMapping = &mapping
 	}
 }
 
-func WithOutOfMarket(supports bool) HotelInvCountNotifValidatorFunc {
+func WithDeltas() HotelInvCountNotifValidatorFunc {
 	return func(v *HotelInvCountNotifValidator) {
-		v.supportsOutOfMarket = supports
+		v.supportsDeltas = true
 	}
 }
 
-func WithClosingSeasons(supports bool) HotelInvCountNotifValidatorFunc {
+func WithOutOfOrder() HotelInvCountNotifValidatorFunc {
 	return func(v *HotelInvCountNotifValidator) {
-		v.supportsClosingSeasons = supports
+		v.supportsOutOfOrder = true
+	}
+}
+
+func WithOutOfMarket() HotelInvCountNotifValidatorFunc {
+	return func(v *HotelInvCountNotifValidator) {
+		v.supportsOutOfMarket = true
+	}
+}
+
+func WithClosingSeasons() HotelInvCountNotifValidatorFunc {
+	return func(v *HotelInvCountNotifValidator) {
+		v.supportsClosingSeasons = true
 	}
 }
 

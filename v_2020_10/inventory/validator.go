@@ -24,15 +24,15 @@ func NewHotelDescriptiveContentNotifValidator(opts ...HotelDescriptiveContentNot
 	return v
 }
 
-func WithHotelDescriptiveContentNotifRooms(supports bool) HotelDescriptiveContentNotifValidatorFunc {
+func WithRooms() HotelDescriptiveContentNotifValidatorFunc {
 	return func(v *HotelDescriptiveContentNotifValidator) {
-		v.supportsRooms = supports
+		v.supportsRooms = true
 	}
 }
 
-func WithHotelDescriptiveContentNotifOccupancyChildren(supports bool) HotelDescriptiveContentNotifValidatorFunc {
+func WithOccupancyChildren() HotelDescriptiveContentNotifValidatorFunc {
 	return func(v *HotelDescriptiveContentNotifValidator) {
-		v.supportsOccupancyChildren = supports
+		v.supportsOccupancyChildren = true
 	}
 }
 

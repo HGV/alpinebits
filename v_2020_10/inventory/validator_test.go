@@ -24,8 +24,8 @@ func TestHotelDescriptiveContentNotifValidator_Validate(t *testing.T) {
 		{
 			file: "test/data/Inventory-OTA_HotelDescriptiveContentNotifRQ.xml",
 			validator: NewHotelDescriptiveContentNotifValidator(
-				WithHotelDescriptiveContentNotifOccupancyChildren(true),
-				WithHotelDescriptiveContentNotifRooms(true),
+				WithOccupancyChildren(),
+				WithRooms(),
 			),
 		},
 	}

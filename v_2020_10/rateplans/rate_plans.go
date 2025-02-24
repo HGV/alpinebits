@@ -71,7 +71,7 @@ type RatePlan struct {
 	Descriptions      RatePlanDescription `xml:"Description"`
 }
 
-func (r RatePlan) isMaster() bool {
+func (r RatePlan) IsMaster() bool {
 	return (r.RatePlanQualifier == nil && r.RatePlanID == "") ||
 		(*r.RatePlanQualifier && r.RatePlanID != "")
 }
