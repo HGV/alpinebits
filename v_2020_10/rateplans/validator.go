@@ -280,9 +280,10 @@ func (v *HotelRatePlanNotifValidator) validateOfferRule(offerRule *OfferRule) er
 		return common.ErrOfferRuleBookingOffsetNotSupported
 	}
 
-	if len(offerRule.LengthsOfStay) > 0 ||
-		offerRule.ArrivalDaysOfWeek != nil ||
-		offerRule.DepartureDaysOfWeek != nil {
+	if !v.supportsOfferRuleDOWLOS &&
+		(len(offerRule.LengthsOfStay) > 0 ||
+			offerRule.ArrivalDaysOfWeek != nil ||
+			offerRule.DepartureDaysOfWeek != nil) {
 		return common.ErrOfferRuleDOWLOSNotSupported
 	}
 
