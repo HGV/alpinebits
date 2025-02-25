@@ -29,8 +29,10 @@ func ValidateOverlaps[T version.DateRangeProvider](ranges []T) error {
 	})
 
 	for i := 0; i < len(ranges)-1; i++ {
+		range1 := ranges[i].DateRange()
+		range2 := ranges[i+1].DateRange()
 		if !ranges[i].DateRange().End.Before(ranges[i+1].DateRange().Start) {
-			return errors.New("overlap")
+			return ErrDateRangeOverlaps(range1, range2)
 		}
 	}
 

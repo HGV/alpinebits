@@ -1,6 +1,10 @@
 package common
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/HGV/x/timex"
+)
 
 var (
 	ErrMissingHotelCode                        = newMissingAttributeError("HotelCode")
@@ -137,6 +141,10 @@ func ErrInvCodeNotFound(invCode string) *Error {
 
 func ErrInvTypeCodeNotFound(invTypeCode string) *Error {
 	return newErrorf("inv type code not found %s", invTypeCode)
+}
+
+func ErrDateRangeOverlaps(range1, range2 timex.DateRange) *Error {
+	return newErrorf("date range [%s - %s] overlaps with [%s - %s]", range1.Start, range1.End, range2.Start, range2.End)
 }
 
 func ErrInvalidRoomClassificationCode(roomClassificationCode int) *Error {

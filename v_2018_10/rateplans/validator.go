@@ -929,10 +929,13 @@ func (v *HotelRatePlanNotifValidator) validateDateDependingSupplement(supplement
 
 func (v *HotelRatePlanNotifValidator) validateDateDependingSupplementsOverlaps(supplements []Supplement) error {
 	supplementsByInvCode := slicesx.GroupByFunc(supplements, func(s Supplement) string {
-		if s.PrerequisiteInventory == nil {
-			return ""
+		if s.PrerequisiteInventory != nil {
+			switch s.PrerequisiteInventory.InvType {
+			case PrerequisiteInventoryInvTypeRoomType:
+				return s.PrerequisiteInventory.InvCode
+			}
 		}
-		return s.PrerequisiteInventory.InvCode
+		return s.InvCode
 	})
 	for _, supplements := range supplementsByInvCode {
 		if err := common.ValidateOverlaps(supplements); err != nil {
