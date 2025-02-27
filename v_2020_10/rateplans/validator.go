@@ -741,9 +741,7 @@ func (v *HotelRatePlanNotifValidator) validateBaseByGuestAmt(baseByGuestAmt Base
 }
 
 func (v *HotelRatePlanNotifValidator) validateAdditionalGuestAmounts(additionalGuestAmounts []AdditionalGuestAmount) error {
-	adults := slicesx.Filter(additionalGuestAmounts, func(a AdditionalGuestAmount) bool {
-		return a.AgeQualifyingCode != nil && *a.AgeQualifyingCode == AgeQualifyingCodeAdult
-	})
+	adults := slicesx.Filter(additionalGuestAmounts, AdditionalGuestAmount.IsAdult)
 	switch len(adults) {
 	case 0:
 		break
@@ -755,9 +753,7 @@ func (v *HotelRatePlanNotifValidator) validateAdditionalGuestAmounts(additionalG
 		return common.ErrDuplicateAdditionalGuestAmountAdult
 	}
 
-	children := slicesx.Filter(additionalGuestAmounts, func(a AdditionalGuestAmount) bool {
-		return a.AgeQualifyingCode != nil && *a.AgeQualifyingCode == AgeQualifyingCodeChild
-	})
+	children := slicesx.Filter(additionalGuestAmounts, AdditionalGuestAmount.IsChild)
 	if v.childOccupancy == nil && len(children) > 0 {
 		return common.ErrChildrenNotAllowed
 	}

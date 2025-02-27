@@ -210,6 +210,16 @@ type AdditionalGuestAmount struct {
 	Amount            *string            `xml:"Amount,attr"`
 }
 
+func (a AdditionalGuestAmount) IsAdult() bool {
+	return a.AgeQualifyingCode != nil &&
+		*a.AgeQualifyingCode == AgeQualifyingCodeAdult
+}
+
+func (a AdditionalGuestAmount) IsChild() bool {
+	return a.AgeQualifyingCode != nil &&
+		*a.AgeQualifyingCode == AgeQualifyingCodeChild
+}
+
 type MealPlan int
 
 const (
