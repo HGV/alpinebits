@@ -978,7 +978,7 @@ func (v *HotelRatePlanNotifValidator) validateRatePlanOverlay(ratePlan RatePlan)
 		return err
 	}
 
-	if len(ratePlan.Offers) == 0 {
+	if len(ratePlan.Offers) > 0 {
 		return common.ErrUnexpectedOffers
 	}
 
@@ -990,7 +990,7 @@ func (v *HotelRatePlanNotifValidator) validateRatePlanOverlay(ratePlan RatePlan)
 }
 
 func (v *HotelRatePlanNotifValidator) validateRatePlanRemove(ratePlan RatePlan) error {
-	if len(ratePlan.Offers) == 0 {
+	if len(ratePlan.Offers) > 0 {
 		return common.ErrUnexpectedOffers
 	}
 
