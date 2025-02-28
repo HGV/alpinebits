@@ -255,7 +255,7 @@ func (v *HotelRatePlanNotifValidator) validateRatePlanNewDerived(ratePlan RatePl
 		return err
 	}
 
-	if len(ratePlan.Offers) == 0 {
+	if len(ratePlan.Offers) > 0 {
 		return common.ErrUnexpectedOffers
 	}
 
