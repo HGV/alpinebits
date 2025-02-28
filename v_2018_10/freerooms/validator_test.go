@@ -28,10 +28,12 @@ func TestNewHotelAvailNotifValidator(t *testing.T) {
 		}
 
 		validator := NewHotelAvailNotifValidator(
-			WithRooms(true, &roomMapping),
-			WithCategories(true, &categoryMapping),
-			WithDeltas(true),
-			WithBookingThreshold(true),
+			WithRooms(),
+			WithRoomMapping(&roomMapping),
+			WithCategories(),
+			WithCategoriesMapping(&categoryMapping),
+			WithDeltas(),
+			WithBookingThreshold(),
 		)
 
 		assert.True(t, validator.supportsRooms)

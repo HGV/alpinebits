@@ -16,12 +16,12 @@ func TestHotelRatePlanNotifValidator_Validate(t *testing.T) {
 		{
 			file: "test/data/RatePlans-OTA_HotelRatePlanNotifRQ.xml",
 			validator: NewHotelRatePlanNotifValidator(
-				WithArrivalDOW(true),
-				WithDepartureDOW(true),
+				WithArrivalDOW(),
+				WithDepartureDOW(),
 				WithRoomTypeCodes(map[string]RoomTypeOccupancySettings{
 					"double": {Std: 2},
 				}),
-				WithSupplements(true),
+				WithSupplements(),
 			),
 		},
 	}

@@ -28,29 +28,39 @@ func NewHotelAvailNotifValidator(opts ...HotelAvailNotifValidatorFunc) HotelAvai
 	return v
 }
 
-func WithRooms(supports bool, mapping *map[string]map[string]struct{}) HotelAvailNotifValidatorFunc {
+func WithRooms() HotelAvailNotifValidatorFunc {
 	return func(v *HotelAvailNotifValidator) {
-		v.supportsRooms = supports
+		v.supportsRooms = true
+	}
+}
+
+func WithRoomMapping(mapping *map[string]map[string]struct{}) HotelAvailNotifValidatorFunc {
+	return func(v *HotelAvailNotifValidator) {
 		v.roomMapping = mapping
 	}
 }
 
-func WithCategories(supports bool, mapping *map[string]struct{}) HotelAvailNotifValidatorFunc {
+func WithCategories() HotelAvailNotifValidatorFunc {
 	return func(v *HotelAvailNotifValidator) {
-		v.supportsCategories = supports
+		v.supportsCategories = true
+	}
+}
+
+func WithCategoriesMapping(mapping *map[string]struct{}) HotelAvailNotifValidatorFunc {
+	return func(v *HotelAvailNotifValidator) {
 		v.categoriesMapping = mapping
 	}
 }
 
-func WithDeltas(supports bool) HotelAvailNotifValidatorFunc {
+func WithDeltas() HotelAvailNotifValidatorFunc {
 	return func(v *HotelAvailNotifValidator) {
-		v.supportsDeltas = supports
+		v.supportsDeltas = true
 	}
 }
 
-func WithBookingThreshold(supports bool) HotelAvailNotifValidatorFunc {
+func WithBookingThreshold() HotelAvailNotifValidatorFunc {
 	return func(v *HotelAvailNotifValidator) {
-		v.supportsBookingThreshold = supports
+		v.supportsBookingThreshold = true
 	}
 }
 

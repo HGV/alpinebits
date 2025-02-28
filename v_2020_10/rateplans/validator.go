@@ -74,6 +74,18 @@ func WithRatePlanMapping(mapping map[string]struct{}) HotelRatePlanNotifValidato
 	}
 }
 
+func WithAdultOccupancy(occupancy RatePlanOccupancySettings) HotelRatePlanNotifValidatorFunc {
+	return func(v *HotelRatePlanNotifValidator) {
+		v.adultOccupancy = occupancy
+	}
+}
+
+func WithChildOccupancy(occupancy RatePlanOccupancySettings) HotelRatePlanNotifValidatorFunc {
+	return func(v *HotelRatePlanNotifValidator) {
+		v.childOccupancy = &occupancy
+	}
+}
+
 func WithRatePlanJoin() HotelRatePlanNotifValidatorFunc {
 	return func(v *HotelRatePlanNotifValidator) {
 		v.supportsRatePlanJoin = true
