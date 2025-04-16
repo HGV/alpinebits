@@ -158,13 +158,17 @@ func (v *HotelDescriptiveContentNotifValidator) validateAmenities(amenities *[]A
 	return nil
 }
 
-func (v *HotelDescriptiveContentNotifValidator) validateMultimediaDescriptions(mds MultimediaDescriptions) error {
+func (v *HotelDescriptiveContentNotifValidator) validateMultimediaDescriptions(mds *MultimediaDescriptions) error {
+	if mds == nil {
+		return common.ErrMissingMultimediaDescriptions
+	}
+
 	longNames := mds.LongNames()
 	if len(longNames) == 0 {
 		return common.ErrMissingLongName
 	}
 
-	for _, md := range mds {
+	for _, md := range *mds {
 		switch md.InfoCode {
 		case InformationTypeLongName:
 			if err := common.ValidateLanguageUniqueness(*md.TextItems); err != nil {

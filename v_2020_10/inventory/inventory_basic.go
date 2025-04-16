@@ -28,14 +28,14 @@ type HotelDescriptiveContent struct {
 }
 
 type GuestRoom struct {
-	Code                   string                 `xml:"Code,attr"`
-	MinOccupancy           int                    `xml:"MinOccupancy,attr"`
-	MaxOccupancy           int                    `xml:"MaxOccupancy,attr"`
-	MaxChildOccupancy      int                    `xml:"MaxChildOccupancy,attr,omitempty"`
-	OldCode                string                 `xml:"ID,attr,omitempty"`
-	TypeRoom               TypeRoom               `xml:"TypeRoom"`
-	Amenities              *[]Amenity             `xml:"Amenities>Amenity"`
-	MultimediaDescriptions MultimediaDescriptions `xml:"MultimediaDescriptions>MultimediaDescription"`
+	Code                   string                  `xml:"Code,attr"`
+	MinOccupancy           int                     `xml:"MinOccupancy,attr,omitempty"`
+	MaxOccupancy           int                     `xml:"MaxOccupancy,attr,omitempty"`
+	MaxChildOccupancy      int                     `xml:"MaxChildOccupancy,attr,omitempty"`
+	OldCode                string                  `xml:"ID,attr,omitempty"`
+	TypeRoom               TypeRoom                `xml:"TypeRoom"`
+	Amenities              *[]Amenity              `xml:"Amenities>Amenity"`
+	MultimediaDescriptions *MultimediaDescriptions `xml:"MultimediaDescriptions>MultimediaDescription"`
 }
 
 func (g GuestRoom) MinFull() int {
@@ -43,8 +43,8 @@ func (g GuestRoom) MinFull() int {
 }
 
 type TypeRoom struct {
-	StandardOccupancy      int    `xml:"StandardOccupancy,attr"`
-	RoomClassificationCode int    `xml:"RoomClassificationCode,attr"`
+	StandardOccupancy      int    `xml:"StandardOccupancy,attr,omitempty"`
+	RoomClassificationCode int    `xml:"RoomClassificationCode,attr,omitempty"`
 	RoomType               int    `xml:"RoomType,attr,omitempty"`
 	Size                   int    `xml:"Size,attr,omitempty"`
 	RoomID                 string `xml:"RoomID,attr,omitempty"`

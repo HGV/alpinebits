@@ -21,6 +21,7 @@ var (
 	ErrMaxChildOccGreaterThanMaxOcc        = newError("child occupancy must be ≤ max occupancy")
 	ErrStdOccLowerThanMinOcc               = newError("standard occupancy must be ≥ min occupancy")
 	ErrMaxOccLowerThanStdOcc               = newError("max occupancy must be ≥ standard occupancy")
+	ErrMissingMultimediaDescriptions       = newMissingElementError("MultimediaDescriptions")
 	ErrMissingLongName                     = newMissingElementError("MultimediaDescription with attribute InfoCode = 25 (Long name)")
 	ErrDuplicateLanguage                   = newError("duplicate language found for element Description")
 	ErrRoomsNotSupported                   = newError("rooms not supported")
