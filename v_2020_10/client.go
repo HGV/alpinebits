@@ -2,6 +2,7 @@ package v_2020_10
 
 import (
 	"bytes"
+	"cmp"
 	"context"
 	"encoding/xml"
 	"errors"
@@ -18,7 +19,6 @@ import (
 	"github.com/HGV/alpinebits/v_2020_10/inventory"
 	"github.com/HGV/alpinebits/v_2020_10/rateplans"
 	"github.com/HGV/alpinebits/version"
-	"github.com/HGV/x"
 )
 
 type (
@@ -52,7 +52,7 @@ func NewClient(config ClientConfig) (*Client, error) {
 
 	return &Client{
 		config: &config,
-		client: x.If(config.HttpClient != nil, config.HttpClient, &http.Client{}),
+		client: cmp.Or(config.HttpClient, &http.Client{}),
 	}, nil
 }
 

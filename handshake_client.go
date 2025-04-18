@@ -2,6 +2,7 @@ package alpinebits
 
 import (
 	"bytes"
+	"cmp"
 	"context"
 	"encoding/json"
 	"encoding/xml"
@@ -25,6 +26,7 @@ type (
 		Password      string
 		ClientID      string
 		HandshakeData HandshakeData
+		HttpClient    *http.Client
 	}
 )
 
@@ -89,7 +91,7 @@ func NewHandshakeClient(config HandshakeClientConfig) (*HandshakeClient, error) 
 
 	return &HandshakeClient{
 		config: &config,
-		client: &http.Client{},
+		client: cmp.Or(config.HttpClient, &http.Client{}),
 	}, nil
 }
 
