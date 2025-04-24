@@ -45,9 +45,11 @@ func WithRoomTypeCodes(mapping map[string]struct{}) ResRetrieveValidatorFunc {
 }
 
 func (v ResRetrieveValidator) Validate(r ResRetrieveRS) error {
-	for _, res := range r.HotelReservations {
-		if err := v.validateHotelReservation(res); err != nil {
-			return err
+	if r.HotelReservations != nil {
+		for _, res := range *r.HotelReservations {
+			if err := v.validateHotelReservation(res); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
