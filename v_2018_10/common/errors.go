@@ -91,7 +91,6 @@ var (
 	ErrMissingStaticRate                       = newMissingElementError("static Rate")
 	ErrInvalidRateTimeUnit                     = newError("invalid value for attribute RateTimeUnit")
 	ErrMissingBaseByGuestAmt                   = newMissingElementError("BaseByGuestAmt")
-	ErrMissingUnitMultiplier                   = newMissingAttributeError("UnitMultiplier")
 	ErrMissingNumberOfGuests                   = newMissingAttributeError("NumberOfGuests")
 	ErrMissingAgeQualifyingCode                = newMissingAttributeError("AgeQualifyingCode")
 	ErrMissingAmountAfterTax                   = newMissingAttributeError("AmountAfterTax")

@@ -152,7 +152,7 @@ type RestrictionStatus struct {
 }
 
 type Rate struct {
-	RateTimeUnit           TimeUnit                `xml:"RateTimeUnit,attr,omitempty"`
+	RateTimeUnit           *TimeUnit               `xml:"RateTimeUnit,attr,omitempty"`
 	UnitMultiplier         int                     `xml:"UnitMultiplier,attr,omitempty"`
 	InvTypeCode            string                  `xml:"InvTypeCode,attr,omitempty"`
 	Start                  *timex.Date             `xml:"Start,attr,omitempty"`

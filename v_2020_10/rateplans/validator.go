@@ -598,12 +598,8 @@ func (v *HotelRatePlanNotifValidator) validateRates(rates []Rate) error {
 }
 
 func (v *HotelRatePlanNotifValidator) validateStaticRate(rate Rate) error {
-	if rate.RateTimeUnit != TimeUnitDay {
+	if rate.RateTimeUnit != nil && *rate.RateTimeUnit != TimeUnitDay {
 		return common.ErrInvalidRateTimeUnit
-	}
-
-	if rate.UnitMultiplier == 0 {
-		return common.ErrMissingUnitMultiplier
 	}
 
 	switch len(rate.BaseByGuestAmts) {
@@ -691,7 +687,7 @@ func (v *HotelRatePlanNotifValidator) validateDateDependingRate(rate Rate) error
 		return err
 	}
 
-	if rate.RateTimeUnit != "" {
+	if rate.RateTimeUnit != nil {
 		return common.ErrUnexpectedRateTimeUnit
 	}
 
