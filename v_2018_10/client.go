@@ -123,9 +123,11 @@ func sendRequest[RS any, RQ any](ctx context.Context, c *Client, action Action, 
 	return newClientResponse(resp, &rs)
 }
 
+var ErrUnsupportedAction = errors.New("unsupported action")
+
 func (c *Client) newRequest(ctx context.Context, action Action, request any) (*http.Request, error) {
 	if _, ok := c.config.NegotiatedVersion[action.HandshakeName()]; !ok {
-		return nil, errors.New("unsupported action")
+		return nil, ErrUnsupportedAction
 	}
 
 	xml, err := xml.Marshal(request)
