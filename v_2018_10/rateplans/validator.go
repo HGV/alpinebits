@@ -25,7 +25,7 @@ type RoomTypeOccupancySettings struct {
 type HotelRatePlanNotifValidator struct {
 	supportsArrivalDOW             bool
 	supportsDepartureDOW           bool
-	ratePlanMapping                map[string]struct{}
+	ratePlanMapping                map[string]map[string]struct{}
 	supportsRatePlanJoin           bool
 	adultOccupancy                 RatePlanOccupancySettings
 	childOccupancy                 *RatePlanOccupancySettings
@@ -69,7 +69,7 @@ func WithDepartureDOW() HotelRatePlanNotifValidatorFunc {
 	}
 }
 
-func WithRatePlanMapping(mapping map[string]struct{}) HotelRatePlanNotifValidatorFunc {
+func WithRatePlanMapping(mapping map[string]map[string]struct{}) HotelRatePlanNotifValidatorFunc {
 	return func(v *HotelRatePlanNotifValidator) {
 		v.ratePlanMapping = mapping
 	}
@@ -961,6 +961,16 @@ func (v *HotelRatePlanNotifValidator) validateDateDependingSupplementsOverlaps(s
 func (v *HotelRatePlanNotifValidator) validateRatePlanOverlay(ratePlan RatePlan) error {
 	if !v.supportsOverlay {
 		return common.ErrDeltasNotSupported
+	}
+
+	mealPlanSeen := false
+	for _, v := range v.ratePlanMapping {
+		if _, ok := v[ratePlan.RatePlanCode]; ok {
+			mealPlanSeen = true
+		}
+	}
+	if !mealPlanSeen {
+		return common.ErrRatePlanNotFound(ratePlan.RatePlanCode)
 	}
 
 	if err := v.validateBookingRules(ratePlan.BookingRules); err != nil {
