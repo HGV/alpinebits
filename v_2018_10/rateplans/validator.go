@@ -963,10 +963,17 @@ func (v *HotelRatePlanNotifValidator) validateRatePlanOverlay(ratePlan RatePlan)
 		return common.ErrDeltasNotSupported
 	}
 
+	if ratePlan.RatePlanID != "" {
+		if _, ok := v.ratePlanMapping[ratePlan.RatePlanID]; !ok {
+			return common.ErrRatePlanNotFound(ratePlan.RatePlanID)
+		}
+	}
+
 	mealPlanSeen := false
 	for _, v := range v.ratePlanMapping {
 		if _, ok := v[ratePlan.RatePlanCode]; ok {
 			mealPlanSeen = true
+			break
 		}
 	}
 	if !mealPlanSeen {
