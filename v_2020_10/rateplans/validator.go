@@ -39,6 +39,7 @@ type HotelRatePlanNotifValidator struct {
 	supportsFamilyOffer            bool
 	supportsOfferRuleBookingOffset bool
 	supportsOfferRuleDOWLOS        bool
+	ratePlanNotifType              RatePlanNotifType
 }
 
 var _ common.Validatable[HotelRatePlanNotifRQ] = (*HotelRatePlanNotifValidator)(nil)
@@ -180,7 +181,7 @@ func (v *HotelRatePlanNotifValidator) validateRatePlan(ratePlan RatePlan) error 
 		return common.ErrRatePlanJoinNotSupported
 	}
 
-	switch ratePlan.RatePlanNotifType {
+	switch v.ratePlanNotifType = ratePlan.RatePlanNotifType; v.ratePlanNotifType {
 	case RatePlanNotifTypeNew:
 		return v.validateRatePlanNew(ratePlan)
 	case RatePlanNotifTypeOverlay:
@@ -721,7 +722,8 @@ func (v *HotelRatePlanNotifValidator) validateBaseByGuestAmts(baseByGuestAmts []
 		}
 	}
 
-	if !stdOccupancySeen {
+	isStdOccupancyRequired := v.ratePlanNotifType == RatePlanNotifTypeNew
+	if isStdOccupancyRequired && !stdOccupancySeen {
 		return common.ErrMissingBaseByGuestAmtWithStdOccupancy(roomTypeOccupancySettings.Std)
 	}
 
