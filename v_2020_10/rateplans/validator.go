@@ -152,10 +152,25 @@ func (v *HotelRatePlanNotifValidator) Validate(r HotelRatePlanNotifRQ) error {
 		return err
 	}
 
-	if err := v.validateRatePlans(r.RatePlans.RatePlans); err != nil {
-		return err
+	if r.IsReset() {
+		if err := v.validateRatePlansReset(r.RatePlans.RatePlans); err != nil {
+			return err
+		}
+	} else {
+		if err := v.validateRatePlans(r.RatePlans.RatePlans); err != nil {
+			return err
+		}
 	}
 
+	return nil
+}
+
+func (v *HotelRatePlanNotifValidator) validateRatePlansReset(ratePlans []RatePlan) error {
+	for _, ratePlan := range ratePlans {
+		if err := v.validateRatePlanCode(ratePlan.RatePlanCode); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

@@ -17,6 +17,10 @@ type HotelRatePlanNotifRQ struct {
 	RatePlans RatePlans `xml:"RatePlans"`
 }
 
+func (r HotelRatePlanNotifRQ) IsReset() bool {
+	return r.UniqueID != nil && r.UniqueID.Instance == InstanceCompleteSet
+}
+
 var _ version.HotelCodeProvider = (*HotelRatePlanNotifRQ)(nil)
 
 func (h HotelRatePlanNotifRQ) HotelCode() string {
