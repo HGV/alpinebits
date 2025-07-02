@@ -121,8 +121,8 @@ type GuestCount struct {
 }
 
 type TimeSpan struct {
-	Start           *timex.Date      `xml:"Start,attr"`
-	End             *timex.Date      `xml:"End,attr"`
+	Start           timex.Date       `xml:"Start,attr,omitempty"`
+	End             timex.Date       `xml:"End,attr,omitempty"`
 	Duration        *duration.Nights `xml:"Duration,attr"`
 	StartDateWindow *StartDateWindow `xml:"StartDateWindow"`
 }
@@ -146,13 +146,13 @@ const (
 )
 
 type Customer struct {
-	Gender     *Gender     `xml:"Gender,attr"`
-	BirthDate  *timex.Date `xml:"BirthDate,attr"`
-	Language   string      `xml:"Language,attr,omitempty"`
-	PersonName PersonName  `xml:"PersonName"`
-	Phones     []Phone     `xml:"Telephone"`
-	Email      *Email      `xml:"Email"`
-	Address    *Address    `xml:"Address"`
+	Gender     *Gender    `xml:"Gender,attr"`
+	BirthDate  timex.Date `xml:"BirthDate,attr,omitempty"`
+	Language   string     `xml:"Language,attr,omitempty"`
+	PersonName PersonName `xml:"PersonName"`
+	Phones     []Phone    `xml:"Telephone"`
+	Email      *Email     `xml:"Email"`
+	Address    *Address   `xml:"Address"`
 }
 
 type PersonName struct {
