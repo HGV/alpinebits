@@ -121,9 +121,9 @@ type GuestCount struct {
 }
 
 type TimeSpan struct {
-	Start           timex.Date       `xml:"Start,attr,omitempty"`
-	End             timex.Date       `xml:"End,attr,omitempty"`
-	Duration        *duration.Nights `xml:"Duration,attr"`
+	Start           *timex.Date      `xml:"Start,attr,omitempty"`
+	End             *timex.Date      `xml:"End,attr,omitempty"`
+	Duration        *duration.Nights `xml:"Duration,attr,omitempty"`
 	StartDateWindow *StartDateWindow `xml:"StartDateWindow"`
 }
 
@@ -146,13 +146,13 @@ const (
 )
 
 type Customer struct {
-	Gender     *Gender    `xml:"Gender,attr"`
-	BirthDate  timex.Date `xml:"BirthDate,attr,omitempty"`
-	Language   string     `xml:"Language,attr,omitempty"`
-	PersonName PersonName `xml:"PersonName"`
-	Phones     []Phone    `xml:"Telephone"`
-	Email      *Email     `xml:"Email"`
-	Address    *Address   `xml:"Address"`
+	Gender     *Gender     `xml:"Gender,attr"`
+	BirthDate  *timex.Date `xml:"BirthDate,attr,omitempty"`
+	Language   string      `xml:"Language,attr,omitempty"`
+	PersonName PersonName  `xml:"PersonName"`
+	Phones     []Phone     `xml:"Telephone"`
+	Email      *Email      `xml:"Email"`
+	Address    *Address    `xml:"Address"`
 }
 
 type PersonName struct {
@@ -179,7 +179,9 @@ type Remark string
 
 const (
 	RemarkNewsletterYes Remark = "newsletter:yes"
+	RemarkNewsletterNo  Remark = "newsletter:no"
 	RemarkCatalogYes    Remark = "catalog:yes"
+	RemarkCatalogNo     Remark = "catalog:no"
 )
 
 type Email struct {
@@ -235,11 +237,17 @@ type SpecialRequest struct {
 	Text *Text  `xml:"Text"`
 }
 
+type ResIDType int
+
+const (
+	ResIDTypeInternetBroker = 13
+)
+
 type HotelReservationID struct {
-	ResIDType          int     `xml:"ResID_Type,attr"`
-	ResIDValue         *string `xml:"ResID_Value,attr"`
-	ResIDSource        *string `xml:"ResID_Source,attr"`
-	ResIDSourceContext *string `xml:"ResID_SourceContext,attr"`
+	ResIDType          ResIDType `xml:"ResID_Type,attr"`
+	ResIDValue         *string   `xml:"ResID_Value,attr"`
+	ResIDSource        *string   `xml:"ResID_Source,attr"`
+	ResIDSourceContext *string   `xml:"ResID_SourceContext,attr"`
 }
 
 type ProfileType int

@@ -227,7 +227,7 @@ func (v ResRetrieveValidator) validateTimeSpan(timeSpan TimeSpan) error {
 			return err
 		}
 	} else {
-		hasFixedPeriod := !timeSpan.Start.IsZero() && !timeSpan.End.IsZero()
+		hasFixedPeriod := timeSpan.Start != nil && timeSpan.End != nil
 		hasWindowedPeriod := timeSpan.StartDateWindow != nil && timeSpan.Duration != nil
 
 		if !hasFixedPeriod && !hasWindowedPeriod {
@@ -251,15 +251,15 @@ func (v ResRetrieveValidator) validateTimeSpan(timeSpan TimeSpan) error {
 }
 
 func (v ResRetrieveValidator) validateTimeSpanFixedPeriod(timeSpan TimeSpan) error {
-	if timeSpan.Start.IsZero() {
+	if timeSpan.Start == nil {
 		return common.ErrMissingStart
 	}
 
-	if timeSpan.End.IsZero() {
+	if timeSpan.End == nil {
 		return common.ErrMissingEnd
 	}
 
-	if timeSpan.Start.After(timeSpan.End) {
+	if timeSpan.Start.After(*timeSpan.End) {
 		return common.ErrStartAfterEnd
 	}
 
@@ -293,11 +293,11 @@ func (v ResRetrieveValidator) validateTimeSpanWindowedPeriod(timeSpan TimeSpan) 
 		return common.ErrDurationOutOfRange
 	}
 
-	if !timeSpan.Start.IsZero() {
+	if timeSpan.Start != nil {
 		return common.ErrUnexpectedStart
 	}
 
-	if !timeSpan.End.IsZero() {
+	if timeSpan.End != nil {
 		return common.ErrUnexpectedEnd
 	}
 
