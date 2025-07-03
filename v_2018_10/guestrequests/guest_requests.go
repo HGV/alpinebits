@@ -209,7 +209,7 @@ type ResGlobalInfo struct {
 	Comments           *[]Comment          `xml:"Comments>Comment"`
 	SpecialRequests    *[]SpecialRequest   `xml:"SpecialRequests>SpecialRequest"`
 	CancelPenalty      *string             `xml:"CancelPenalties>CancelPenalty>PenaltyDescription>Text"`
-	HotelReservationID *HotelReservationID `xml:"HotelReservationIDs>HotelReservationIDs"`
+	HotelReservationID *HotelReservationID `xml:"HotelReservationIDs>HotelReservationID"`
 	Profile            *Profile            `xml:"Profiles>ProfileInfo>Profile"`
 	BasicPropertyInfo  BasicPropertyInfo   `xml:"BasicPropertyInfo"`
 }
