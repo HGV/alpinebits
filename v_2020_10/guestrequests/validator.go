@@ -2,7 +2,6 @@ package guestrequests
 
 import (
 	"net/mail"
-	"reflect"
 	"strings"
 
 	"github.com/HGV/alpinebits/v_2020_10/common"
@@ -95,19 +94,22 @@ func (v ResRetrieveValidator) validateUniqueID(uid UniqueID, resStatus ResStatus
 	return nil
 }
 
-func (v ResRetrieveValidator) validateRoomStays(roomStays []RoomStay) error {
-	if len(roomStays) == 0 && !v.isCancellation() {
-		return common.ErrMissingRoomStay
+func (v ResRetrieveValidator) validateRoomStays(roomStays *[]RoomStay) error {
+	if roomStays == nil || len(*roomStays) == 0 {
+		if !v.isCancellation() {
+			return common.ErrMissingRoomStay
+		}
+		return nil
 	}
 
-	primaryRoomStays := slicesx.Filter(roomStays, RoomStay.isPrimaryStay)
+	primaryRoomStays := slicesx.Filter(*roomStays, RoomStay.isPrimaryStay)
 	for _, roomStay := range primaryRoomStays {
 		if err := v.validateRoomStay(roomStay); err != nil {
 			return err
 		}
 	}
 
-	alternativeRoomStays := slicesx.Filter(roomStays, RoomStay.isAlternativeStay)
+	alternativeRoomStays := slicesx.Filter(*roomStays, RoomStay.isAlternativeStay)
 	if len(alternativeRoomStays) > 1 {
 		return common.ErrDuplicateAlternativeRoomStay
 	}
@@ -339,8 +341,8 @@ func (v ResRetrieveValidator) validateAlternativeRoomStay(roomStay RoomStay) err
 	return nil
 }
 
-func (v ResRetrieveValidator) validateCustomer(customer Customer) error {
-	if reflect.DeepEqual(customer, Customer{}) && v.isCancellation() {
+func (v ResRetrieveValidator) validateCustomer(customer *Customer) error {
+	if customer == nil && v.isCancellation() {
 		return nil
 	}
 
@@ -415,7 +417,11 @@ func (v ResRetrieveValidator) validateCountryName(countryName *CountryName) erro
 	return common.ValidateString(countryName.Code)
 }
 
-func (v ResRetrieveValidator) validateResGlobalInfo(globalInfo ResGlobalInfo) error {
+func (v ResRetrieveValidator) validateResGlobalInfo(globalInfo *ResGlobalInfo) error {
+	if globalInfo == nil && v.isCancellation() {
+		return nil
+	}
+
 	if err := v.validateComments(globalInfo.Comments); err != nil {
 		return err
 	}

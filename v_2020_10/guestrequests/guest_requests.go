@@ -66,12 +66,12 @@ type UniqueID struct {
 }
 
 type HotelReservation struct {
-	CreateDateTime time.Time     `xml:"CreateDateTime,attr"`
-	ResStatus      ResStatus     `xml:"ResStatus,attr"`
-	UniqueID       UniqueID      `xml:"UniqueID"`
-	RoomStays      []RoomStay    `xml:"RoomStays>RoomStay"`
-	Customer       Customer      `xml:"ResGuests>ResGuest>Profiles>ProfileInfo>Profile>Customer"`
-	ResGlobalInfo  ResGlobalInfo `xml:"ResGlobalInfo"`
+	CreateDateTime time.Time      `xml:"CreateDateTime,attr"`
+	ResStatus      ResStatus      `xml:"ResStatus,attr"`
+	UniqueID       UniqueID       `xml:"UniqueID"`
+	RoomStays      *[]RoomStay    `xml:"RoomStays>RoomStay"`
+	Customer       *Customer      `xml:"ResGuests>ResGuest>Profiles>ProfileInfo>Profile>Customer"`
+	ResGlobalInfo  *ResGlobalInfo `xml:"ResGlobalInfo"`
 }
 
 type RoomStay struct {
