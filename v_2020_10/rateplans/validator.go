@@ -956,14 +956,21 @@ func (v *HotelRatePlanNotifValidator) validateDateDependingSupplement(supplement
 }
 
 func (v *HotelRatePlanNotifValidator) validateDateDependingSupplementsOverlaps(supplements []Supplement) error {
-	supplementsByInvCode := slicesx.GroupByFunc(supplements, func(s Supplement) string {
+	type key struct {
+		SupplementCode string
+		InvTypeCode    string
+	}
+	supplementsByInvCode := slicesx.GroupByFunc(supplements, func(s Supplement) key {
+		key := key{
+			SupplementCode: s.InvCode,
+		}
 		if s.PrerequisiteInventory != nil {
 			switch s.PrerequisiteInventory.InvType {
 			case PrerequisiteInventoryInvTypeRoomType:
-				return s.PrerequisiteInventory.InvCode
+				key.InvTypeCode = s.PrerequisiteInventory.InvCode
 			}
 		}
-		return s.InvCode
+		return key
 	})
 	for _, supplements := range supplementsByInvCode {
 		if err := common.ValidateOverlaps(supplements); err != nil {
