@@ -195,6 +195,10 @@ func ErrMaxAgeOutOfRange(childMaxAge, ratePlanAdultMinAge int) *Error {
 	return newErrorf("child max age must be < rate plan adult min age, got %d and %d", childMaxAge, ratePlanAdultMinAge)
 }
 
+func ErrAgeRangeOverlaps(min1, max1, min2, max2 int) *Error {
+	return newErrorf("age range [%d - %d] overlaps with [%d - %d]", min1, max1, min2, max2)
+}
+
 func ErrInvalidInvType(invType string) *Error {
 	return newErrorf("invalid value for attribute InvType %s", invType)
 }

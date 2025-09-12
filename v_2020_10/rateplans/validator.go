@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"math"
 	"regexp"
+	"slices"
 
 	"github.com/HGV/alpinebits/internal"
 	"github.com/HGV/alpinebits/v_2020_10/common"
@@ -804,7 +805,70 @@ func (v *HotelRatePlanNotifValidator) validateAdditionalGuestAmounts(additionalG
 		}
 	}
 
+	if err := v.validateAgeRangeOverlaps(children); err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func (v *HotelRatePlanNotifValidator) validateAgeRangeOverlaps(ageRanges []AdditionalGuestAmount) error {
+	minMaxAge := func(a AdditionalGuestAmount) (min int, max int) {
+		min = 0
+		if a.MinAge != nil {
+			min = *a.MinAge
+		}
+
+		max = 18
+		if a.MaxAge != nil {
+			// MaxAge is exclusive
+			max = *a.MaxAge - 1
+		}
+
+		return
+	}
+
+	sortAdditionalGuestAmountsByAge(ageRanges)
+
+	for i := 0; i < len(ageRanges)-1; i++ {
+		min1, max1 := minMaxAge(ageRanges[i])
+		min2, max2 := minMaxAge(ageRanges[i+1])
+		if max1 >= min2 {
+			return common.ErrAgeRangeOverlaps(min1, max1, min2, max2)
+		}
+	}
+
+	return nil
+}
+
+func sortAdditionalGuestAmountsByAge(amounts []AdditionalGuestAmount) {
+	slices.SortFunc(amounts, func(a, b AdditionalGuestAmount) int {
+		// Compare MinAge first (nil treated as 0)
+		minA := 0
+		if a.MinAge != nil {
+			minA = *a.MinAge
+		}
+		minB := 0
+		if b.MinAge != nil {
+			minB = *b.MinAge
+		}
+
+		if minA != minB {
+			return cmp.Compare(minA, minB)
+		}
+
+		// If MinAge is equal, compare MaxAge (nil treated as infinity)
+		maxA := math.MaxInt32
+		if a.MaxAge != nil {
+			maxA = *a.MaxAge
+		}
+		maxB := math.MaxInt32
+		if b.MaxAge != nil {
+			maxB = *b.MaxAge
+		}
+
+		return cmp.Compare(maxA, maxB)
+	})
 }
 
 func (v *HotelRatePlanNotifValidator) validateDateDependingRateOverlaps(rates []Rate) error {
