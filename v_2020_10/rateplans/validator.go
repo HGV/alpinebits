@@ -469,6 +469,10 @@ func (v *HotelRatePlanNotifValidator) validateFamilyOffer(offer Offer) error {
 		return common.ErrInvalidGuestAgeQualifyngCode
 	}
 
+	if v.childOccupancy != nil && v.childOccupancy.MinAge != nil && offer.Guest.MaxAge <= *v.childOccupancy.MinAge {
+		return common.ErrFamilyOfferMaxAgeTooLow(offer.Guest.MaxAge, *v.childOccupancy.MinAge)
+	}
+
 	if offer.Discount.NightsRequired > 0 {
 		return common.ErrUnexpectedNightsRequired
 	}
