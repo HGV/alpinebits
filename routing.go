@@ -89,7 +89,7 @@ type Route struct {
 	action               version.Action
 	handler              HandlerFunc
 	capabilities         []string
-	excludeFromHandshake bool
+	excludeFromHandshake func(clientID string) bool
 }
 
 type RouteFunc func(*Route)
@@ -102,9 +102,9 @@ func WithCapabilities[C ~string](caps ...C) RouteFunc {
 	}
 }
 
-func WithExcludeFromHandshake() RouteFunc {
+func WithExcludeFromHandshake(fn func(clientID string) bool) RouteFunc {
 	return func(r *Route) {
-		r.excludeFromHandshake = true
+		r.excludeFromHandshake = fn
 	}
 }
 
@@ -193,7 +193,7 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Data:         data,
 		Capabilities: route.capabilities,
 		handshakeDataFromRouter: func() HandshakeData {
-			return NewHandshakeDataFromRouter(*router)
+			return NewHandshakeDataFromRouter(*router, clientID)
 		},
 	}
 	resp, err := route.handler(req)

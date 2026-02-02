@@ -15,12 +15,12 @@ type HandshakeData map[string]map[string][]string
 var _ json.Marshaler = (*HandshakeData)(nil)
 var _ json.Unmarshaler = (*HandshakeData)(nil)
 
-func NewHandshakeDataFromRouter(r Router) HandshakeData {
+func NewHandshakeDataFromRouter(r Router, clientID string) HandshakeData {
 	handshakeData := make(HandshakeData)
 	for _, version := range r.versionRoutes {
 		actions := make(map[string][]string)
 		for _, action := range version.actionRoutes {
-			if action.excludeFromHandshake {
+			if action.excludeFromHandshake != nil && action.excludeFromHandshake(clientID) {
 				continue
 			}
 			actions[action.action.HandshakeName()] = action.capabilities
