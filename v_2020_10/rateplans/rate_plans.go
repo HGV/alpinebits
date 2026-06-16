@@ -77,7 +77,7 @@ type RatePlan struct {
 
 func (r RatePlan) IsMaster() bool {
 	return (r.RatePlanQualifier == nil && r.RatePlanID == "") ||
-		(*r.RatePlanQualifier && r.RatePlanID != "")
+		(r.RatePlanQualifier != nil && *r.RatePlanQualifier && r.RatePlanID != "")
 }
 
 type CodeContext string

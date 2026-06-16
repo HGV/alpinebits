@@ -193,7 +193,8 @@ func (v *HotelRatePlanNotifValidator) validateRatePlan(ratePlan RatePlan) error 
 		return err
 	}
 
-	if !v.supportsRatePlanJoin && !ratePlan.IsMaster() {
+	usesJoinFeature := ratePlan.RatePlanQualifier != nil || ratePlan.RatePlanID != ""
+	if !v.supportsRatePlanJoin && usesJoinFeature {
 		return common.ErrRatePlanJoinNotSupported
 	}
 
@@ -207,6 +208,22 @@ func (v *HotelRatePlanNotifValidator) validateRatePlan(ratePlan RatePlan) error 
 	default:
 		return nil
 	}
+}
+
+func (v *HotelRatePlanNotifValidator) validateRatePlanMasterCode(rp RatePlan) error {
+	if !v.supportsRatePlanJoin {
+		return nil
+	}
+
+	if err := common.ValidateString(rp.RatePlanID); err != nil {
+		return common.ErrMissingRatePlanID
+	}
+
+	if rp.RatePlanQualifier == nil {
+		return common.ErrMissingRatePlanQualifier
+	}
+
+	return nil
 }
 
 func (v *HotelRatePlanNotifValidator) validateRatePlanCode(code string) error {
@@ -224,6 +241,10 @@ func (v *HotelRatePlanNotifValidator) validateCurrencyCode(code string) error {
 }
 
 func (v *HotelRatePlanNotifValidator) validateRatePlanNew(ratePlan RatePlan) error {
+	if err := v.validateRatePlanMasterCode(ratePlan); err != nil {
+		return err
+	}
+
 	if ratePlan.IsMaster() {
 		return v.validateRatePlanNewMaster(ratePlan)
 	}
@@ -255,9 +276,8 @@ func (v *HotelRatePlanNotifValidator) validateRatePlanNewMaster(ratePlan RatePla
 }
 
 func (v *HotelRatePlanNotifValidator) validateRatePlanNewDerived(ratePlan RatePlan) error {
-	code := cmp.Or(ratePlan.RatePlanID, ratePlan.RatePlanCode)
-	if _, ok := v.ratePlanMapping[code]; !ok {
-		return common.ErrRatePlanNotFound(code)
+	if _, ok := v.ratePlanMapping[ratePlan.RatePlanID]; !ok {
+		return common.ErrRatePlanNotFound(ratePlan.RatePlanID)
 	}
 
 	if err := v.validateBookingRules(ratePlan.BookingRules); err != nil {
@@ -1051,6 +1071,10 @@ func (v *HotelRatePlanNotifValidator) validateDateDependingSupplementsOverlaps(s
 func (v *HotelRatePlanNotifValidator) validateRatePlanOverlay(ratePlan RatePlan) error {
 	if !v.supportsOverlay {
 		return common.ErrDeltasNotSupported
+	}
+
+	if err := v.validateRatePlanMasterCode(ratePlan); err != nil {
+		return err
 	}
 
 	if ratePlan.RatePlanID != "" {

@@ -32,6 +32,8 @@ var (
 	ErrMissingRoomTypeCode                     = newMissingAttributeError("RoomTypeCode")
 	ErrMissingRatePlan                         = newMissingElementError("RatePlan")
 	ErrUnexpectedRatePlan                      = newUnexpectedElementError("RatePlan")
+	ErrMissingRatePlanID                       = newMissingAttributeError("RatePlanID")
+	ErrMissingRatePlanQualifier                = newMissingAttributeError("RatePlanQualifier")
 	ErrMissingRatePlanCode                     = newMissingAttributeError("RatePlanCode")
 	ErrInvalidPercent                          = newError("percent must be ≤ 100")
 	ErrMissingMealsIncluded                    = newMissingElementError("MealsIncluded")
