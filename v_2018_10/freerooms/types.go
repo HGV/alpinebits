@@ -1,0 +1,87 @@
+package freerooms
+
+import (
+	"encoding/xml"
+
+	"github.com/HGV/alpinebits"
+	"github.com/HGV/x/timex"
+)
+
+type HotelAvailNotifRQ struct {
+	XMLName             xml.Name            `xml:"http://www.opentravel.org/OTA/2003/05 OTA_HotelAvailNotifRQ"`
+	Version             string              `xml:"Version,attr"`
+	UniqueID            *UniqueID           `xml:"UniqueID,omitempty"`
+	AvailStatusMessages AvailStatusMessages `xml:"AvailStatusMessages"`
+}
+
+// HotelCode implements alpinebits.HotelCoded.
+func (r HotelAvailNotifRQ) HotelCode() string {
+	return r.AvailStatusMessages.HotelCode
+}
+
+type UniqueIDType int
+
+const (
+	UniqueIDTypeReference             UniqueIDType = 16
+	UniqueIDTypePurgedMasterReference UniqueIDType = 35
+)
+
+type Instance string
+
+const (
+	InstanceCompleteSet Instance = "CompleteSet"
+)
+
+type UniqueID struct {
+	Type     UniqueIDType `xml:"Type,attr"`
+	ID       string       `xml:"ID,attr"`
+	Instance Instance     `xml:"Instance,attr"`
+}
+
+type AvailStatusMessages struct {
+	HotelCode           string               `xml:"HotelCode,attr"`
+	HotelName           string               `xml:"HotelName,attr"`
+	AvailStatusMessages []AvailStatusMessage `xml:"AvailStatusMessage"`
+}
+
+func (a AvailStatusMessages) IsReset() bool {
+	var zero AvailStatusMessage
+	return len(a.AvailStatusMessages) == 1 &&
+		a.AvailStatusMessages[0] == zero
+}
+
+type BookingLimitMessageType string
+
+const (
+	BookingLimitMessageTypeSetLimit BookingLimitMessageType = "SetLimit"
+)
+
+type AvailStatusMessage struct {
+	BookingLimit             int                      `xml:"BookingLimit,attr"`
+	BookingLimitMessageType  BookingLimitMessageType  `xml:"BookingLimitMessageType,attr"`
+	BookingThreshold         int                      `xml:"BookingThreshold,attr"`
+	StatusApplicationControl StatusApplicationControl `xml:"StatusApplicationControl"`
+}
+
+// DateRange implements alpinebits.DateRanged.
+func (m AvailStatusMessage) DateRange() timex.DateRange {
+	return timex.DateRange{
+		Start: m.StatusApplicationControl.Start,
+		End:   m.StatusApplicationControl.End,
+	}
+}
+
+type StatusApplicationControl struct {
+	Start       timex.Date `xml:"Start,attr"`
+	End         timex.Date `xml:"End,attr"`
+	InvTypeCode string     `xml:"InvTypeCode,attr,omitempty"`
+	InvCode     string     `xml:"InvCode,attr,omitempty"`
+}
+
+type HotelAvailNotifRS struct {
+	XMLName  xml.Name            `xml:"http://www.opentravel.org/OTA/2003/05 OTA_HotelAvailNotifRS"`
+	Version  string              `xml:"Version,attr"`
+	Success  *alpinebits.Success `xml:"Success"`
+	Warnings *alpinebits.Warnings `xml:"Warnings>Warning"`
+	Errors   *alpinebits.Errors   `xml:"Errors>Error"`
+}
