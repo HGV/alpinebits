@@ -1073,10 +1073,6 @@ func (v *HotelRatePlanNotifValidator) validateRatePlanOverlay(ratePlan RatePlan)
 		return common.ErrDeltasNotSupported
 	}
 
-	if err := v.validateRatePlanMasterCode(ratePlan); err != nil {
-		return err
-	}
-
 	if ratePlan.RatePlanID != "" {
 		if _, ok := v.ratePlanMapping[ratePlan.RatePlanID]; !ok {
 			return common.ErrRatePlanNotFound(ratePlan.RatePlanID)
