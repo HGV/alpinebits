@@ -131,6 +131,7 @@ var (
 	ErrUnexpectedAddToBasicRateIndicator       = newUnexpectedAttributeError("AddToBasicRateIndicator")
 	ErrUnexpectedMandatoryIndicator            = newUnexpectedAttributeError("MandatoryIndicator")
 	ErrUnexpectedChargeTypeCode                = newUnexpectedAttributeError("ChargeTypeCode")
+	ErrChargeTypeMismatch                      = newError("derived rate plan charge type must match master rate plan charge type")
 )
 
 func ErrInvalidBookingLimit(n int) *Error {
@@ -171,6 +172,10 @@ func ErrInvalidUniqueID(status string, uidType int) *Error {
 
 func ErrRatePlanNotFound(code string) *Error {
 	return newErrorf("rate plan not found %s", code)
+}
+
+func ErrDuplicateMealType(existingRatePlanCode string, mealType int) *Error {
+	return newErrorf("rate plan %s with meal type %d already exists", existingRatePlanCode, mealType)
 }
 
 func ErrMinStayArrivalGratherThanMaxStayArrival(min, max int) *Error {

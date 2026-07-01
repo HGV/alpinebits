@@ -23,10 +23,15 @@ type RoomTypeOccupancySettings struct {
 	Max int
 }
 
+type MasterRatePlan struct {
+	ChargeType   RatePlanChargeType
+	DerivedPlans map[string]MealPlan
+}
+
 type HotelRatePlanNotifValidator struct {
 	supportsArrivalDOW             bool
 	supportsDepartureDOW           bool
-	ratePlanMapping                map[string]map[string]struct{}
+	ratePlanMapping                map[string]MasterRatePlan
 	supportsRatePlanJoin           bool
 	adultOccupancy                 RatePlanOccupancySettings
 	childOccupancy                 *RatePlanOccupancySettings
@@ -50,6 +55,7 @@ type HotelRatePlanNotifValidatorFunc func(*HotelRatePlanNotifValidator)
 func NewHotelRatePlanNotifValidator(opts ...HotelRatePlanNotifValidatorFunc) HotelRatePlanNotifValidator {
 	v := HotelRatePlanNotifValidator{
 		supplementMapping: map[string]struct{}{},
+		ratePlanMapping:   map[string]MasterRatePlan{},
 	}
 
 	for _, opt := range opts {
@@ -70,7 +76,7 @@ func WithDepartureDOW() HotelRatePlanNotifValidatorFunc {
 	}
 }
 
-func WithRatePlanMapping(mapping map[string]map[string]struct{}) HotelRatePlanNotifValidatorFunc {
+func WithRatePlanMapping(mapping map[string]MasterRatePlan) HotelRatePlanNotifValidatorFunc {
 	return func(v *HotelRatePlanNotifValidator) {
 		v.ratePlanMapping = mapping
 	}
@@ -280,6 +286,14 @@ func (v *HotelRatePlanNotifValidator) validateRatePlanNewDerived(ratePlan RatePl
 		return common.ErrRatePlanNotFound(ratePlan.RatePlanID)
 	}
 
+	if err := v.validateDerivedChargeType(ratePlan); err != nil {
+		return err
+	}
+
+	if err := v.validateMealTypeUniqueness(ratePlan); err != nil {
+		return err
+	}
+
 	if err := v.validateBookingRules(ratePlan.BookingRules); err != nil {
 		return err
 	}
@@ -298,6 +312,55 @@ func (v *HotelRatePlanNotifValidator) validateRatePlanNewDerived(ratePlan RatePl
 
 	if !ratePlan.Descriptions.isZero() {
 		return common.ErrUnexpectedDescription
+	}
+
+	return nil
+}
+
+// validateDerivedChargeType validates that a derived rate plan's charge type matches the master rate plan's charge type.
+func (v *HotelRatePlanNotifValidator) validateDerivedChargeType(ratePlan RatePlan) error {
+	if len(ratePlan.Rates) == 0 || len(ratePlan.Rates[0].BaseByGuestAmts) == 0 {
+		return nil
+	}
+
+	derivedChargeType := ratePlan.Rates[0].BaseByGuestAmts[0].Type
+	if derivedChargeType == nil {
+		return nil
+	}
+
+	master, ok := v.ratePlanMapping[ratePlan.RatePlanID]
+	if !ok {
+		return nil
+	}
+
+	if *derivedChargeType != master.ChargeType {
+		return common.ErrChargeTypeMismatch
+	}
+
+	return nil
+}
+
+// validateMealTypeUniqueness validates that no other rate plan code under the same master has the same meal type.
+func (v *HotelRatePlanNotifValidator) validateMealTypeUniqueness(ratePlan RatePlan) error {
+	if len(ratePlan.Rates) == 0 || ratePlan.Rates[0].MealsIncluded == nil {
+		return nil
+	}
+
+	mealType := ratePlan.Rates[0].MealsIncluded.MealPlanCodes
+
+	master, ok := v.ratePlanMapping[ratePlan.RatePlanID]
+	if !ok {
+		return nil
+	}
+
+	for existingCode, existingMealType := range master.DerivedPlans {
+		if existingCode == ratePlan.RatePlanCode {
+			continue
+		}
+
+		if existingMealType == mealType {
+			return common.ErrDuplicateMealType(existingCode, int(mealType))
+		}
 	}
 
 	return nil
@@ -1081,8 +1144,8 @@ func (v *HotelRatePlanNotifValidator) validateRatePlanOverlay(ratePlan RatePlan)
 	}
 
 	mealPlanSeen := false
-	for _, v := range v.ratePlanMapping {
-		if _, ok := v[ratePlan.RatePlanCode]; ok {
+	for _, master := range v.ratePlanMapping {
+		if _, ok := master.DerivedPlans[ratePlan.RatePlanCode]; ok {
 			mealPlanSeen = true
 			break
 		}
