@@ -132,6 +132,7 @@ var (
 	ErrUnexpectedMandatoryIndicator            = newUnexpectedAttributeError("MandatoryIndicator")
 	ErrUnexpectedChargeTypeCode                = newUnexpectedAttributeError("ChargeTypeCode")
 	ErrChargeTypeMismatch                      = newError("derived rate plan charge type must match master rate plan charge type")
+	ErrUnitMultiplierMismatch                  = newError("derived rate plan unit multiplier must match master rate plan unit multiplier")
 )
 
 func ErrInvalidBookingLimit(n int) *Error {

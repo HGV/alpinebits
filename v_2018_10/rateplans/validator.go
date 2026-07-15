@@ -24,8 +24,9 @@ type RoomTypeOccupancySettings struct {
 }
 
 type MasterRatePlan struct {
-	ChargeType   RatePlanChargeType
-	DerivedPlans map[string]MealPlan
+	ChargeType     RatePlanChargeType
+	UnitMultiplier int
+	DerivedPlans   map[string]MealPlan
 }
 
 type HotelRatePlanNotifValidator struct {
@@ -290,6 +291,10 @@ func (v *HotelRatePlanNotifValidator) validateRatePlanNewDerived(ratePlan RatePl
 		return err
 	}
 
+	if err := v.validateDerivedUnitMultiplier(ratePlan); err != nil {
+		return err
+	}
+
 	if err := v.validateMealTypeUniqueness(ratePlan); err != nil {
 		return err
 	}
@@ -335,6 +340,29 @@ func (v *HotelRatePlanNotifValidator) validateDerivedChargeType(ratePlan RatePla
 
 	if *derivedChargeType != master.ChargeType {
 		return common.ErrChargeTypeMismatch
+	}
+
+	return nil
+}
+
+// validateDerivedUnitMultiplier validates that a derived rate plan's unit multiplier matches the master rate plan's unit multiplier.
+func (v *HotelRatePlanNotifValidator) validateDerivedUnitMultiplier(ratePlan RatePlan) error {
+	if len(ratePlan.Rates) == 0 {
+		return nil
+	}
+
+	derivedUnitMultiplier := ratePlan.Rates[0].UnitMultiplier
+	if derivedUnitMultiplier == 0 {
+		return nil
+	}
+
+	master, ok := v.ratePlanMapping[ratePlan.RatePlanID]
+	if !ok {
+		return nil
+	}
+
+	if derivedUnitMultiplier != master.UnitMultiplier {
+		return common.ErrUnitMultiplierMismatch
 	}
 
 	return nil
