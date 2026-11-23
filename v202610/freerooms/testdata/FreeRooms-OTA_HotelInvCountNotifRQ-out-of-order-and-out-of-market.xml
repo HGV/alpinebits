@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    AlpineBits 2026-10
+    https://www.alpinebits.org/
+
+    Sample message file for a FreeRooms request that uses all three counts:
+    bookable rooms, rooms out of order and rooms that are free but not bookable.
+
+    CountType 2 must always be supported; CountType 6 requires the capability
+    OTA_HotelInvCountNotif_accept_out_of_order and CountType 9 requires
+    OTA_HotelInvCountNotif_accept_out_of_market. A client must not send them to
+    a server that does not declare the corresponding capability.
+
+    Changelog:
+    v. 2026-10 1.0 initial example
+-->
+
+<OTA_HotelInvCountNotifRQ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                        xmlns="http://www.opentravel.org/OTA/2003/05"
+                        Version="3.000"
+                        xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_HotelInvCountNotifRQ.xsd">
+
+    <UniqueID Type="16" ID="1" Instance="CompleteSet"/>
+
+    <Inventories HotelCode="123" HotelName="AlpineBits Hotel">
+
+        <!-- eight rooms of the category: five bookable, two being renovated, one free but held back -->
+        <Inventory>
+            <StatusApplicationControl Start="2027-08-01" End="2027-08-10" InvTypeCode="DOUBLE" />
+            <InvCounts>
+                <!-- 2 -> bookable -->
+                <InvCount CountType="2" Count="5" />
+                <!-- 6 -> out of order: neither booked nor bookable -->
+                <InvCount CountType="6" Count="2" />
+                <!-- 9 -> free but not bookable through this channel -->
+                <InvCount CountType="9" Count="1" />
+            </InvCounts>
+        </Inventory>
+
+        <!-- the renovation is over, the room held back is released -->
+        <Inventory>
+            <StatusApplicationControl Start="2027-08-11" End="2027-08-20" InvTypeCode="DOUBLE" />
+            <InvCounts>
+                <InvCount CountType="2" Count="8" />
+            </InvCounts>
+        </Inventory>
+
+    </Inventories>
+
+</OTA_HotelInvCountNotifRQ>

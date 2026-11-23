@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    AlpineBits 2026-10
+    https://www.alpinebits.org/
+
+    Sample message file for a Handshake request
+
+    Changelog:
+    v. 2026-10 1.1 EchoData sent as a single line, as recommended; 2022-10 removed from the example
+    v. 2026-10 1.0 2026-10 announced as supported version; OTA_Ping listed only under 2022-10, since it is implicit from 2024-10 on
+    v. 2024-10 1.2 Example extended with all capabilities and two supported releases
+    v. 2024-10 1.1 Removed the OTA_Ping action
+    v. 2024-10 1.0 added supported version 2024-10 in the example
+    v. 2018-10 1.0 initial example
+-->
+
+<OTA_PingRQ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://www.opentravel.org/OTA/2003/05"
+            xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_PingRQ.xsd"
+            Version="3.000">
+
+    <!-- EchoData is a string and must be transmitted as single line to avoid whitespace and indentation mismatch -->
+    <EchoData>{"versions":[{"version":"2026-10","actions":[{"action":"action_OTA_Read"},{"action":"action_OTA_HotelResNotif_GuestRequests"},{"action":"action_OTA_HotelResNotif_GuestRequests_StatusUpdate"},{"action":"action_OTA_HotelInvCountNotif","supports":["OTA_HotelInvCountNotif_accept_rooms","OTA_HotelInvCountNotif_accept_categories","OTA_HotelInvCountNotif_accept_deltas","OTA_HotelInvCountNotif_accept_out_of_market","OTA_HotelInvCountNotif_accept_out_of_order","OTA_HotelInvCountNotif_accept_complete_set","OTA_HotelInvCountNotif_accept_closing_seasons"]},{"action":"action_OTA_HotelDescriptiveContentNotif_Inventory","supports":["OTA_HotelDescriptiveContentNotif_Inventory_use_rooms","OTA_HotelDescriptiveContentNotif_Inventory_occupancy_children"]},{"action":"action_OTA_HotelDescriptiveContentNotif_Info"},{"action":"action_OTA_HotelDescriptiveInfo_Inventory"},{"action":"action_OTA_HotelDescriptiveInfo_Info"},{"action":"action_OTA_HotelRatePlanNotif_RatePlans","supports":["OTA_HotelRatePlanNotif_accept_ArrivalDOW","OTA_HotelRatePlanNotif_accept_DepartureDOW","OTA_HotelRatePlanNotif_accept_RatePlan_BookingRule","OTA_HotelRatePlanNotif_accept_RatePlan_RoomType_BookingRule","OTA_HotelRatePlanNotif_accept_RatePlan_mixed_BookingRule","OTA_HotelRatePlanNotif_accept_Supplements","OTA_HotelRatePlanNotif_accept_FreeNightsOffers","OTA_HotelRatePlanNotif_accept_FamilyOffers","OTA_HotelRatePlanNotif_accept_full","OTA_HotelRatePlanNotif_accept_overlay","OTA_HotelRatePlanNotif_accept_RatePlanJoin","OTA_HotelRatePlanNotif_accept_OfferRule_BookingOffset","OTA_HotelRatePlanNotif_accept_OfferRule_DOWLOS"]},{"action":"action_OTA_HotelRatePlan_BaseRates","supports":["OTA_HotelRatePlan_BaseRates_deltas"]},{"action":"action_OTA_HotelPostEventNotif_EventReports"}]},{"version":"2024-10","actions":[{"action":"action_OTA_Read"},{"action":"action_OTA_HotelRatePlan_BaseRates","supports":["OTA_HotelRatePlan_BaseRates_deltas"]},{"action":"action_OTA_HotelPostEventNotif_EventReports"}]}]}</EchoData>
+
+</OTA_PingRQ>

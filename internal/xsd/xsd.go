@@ -45,7 +45,7 @@ func Parse(b []byte) (*Schema, error) {
 func MustParse(b []byte) *Schema {
 	s, err := Parse(b)
 	if err != nil {
-		panic("xsd: parse schema: " + err.Error())
+		panic("alpinebits: parse schema: " + err.Error())
 	}
 	return s
 }

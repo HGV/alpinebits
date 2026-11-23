@@ -27,6 +27,16 @@ func newRequest(version, client, action, doc string) *http.Request {
 	return req
 }
 
+// newXMLRequest posts doc as AlpineBits 2026-10 does.
+func newXMLRequest(version, action, doc string) *http.Request {
+	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(doc))
+	req.Header.Set("Content-Type", "application/xml")
+	req.Header.Set(HeaderVersion, version)
+	req.Header.Set(HeaderAction, action)
+	req.SetBasicAuth("c", "secret")
+	return req
+}
+
 func serve(h http.Handler, req *http.Request) (int, string) {
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
@@ -60,11 +70,11 @@ func TestHandleRunsRulesAndRejections(t *testing.T) {
 
 	var calls int
 	var reply error
-	r := NewRouter()
-	r.Version(v, Handle(a, func(context.Context, Request[testRQ]) (testRS, error) {
-		calls++
-		return testRS{Response: OK()}, reply
-	}))
+	r := NewRouter().
+		Handle(a, func(context.Context, Request[testRQ]) (testRS, error) {
+			calls++
+			return testRS{Response: OK()}, reply
+		})
 
 	tests := []struct {
 		name      string
@@ -116,8 +126,8 @@ func TestBodyLimit(t *testing.T) {
 
 	small := newRequest("2018-10", "c", "OTA_Test:Test", `<TestRQ/>`)
 	limit := small.ContentLength
-	r := NewRouter(WithMaxFormSize(limit))
-	r.Version(v, Handle(a, handler))
+	r := NewRouter(WithMaxFormSize(limit)).
+		Handle(a, handler)
 
 	if code, body := serve(r, small); code != http.StatusOK {
 		t.Errorf("at the limit: status %d: %s", code, body)
@@ -133,11 +143,11 @@ func TestHandlerGetsRequestContext(t *testing.T) {
 	v := NewVersion("2018-10", nopValidator{})
 	a := NewAction[testRQ, testRS](v, "OTA_Test:Test", "action_OTA_Test", nil)
 	var got any
-	r := NewRouter()
-	r.Version(v, Handle(a, func(ctx context.Context, _ Request[testRQ]) (testRS, error) {
-		got = ctx.Value(key{})
-		return testRS{Response: OK()}, nil
-	}))
+	r := NewRouter().
+		Handle(a, func(ctx context.Context, _ Request[testRQ]) (testRS, error) {
+			got = ctx.Value(key{})
+			return testRS{Response: OK()}, nil
+		})
 
 	req := newRequest("2018-10", "c", "OTA_Test:Test", `<TestRQ/>`)
 	if code, body := serve(r, req.WithContext(context.WithValue(req.Context(), key{}, "v"))); code != http.StatusOK {
@@ -176,13 +186,11 @@ func TestServeHTTPAnswers(t *testing.T) {
 	slog.SetDefault(slog.New(slog.NewTextHandler(&log, nil)))
 
 	v := NewVersion("2018-10", failValidator{})
-	r := NewRouter()
-	r.Version(v,
+	r := NewRouter().
 		Handle(NewAction[testRQ, testRS](v, "OTA_Test:Test", "action_OTA_Test", nil),
-			func(context.Context, Request[testRQ]) (testRS, error) { return testRS{Response: OK()}, nil }),
+			func(context.Context, Request[testRQ]) (testRS, error) { return testRS{Response: OK()}, nil }).
 		Handle(NewAction[testRQ, testRS](v, "OTA_Fail:Fail", "action_OTA_Fail", nil),
-			func(context.Context, Request[testRQ]) (testRS, error) { return testRS{}, errors.New("database down") }),
-	)
+			func(context.Context, Request[testRQ]) (testRS, error) { return testRS{}, errors.New("database down") })
 	gzipped := newRequest("2018-10", "c", "OTA_Test:Test", `<TestRQ/>`)
 	gzipped.Header.Set("Content-Encoding", "gzip")
 
@@ -218,6 +226,60 @@ func TestServeHTTPAnswers(t *testing.T) {
 	}
 }
 
+func TestContentTypeSelectsTransport(t *testing.T) {
+	ok := func(context.Context, Request[testRQ]) (testRS, error) { return testRS{Response: OK()}, nil }
+	router := func(names ...string) *Router {
+		r := NewRouter(WithMaxFormSize(1000))
+		for _, name := range names {
+			v := NewVersion(name, nopValidator{})
+			r.Handle(NewAction[testRQ, testRS](v, "OTA_Test:Test", "action_OTA_Test", nil), ok)
+		}
+		return r
+	}
+	both, only24, only26 := router("2024-10", "2026-10"), router("2024-10"), router("2026-10")
+
+	withHeader := func(req *http.Request, key, value string) *http.Request {
+		req.Header.Set(key, value)
+		return req
+	}
+	const doc = `<TestRQ/>`
+	tests := []struct {
+		name       string
+		r          *Router
+		req        *http.Request
+		wantStatus int
+		wantBody   string
+	}{
+		{"XML", both, newXMLRequest("2026-10", "OTA_Test:Test", doc), 200, ""},
+		{"XML with charset", both, withHeader(newXMLRequest("2026-10", "OTA_Test:Test", doc),
+			"Content-Type", "application/xml; charset=utf-8"), 200, ""},
+		{"multipart", both, newRequest("2024-10", "c", "OTA_Test:Test", doc), 200, ""},
+		{"XML handshake for unknown version", both, newXMLRequest("2099-10", "OTA_Ping:Handshaking",
+			ping(`{"versions":[{"version":"2026-10"}]}`)), 200, ""},
+		{"XML for 2024-10", both, newXMLRequest("2024-10", "OTA_Test:Test", doc), 400,
+			"ERROR:content type does not match the client protocol version"},
+		{"multipart for 2026-10", both, newRequest("2026-10", "c", "OTA_Test:Test", doc), 400,
+			"ERROR:content type does not match the client protocol version"},
+		{"XML without action", both, newXMLRequest("2026-10", "", doc), 400, "ERROR:unknown or missing action"},
+		{"XML too large", both, newXMLRequest("2026-10", "OTA_Test:Test", strings.Repeat(" ", 1001)), 413,
+			"ERROR:request too large"},
+		{"XML to earlier versions only", only24, newXMLRequest("2026-10", "OTA_Test:Test", doc), 400,
+			"ERROR:unsupported content type"},
+		{"multipart to 2026-10 only", only26, newRequest("2024-10", "c", "OTA_Test:Test", doc), 400,
+			"ERROR:unsupported content type"},
+		{"other content type", both, withHeader(newXMLRequest("2026-10", "OTA_Test:Test", doc),
+			"Content-Type", "text/xml"), 400, "ERROR:unsupported content type"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			code, body := serve(tt.r, tt.req)
+			if code != tt.wantStatus || tt.wantBody != "" && body != tt.wantBody {
+				t.Errorf("got %d %q\nwant %d %q", code, body, tt.wantStatus, tt.wantBody)
+			}
+		})
+	}
+}
+
 func TestUnauthorized(t *testing.T) {
 	rec := httptest.NewRecorder()
 	Unauthorized(rec, "invalid credentials")
@@ -230,11 +292,11 @@ func TestRequestUserAndClientID(t *testing.T) {
 	v := NewVersion("2018-10", nopValidator{})
 	a := NewAction[testRQ, testRS](v, "OTA_Test:Test", "action_OTA_Test", nil)
 	var got Request[testRQ]
-	r := NewRouter()
-	r.Version(v, Handle(a, func(_ context.Context, r Request[testRQ]) (testRS, error) {
-		got = r
-		return testRS{Response: OK()}, nil
-	}))
+	r := NewRouter().
+		Handle(a, func(_ context.Context, r Request[testRQ]) (testRS, error) {
+			got = r
+			return testRS{Response: OK()}, nil
+		})
 	req := newRequest("2018-10", "user", "OTA_Test:Test", `<TestRQ/>`)
 	req.Header.Set(HeaderClientID, "pms 1.0")
 	serve(r, req)

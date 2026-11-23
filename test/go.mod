@@ -1,6 +1,6 @@
 module github.com/HGV/alpinebits/test
 
-go 1.26
+go 1.27
 
 require (
 	github.com/HGV/alpinebits v0.0.0

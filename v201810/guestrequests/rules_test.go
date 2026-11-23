@@ -243,6 +243,14 @@ func TestValidateReservation(t *testing.T) {
 	}
 }
 
+func TestValidateHotelReservation(t *testing.T) {
+	rs := load[ResRetrieveRS](t, "GuestRequests-OTA_ResRetrieveRS-reservation.xml")
+	res := rs.HotelReservations[0]
+	rulestest.Expect(t, ValidateHotelReservation(res), nil)
+	res.UniqueID.ID = " "
+	rulestest.Expect(t, ValidateHotelReservation(res), []string{"UniqueID: ID required"})
+}
+
 // quoteRequest is the official quote request sample with the Duration it
 // lacks.
 func quoteRequest(t *testing.T) ResRetrieveRS {

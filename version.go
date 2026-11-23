@@ -34,9 +34,9 @@ func (v *Version) Validate(doc []byte) error {
 	return v.validator.Validate(doc)
 }
 
-func versionName(v *Version) string {
-	if v == nil {
-		return "<none>"
-	}
-	return v.name
+// xmlBody reports whether requests of v are an XML document with the action in
+// the X-AlpineBits-Action header (AlpineBits 2026-10 §2.1) rather than
+// multipart/form-data.
+func (v *Version) xmlBody() bool {
+	return v.name >= "2026-10"
 }

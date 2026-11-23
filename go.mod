@@ -1,6 +1,6 @@
 module github.com/HGV/alpinebits
 
-go 1.26
+go 1.27
 
 require (
 	github.com/HGV/x v0.0.0-20260225100025-0bf39497adb4

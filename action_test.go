@@ -25,20 +25,14 @@ type testRS struct {
 
 func testHandler(context.Context, Request[testRQ]) (testRS, error) { return testRS{}, nil }
 
-func TestHandleRejectsActionOfOtherVersion(t *testing.T) {
-	v1 := NewVersion("2020-10", nopValidator{})
-	v2 := NewVersion("2022-10", nopValidator{})
-	a := NewAction[testRQ, testRS](v1, "OTA_Test:Test", "action_OTA_Test", nil)
-
-	NewRouter().Version(v1, Handle(a, testHandler)) // same version: no panic
-
+func TestHandleRejectsTwoVersionsOfSameName(t *testing.T) {
+	r := NewRouter().Handle(NewAction[testRQ, testRS](NewVersion("2018-10", nopValidator{}), "OTA_A:A", "action_A", nil), testHandler)
 	defer func() {
-		msg, _ := recover().(string)
-		if !strings.Contains(msg, "OTA_Test:Test") || !strings.Contains(msg, "2020-10") || !strings.Contains(msg, "2022-10") {
-			t.Errorf("got panic %q, want one naming the action and both versions", msg)
+		if msg, _ := recover().(string); msg != "alpinebits: two versions named 2018-10" {
+			t.Errorf("got panic %q", msg)
 		}
 	}()
-	NewRouter().Version(v2, Handle(a, testHandler))
+	r.Handle(NewAction[testRQ, testRS](NewVersion("2018-10", nopValidator{}), "OTA_B:B", "action_B", nil), testHandler)
 }
 
 func TestSendRejectsActionOfOtherVersion(t *testing.T) {
@@ -52,7 +46,7 @@ func TestSendRejectsActionOfOtherVersion(t *testing.T) {
 	a := NewAction[testRQ, testRS](v1, "OTA_Test:Test", "action_OTA_Test", nil)
 	c := NewClient(srv.URL, "user", "pass", v2)
 
-	if _, err := Send(context.Background(), c, a, testRQ{}); err == nil || !strings.Contains(err.Error(), "2022-10") {
+	if _, err := c.Send(context.Background(), a, testRQ{}); err == nil || !strings.Contains(err.Error(), "2022-10") {
 		t.Errorf("got %v, want version mismatch error", err)
 	}
 }

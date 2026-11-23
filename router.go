@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"maps"
+	"mime"
 	"net/http"
 	"slices"
 )
@@ -15,7 +15,10 @@ import (
 const (
 	HeaderVersion  = "X-AlpineBits-ClientProtocolVersion"
 	HeaderClientID = "X-AlpineBits-ClientID"
+	// HeaderAction carries the action from AlpineBits 2026-10 on.
+	HeaderAction = "X-AlpineBits-Action"
 
+	// Until AlpineBits 2024-10 the action and the request are form fields.
 	FormAction  = "action"
 	FormRequest = "request"
 )
@@ -118,68 +121,14 @@ type request struct {
 // handlerFunc is the internal untyped handler for storage.
 type handlerFunc func(ctx context.Context, r *request) (any, error)
 
-// RouteOption configures an action route within a version.
-type RouteOption interface {
-	apply(*versionRouter)
-}
-
-type routeOption struct {
-	action       action
-	handler      handlerFunc
-	capabilities []Capability
-}
-
-func (o *routeOption) apply(vr *versionRouter) {
-	if v := o.action.Version(); v != vr.version {
-		panic("alpinebits: cannot register action " + o.action.Name() +
-			" of version " + versionName(v) + " under version " + vr.version.Name())
-	}
-	vr.actions[o.action.Name()] = &route{
-		action:       o.action,
-		handler:      o.handler,
-		capabilities: o.capabilities,
-	}
-}
-
-// HandleOption configures an action handler.
-type HandleOption func(*routeOption)
+// HandleOption configures an action route.
+type HandleOption func(*route)
 
 // WithCapabilities sets the capabilities supported by this route.
 func WithCapabilities(caps ...Capability) HandleOption {
-	return func(o *routeOption) {
-		o.capabilities = caps
+	return func(rt *route) {
+		rt.capabilities = caps
 	}
-}
-
-// Handle registers fn for a. fn only sees requests that passed the action's
-// rules, and rejects requests by returning Reject(errs...).
-func Handle[RQ, RS any](a Action[RQ, RS], fn HandlerFunc[RQ, RS], opts ...HandleOption) RouteOption {
-	handler := func(ctx context.Context, r *request) (any, error) {
-		rq := *r.data.(*RQ)
-		if a.validate != nil {
-			if errs := a.validate(rq, r.capabilities); len(errs) > 0 {
-				return a.reject(errs), nil
-			}
-		}
-		rs, err := fn(ctx, Request[RQ]{
-			User:         r.user,
-			ClientID:     r.clientID,
-			Data:         rq,
-			Capabilities: r.capabilities,
-		})
-		if rej, ok := errors.AsType[*Rejection](err); ok {
-			return a.reject(rej.Errors), nil
-		}
-		return rs, err
-	}
-	ro := &routeOption{
-		action:  a,
-		handler: handler,
-	}
-	for _, opt := range opts {
-		opt(ro)
-	}
-	return ro
 }
 
 // ServerCapabilities returns the registered capabilities for a version.
@@ -191,15 +140,51 @@ func (r *Router) ServerCapabilities(version string) ActionCapabilities {
 	return vr.serverCapabilities()
 }
 
-// Version registers a version with its action handlers.
-// The handshake action (OTA_Ping) is automatically registered.
-func (r *Router) Version(v *Version, opts ...RouteOption) *Router {
+// Handle registers fn for a, under the version of a. fn only sees requests
+// that passed the action's rules, and rejects requests by returning
+// Reject(errs...).
+func (r *Router) Handle[RQ, RS any](a Action[RQ, RS], fn HandlerFunc[RQ, RS], opts ...HandleOption) *Router {
+	rt := &route{
+		action: a,
+		handler: func(ctx context.Context, r *request) (any, error) {
+			rq := *r.data.(*RQ)
+			if a.validate != nil {
+				if errs := a.validate(rq, r.capabilities); len(errs) > 0 {
+					return a.reject(errs), nil
+				}
+			}
+			rs, err := fn(ctx, Request[RQ]{
+				User:         r.user,
+				ClientID:     r.clientID,
+				Data:         rq,
+				Capabilities: r.capabilities,
+			})
+			if rej, ok := errors.AsType[*Rejection](err); ok {
+				return a.reject(rej.Errors), nil
+			}
+			return rs, err
+		},
+	}
+	for _, opt := range opts {
+		opt(rt)
+	}
+	r.version(a.version).actions[a.name] = rt
+	return r
+}
+
+// version returns the routes of v, registering v with its handshake action
+// (OTA_Ping) on first use.
+func (r *Router) version(v *Version) *versionRouter {
+	if vr, ok := r.versions[v.Name()]; ok {
+		if vr.version != v {
+			panic("alpinebits: two versions named " + v.Name())
+		}
+		return vr
+	}
 	vr := &versionRouter{
 		version: v,
 		actions: make(map[string]*route),
 	}
-
-	// Auto-register handshake action with closure handler
 	vr.actions[handshakeAction.Name()] = &route{
 		action: handshakeAction,
 		handler: func(ctx context.Context, req *request) (any, error) {
@@ -211,12 +196,20 @@ func (r *Router) Version(v *Version, opts ...RouteOption) *Router {
 			return rq.BuildResponse(negotiated), nil
 		},
 	}
-
-	for _, opt := range opts {
-		opt.apply(vr)
-	}
 	r.versions[v.Name()] = vr
-	return r
+	return vr
+}
+
+// latest returns the newest version whose requests have an XML body, or the
+// newest of those whose requests are multipart/form-data; nil if there is none.
+func (r *Router) latest(xmlBody bool) *versionRouter {
+	var latest *versionRouter
+	for _, vr := range r.versions {
+		if vr.version.xmlBody() == xmlBody && (latest == nil || vr.version.Name() > latest.version.Name()) {
+			latest = vr
+		}
+	}
+	return latest
 }
 
 // handshake negotiates every version both sides support, whichever version
@@ -236,12 +229,15 @@ func (r *Router) handshake(ctx context.Context, user string, clientCaps map[stri
 	return negotiated, nil
 }
 
-// ServeHTTP implements http.Handler. It follows AlpineBits 2024-10 §2.2 for
-// every version: requests that fail before their data is checked are answered
-// with 400 (405 for a wrong method, 413 for a body that is too large) and
-// "ERROR:" followed by the reason, server failures with 500. A request that
-// breaks the action's rules or is rejected by its handler gets the action's
-// error response with 200.
+// ServeHTTP implements http.Handler. A request sent as application/xml is for
+// 2026-10 or later, one sent as multipart/form-data for an earlier version,
+// so one URL serves both (AlpineBits 2026-10 §2.1).
+//
+// It answers as AlpineBits 2024-10 §2.2 says, for every version: requests that
+// fail before their data is checked get 400 (405 for a wrong method, 413 for a
+// body that is too large) and "ERROR:" followed by the reason, server failures
+// get 500. A request that breaks the action's rules or is rejected by its
+// handler gets the action's error response with 200.
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
@@ -252,9 +248,28 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		writeError(w, http.StatusBadRequest, "unsupported GZIP compression")
 		return
 	}
-	// maxMemory equal to the body limit keeps the form out of temporary files.
+	mediaType, _, _ := mime.ParseMediaType(req.Header.Get("Content-Type"))
+	xmlBody := mediaType == "application/xml"
+	latest := r.latest(xmlBody)
+	if latest == nil || !xmlBody && mediaType != "multipart/form-data" {
+		writeError(w, http.StatusBadRequest, "unsupported content type")
+		return
+	}
+
 	req.Body = http.MaxBytesReader(w, req.Body, r.maxFormSize)
-	if err := req.ParseMultipartForm(r.maxFormSize); err != nil {
+	var actionName string
+	var payload []byte
+	var err error
+	// For multipart, maxMemory equal to the body limit keeps the form out of
+	// temporary files.
+	if xmlBody {
+		actionName = req.Header.Get(HeaderAction)
+		payload, err = io.ReadAll(req.Body)
+	} else if err = req.ParseMultipartForm(r.maxFormSize); err == nil {
+		actionName = req.PostFormValue(FormAction)
+		payload = []byte(req.PostFormValue(FormRequest))
+	}
+	if err != nil {
 		if _, ok := errors.AsType[*http.MaxBytesError](err); ok {
 			writeError(w, http.StatusRequestEntityTooLarge, "request too large")
 			return
@@ -263,16 +278,17 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	actionName := req.PostFormValue(FormAction)
 	versionName := req.Header.Get(HeaderVersion)
 	vr, ok := r.versions[versionName]
-	if !ok && actionName == handshakeAction.Name() && len(r.versions) > 0 {
+	switch {
+	case ok && vr.version.xmlBody() != xmlBody:
+		writeError(w, http.StatusBadRequest, "content type does not match the client protocol version")
+		return
+	case ok:
+	case actionName == handshakeAction.Name():
 		// The handshake negotiates all common versions whatever the header
 		// says (AlpineBits 2022-10 §3.2).
-		vr, ok = r.versions[slices.Max(slices.Collect(maps.Keys(r.versions)))], true
-	}
-	switch {
-	case ok:
+		vr = latest
 	case versionName == "":
 		writeError(w, http.StatusBadRequest, "no valid client protocol version provided")
 		return
@@ -285,13 +301,12 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		writeError(w, http.StatusBadRequest, "unknown or missing action")
 		return
 	}
-	payload := []byte(req.PostFormValue(FormRequest))
 	if len(payload) == 0 {
 		writeError(w, http.StatusBadRequest, "missing request")
 		return
 	}
 
-	err := vr.version.Validate(payload)
+	err = vr.version.Validate(payload)
 	var data any
 	if err == nil {
 		data, err = route.action.unmarshal(payload)

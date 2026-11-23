@@ -1,5 +1,5 @@
-// Package v202610 holds the Version of AlpineBits 2026-10. No actions are
-// implemented yet.
+// Package v202610 holds the Version and actions of AlpineBits 2026-10. The
+// messages of each action are in a subpackage, such as freerooms.
 package v202610
 
 import (

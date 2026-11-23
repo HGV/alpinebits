@@ -198,18 +198,16 @@ func TestGuestRequestsTypesRoundTrip(t *testing.T) {
 func TestGuestRequestsRouter(t *testing.T) {
 	reservations := unmarshalGuestRequests[guestrequests.ResRetrieveRS](t, guestRequestsSample(t, "OTA_ResRetrieveRS-reservation")).HotelReservations
 	var found []guestrequests.HotelReservation
-	r := alpinebits.NewRouter()
-	r.Version(Version,
-		alpinebits.Handle(ActionRead,
+	r := alpinebits.NewRouter().
+		Handle(ActionRead,
 			func(context.Context, alpinebits.Request[guestrequests.ReadRQ]) (guestrequests.ResRetrieveRS, error) {
 				rs := guestrequests.ResRetrieveRS{Response: alpinebits.OK(), HotelReservations: found}
 				return rs, alpinebits.Reject(guestrequests.ValidateResRetrieveRS(rs)...)
-			}),
-		alpinebits.Handle(ActionNotifReport,
+			}).
+		Handle(ActionNotifReport,
 			func(context.Context, alpinebits.Request[guestrequests.NotifReportRQ]) (guestrequests.NotifReportRS, error) {
 				return guestrequests.NotifReportRS{Response: alpinebits.OK()}, nil
-			}),
-	)
+			})
 
 	readRQ := func(hotel string) string {
 		return `<OTA_ReadRQ ` + ns + ` Version="1.0"><ReadRequests><HotelReadRequest ` + hotel + `/></ReadRequests></OTA_ReadRQ>`

@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/HGV/alpinebits"
-	"github.com/HGV/alpinebits/v202010"
-	"github.com/HGV/alpinebits/v202210"
+	v202010 "github.com/HGV/alpinebits/v202010"
+	v202210 "github.com/HGV/alpinebits/v202210"
 	"github.com/HGV/alpinebits/v202410/freerooms"
 )
 
@@ -15,8 +15,8 @@ func TestFreeRoomsHandlerServesVersionsSince202010(t *testing.T) {
 	h := func(context.Context, alpinebits.Request[freerooms.HotelInvCountNotifRQ]) (freerooms.HotelInvCountNotifRS, error) {
 		return freerooms.HotelInvCountNotifRS{}, nil
 	}
-	r := alpinebits.NewRouter()
-	r.Version(v202010.Version, alpinebits.Handle(v202010.ActionHotelInvCountNotif, h))
-	r.Version(v202210.Version, alpinebits.Handle(v202210.ActionHotelInvCountNotif, h))
-	r.Version(Version, alpinebits.Handle(ActionHotelInvCountNotif, h))
+	_ = alpinebits.NewRouter().
+		Handle(v202010.ActionHotelInvCountNotif, h).
+		Handle(v202210.ActionHotelInvCountNotif, h).
+		Handle(ActionHotelInvCountNotif, h)
 }

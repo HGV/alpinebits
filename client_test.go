@@ -26,7 +26,7 @@ func TestSendServerError(t *testing.T) {
 			w.WriteHeader(tt.status)
 			io.WriteString(w, tt.body)
 		}))
-		_, err := Send(context.Background(), NewClient(srv.URL, "user", "secret", v), a, testRQ{})
+		_, err := NewClient(srv.URL, "user", "secret", v).Send(context.Background(), a, testRQ{})
 		srv.Close()
 		if se, ok := errors.AsType[*ServerError](err); !ok || *se != tt.want {
 			t.Errorf("%d %q: got %v, want %+v", tt.status, tt.body, err, tt.want)

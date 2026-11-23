@@ -45,6 +45,14 @@ func ValidateResRetrieveRS(rs ResRetrieveRS) alpinebits.Errors {
 	return c.Errors()
 }
 
+// ValidateHotelReservation checks res like ValidateResRetrieveRS, so a handler
+// can leave out the reservations that fail instead of failing the response.
+func ValidateHotelReservation(res HotelReservation) alpinebits.Errors {
+	c := checker{rules.New(nil)}
+	c.hotelReservation("", res)
+	return c.Errors()
+}
+
 type checker struct{ *rules.Checker }
 
 // A cancellation may repeat any part of the reservation or quote request it

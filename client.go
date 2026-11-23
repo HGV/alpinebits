@@ -54,7 +54,7 @@ func NewClient(baseURL, username, password string, v *Version, opts ...ClientOpt
 }
 
 // Send sends a request and returns the response.
-func Send[RQ, RS any](ctx context.Context, c *Client, a Action[RQ, RS], rq RQ) (*RS, error) {
+func (c *Client) Send[RQ, RS any](ctx context.Context, a Action[RQ, RS], rq RQ) (*RS, error) {
 	// The handshake action has no version and is valid for every client.
 	if a.version != nil && a.version != c.version {
 		return nil, fmt.Errorf("alpinebits: action %s is of version %s, client uses version %s",
@@ -63,25 +63,31 @@ func Send[RQ, RS any](ctx context.Context, c *Client, a Action[RQ, RS], rq RQ) (
 
 	reqXML, err := xml.Marshal(rq)
 	if err != nil {
-		return nil, fmt.Errorf("marshal request: %w", err)
+		return nil, fmt.Errorf("alpinebits: marshal request: %w", err)
 	}
 
 	if err := c.version.Validate(reqXML); err != nil {
-		return nil, fmt.Errorf("validate request: %w", err)
+		return nil, fmt.Errorf("alpinebits: validate request: %w", err)
 	}
 
-	body, contentType, err := c.buildMultipartBody(a.Name(), reqXML)
-	if err != nil {
-		return nil, fmt.Errorf("build request body: %w", err)
+	body, contentType := io.Reader(bytes.NewReader(reqXML)), "application/xml"
+	if !c.version.xmlBody() {
+		body, contentType, err = multipartBody(a.Name(), reqXML)
+		if err != nil {
+			return nil, fmt.Errorf("alpinebits: build request body: %w", err)
+		}
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL, body)
 	if err != nil {
-		return nil, fmt.Errorf("create request: %w", err)
+		return nil, fmt.Errorf("alpinebits: create request: %w", err)
 	}
 
 	req.Header.Set("Content-Type", contentType)
 	req.Header.Set(HeaderVersion, c.version.Name())
+	if c.version.xmlBody() {
+		req.Header.Set(HeaderAction, a.Name())
+	}
 	if c.clientID != "" {
 		req.Header.Set(HeaderClientID, c.clientID)
 	}
@@ -89,13 +95,13 @@ func Send[RQ, RS any](ctx context.Context, c *Client, a Action[RQ, RS], rq RQ) (
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("send request: %w", err)
+		return nil, fmt.Errorf("alpinebits: send request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("read response: %w", err)
+		return nil, fmt.Errorf("alpinebits: read response: %w", err)
 	}
 	if resp.StatusCode != http.StatusOK || bytes.HasPrefix(respBody, []byte("ERROR:")) {
 		msg := strings.TrimPrefix(strings.TrimSpace(string(respBody)), "ERROR:")
@@ -103,12 +109,12 @@ func Send[RQ, RS any](ctx context.Context, c *Client, a Action[RQ, RS], rq RQ) (
 	}
 
 	if err := c.version.Validate(respBody); err != nil {
-		return nil, fmt.Errorf("validate response: %w", err)
+		return nil, fmt.Errorf("alpinebits: validate response: %w", err)
 	}
 
 	var rs RS
 	if err := xml.Unmarshal(respBody, &rs); err != nil {
-		return nil, fmt.Errorf("unmarshal response: %w", err)
+		return nil, fmt.Errorf("alpinebits: unmarshal response: %w", err)
 	}
 
 	return &rs, nil
@@ -135,14 +141,14 @@ func (c *Client) Handshake(ctx context.Context, caps ActionCapabilities) (Action
 		EchoData: EchoData{Message: encodeCapabilities(map[string]ActionCapabilities{version: caps})},
 	}
 
-	rs, err := Send(ctx, c, handshakeAction, rq)
+	rs, err := c.Send(ctx, handshakeAction, rq)
 	if err != nil {
 		return nil, err
 	}
 
 	negotiated, err := parseCapabilities(rs.Warnings.Message)
 	if err != nil {
-		return nil, fmt.Errorf("parse negotiated capabilities: %w", err)
+		return nil, fmt.Errorf("alpinebits: parse negotiated capabilities: %w", err)
 	}
 	actions, ok := negotiated[version]
 	if !ok {
@@ -151,7 +157,7 @@ func (c *Client) Handshake(ctx context.Context, caps ActionCapabilities) (Action
 	return actions, nil
 }
 
-func (c *Client) buildMultipartBody(action string, reqXML []byte) (*bytes.Buffer, string, error) {
+func multipartBody(action string, reqXML []byte) (*bytes.Buffer, string, error) {
 	var body bytes.Buffer
 	w := multipart.NewWriter(&body)
 

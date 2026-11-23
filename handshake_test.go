@@ -33,12 +33,10 @@ func handshakeRouter(t *testing.T) (*Router, *[]Capability) {
 		*got = r.Capabilities
 		return testRS{Response: OK()}, nil
 	}
-	r := NewRouter(WithClientStore(NewInMemoryClientStore()))
-	r.Version(v18,
-		Handle(NewAction[testRQ, testRS](v18, "OTA_A:A", "action_A", nil), h, WithCapabilities("rooms", "deltas")),
-		Handle(NewAction[testRQ, testRS](v18, "OTA_B:B", "action_B", nil), h),
-	)
-	r.Version(v24, Handle(NewAction[testRQ, testRS](v24, "OTA_A:A", "action_A", nil), h, WithCapabilities("rooms", "deltas")))
+	r := NewRouter(WithClientStore(NewInMemoryClientStore())).
+		Handle(NewAction[testRQ, testRS](v18, "OTA_A:A", "action_A", nil), h, WithCapabilities("rooms", "deltas")).
+		Handle(NewAction[testRQ, testRS](v18, "OTA_B:B", "action_B", nil), h).
+		Handle(NewAction[testRQ, testRS](v24, "OTA_A:A", "action_A", nil), h, WithCapabilities("rooms", "deltas"))
 	return r, got
 }
 
@@ -168,8 +166,8 @@ func TestClientStoreErrors(t *testing.T) {
 	slog.SetDefault(slog.New(slog.DiscardHandler))
 
 	v := NewVersion("2018-10", nopValidator{})
-	r := NewRouter(WithClientStore(failingStore{}))
-	r.Version(v, Handle(NewAction[testRQ, testRS](v, "OTA_A:A", "action_A", nil), testHandler))
+	r := NewRouter(WithClientStore(failingStore{})).
+		Handle(NewAction[testRQ, testRS](v, "OTA_A:A", "action_A", nil), testHandler)
 
 	client := `{"versions":[{"version":"2018-10","actions":[{"action":"action_A"}]}]}`
 	for _, tt := range []struct{ action, doc string }{

@@ -44,22 +44,20 @@ func freeRooms(uniqueID string, entries ...string) string {
 
 // Error responses must pass response validation, or the router answers 500.
 func TestFreeRoomsAfterHandshake(t *testing.T) {
-	r := alpinebits.NewRouter(alpinebits.WithClientStore(alpinebits.NewInMemoryClientStore()))
-	r.Version(Version,
-		alpinebits.Handle(ActionHotelAvailNotif,
+	r := alpinebits.NewRouter(alpinebits.WithClientStore(alpinebits.NewInMemoryClientStore())).
+		Handle(ActionHotelAvailNotif,
 			func(context.Context, alpinebits.Request[freerooms.HotelAvailNotifRQ]) (freerooms.HotelAvailNotifRS, error) {
 				return freerooms.HotelAvailNotifRS{Response: alpinebits.OK()}, nil
 			},
-			alpinebits.WithCapabilities(freerooms.CapAcceptRooms, freerooms.CapAcceptDeltas)),
-		alpinebits.Handle(ActionRead,
+			alpinebits.WithCapabilities(freerooms.CapAcceptRooms, freerooms.CapAcceptDeltas)).
+		Handle(ActionRead,
 			func(context.Context, alpinebits.Request[guestrequests.ReadRQ]) (guestrequests.ResRetrieveRS, error) {
 				return guestrequests.ResRetrieveRS{Response: alpinebits.OK()}, nil
-			}),
-		alpinebits.Handle(ActionNotifReport,
+			}).
+		Handle(ActionNotifReport,
 			func(context.Context, alpinebits.Request[guestrequests.NotifReportRQ]) (guestrequests.NotifReportRS, error) {
 				return guestrequests.NotifReportRS{Response: alpinebits.OK()}, nil
-			}),
-	)
+			})
 
 	client := `{"versions":[{"version":"2018-10","actions":[{"action":"action_OTA_Ping"},` +
 		`{"action":"action_OTA_HotelAvailNotif","supports":["OTA_HotelAvailNotif_accept_rooms","OTA_HotelAvailNotif_accept_categories"]},` +
@@ -126,12 +124,12 @@ func TestFreeRoomsAfterHandshake(t *testing.T) {
 }
 
 func TestSchemaViolation(t *testing.T) {
-	r := alpinebits.NewRouter()
-	r.Version(Version, alpinebits.Handle(ActionHotelAvailNotif,
-		func(context.Context, alpinebits.Request[freerooms.HotelAvailNotifRQ]) (freerooms.HotelAvailNotifRS, error) {
-			t.Error("handler called")
-			return freerooms.HotelAvailNotifRS{}, nil
-		}))
+	r := alpinebits.NewRouter().
+		Handle(ActionHotelAvailNotif,
+			func(context.Context, alpinebits.Request[freerooms.HotelAvailNotifRQ]) (freerooms.HotelAvailNotifRS, error) {
+				t.Error("handler called")
+				return freerooms.HotelAvailNotifRS{}, nil
+			})
 	code, body := post(t, r, "OTA_HotelAvailNotif:FreeRooms", `<OTA_HotelAvailNotifRQ `+ns+` Version="1.002"><Bogus/></OTA_HotelAvailNotifRQ>`)
 	if code != http.StatusBadRequest || !strings.HasPrefix(body, "ERROR:XML validation error: ") || !strings.Contains(body, "Bogus") {
 		t.Errorf("got %d %s", code, body)

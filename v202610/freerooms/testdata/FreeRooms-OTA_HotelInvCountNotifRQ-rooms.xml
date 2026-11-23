@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    AlpineBits 2026-10
+    https://www.alpinebits.org/
+
+    Sample message file for a FreeRooms request that reports availability for
+    specific rooms rather than for room categories: InvCode names the room and
+    InvTypeCode the category it belongs to. Requires the capability
+    OTA_HotelInvCountNotif_accept_rooms.
+
+    A single room cannot be counted more than once, so the only meaningful Count
+    value is 1. Rooms and categories must not be mixed in the same request.
+
+    Changelog:
+    v. 2026-10 1.0 initial example
+-->
+
+<OTA_HotelInvCountNotifRQ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                        xmlns="http://www.opentravel.org/OTA/2003/05"
+                        Version="3.000"
+                        xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_HotelInvCountNotifRQ.xsd">
+
+    <UniqueID Type="16" ID="1" Instance="CompleteSet"/>
+
+    <Inventories HotelCode="123" HotelName="AlpineBits Hotel">
+
+        <!-- room 101 is bookable -->
+        <Inventory>
+            <StatusApplicationControl Start="2027-08-01" End="2027-08-10" InvTypeCode="DOUBLE" InvCode="101" />
+            <InvCounts>
+                <InvCount CountType="2" Count="1" />
+            </InvCounts>
+        </Inventory>
+
+        <!-- room 102 is booked: no InvCounts at all means fully booked -->
+        <Inventory>
+            <StatusApplicationControl Start="2027-08-01" End="2027-08-10" InvTypeCode="DOUBLE" InvCode="102" />
+        </Inventory>
+
+        <!-- room 103 is out of order -->
+        <Inventory>
+            <StatusApplicationControl Start="2027-08-01" End="2027-08-10" InvTypeCode="DOUBLE" InvCode="103" />
+            <InvCounts>
+                <InvCount CountType="6" Count="1" />
+            </InvCounts>
+        </Inventory>
+
+    </Inventories>
+
+</OTA_HotelInvCountNotifRQ>
