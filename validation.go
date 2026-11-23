@@ -2,96 +2,41 @@ package alpinebits
 
 import (
 	"fmt"
-	"slices"
-
-	"github.com/HGV/x/timex"
+	"strconv"
 )
 
-// RuleResult holds validation warnings and errors.
-type RuleResult struct {
-	Warnings Warnings
-	Errors   Errors
+// Path locates an element of a message in error messages, e.g.
+// "RatePlan[0].BookingRule[2]". The empty Path means the whole message.
+type Path string
+
+// At returns the path of the i-th name element: At("RatePlan", 0) is
+// "RatePlan[0]".
+func At(name string, i int) Path {
+	return Path(name + "[" + strconv.Itoa(i) + "]")
 }
 
-// Ok returns true if there are no errors.
-func (r RuleResult) Ok() bool {
-	return len(r.Errors) == 0
+// At returns the path of the i-th name element inside p.
+func (p Path) At(name string, i int) Path {
+	return p.join(At(name, i))
 }
 
-// WarningsPtr returns a pointer to the warnings slice, or nil if empty.
-func (r RuleResult) WarningsPtr() *Warnings {
-	if len(r.Warnings) == 0 {
-		return nil
+// Field returns the path of the name element inside p.
+func (p Path) Field(name string) Path {
+	return p.join(Path(name))
+}
+
+func (p Path) join(child Path) Path {
+	if p == "" {
+		return child
 	}
-	return &r.Warnings
+	return p + "." + child
 }
 
-// Merge combines another RuleResult into this one.
-func (r *RuleResult) Merge(other RuleResult) {
-	r.Warnings = append(r.Warnings, other.Warnings...)
-	r.Errors = append(r.Errors, other.Errors...)
-}
-
-// Validate runs rules in order, accumulating warnings and stopping on first error.
-func Validate[RQ any](rq RQ, rules ...func(RQ) RuleResult) RuleResult {
-	var result RuleResult
-	for _, rule := range rules {
-		r := rule(rq)
-		result.Merge(r)
-		if len(r.Errors) > 0 {
-			return result
-		}
+// Addf appends an application error (Type 13) about the element at path at.
+func (e *Errors) Addf(code ErrCode, at Path, format string, args ...any) {
+	msg := fmt.Sprintf(format, args...)
+	if at != "" {
+		msg = string(at) + ": " + msg
 	}
-	return result
-}
-
-// When wraps a rule to only run when condition is true.
-func When[RQ any](cond func(RQ) bool, rule func(RQ) RuleResult) func(RQ) RuleResult {
-	return func(rq RQ) RuleResult {
-		if !cond(rq) {
-			return RuleResult{}
-		}
-		return rule(rq)
-	}
-}
-
-// RequiredHotelCode returns a rule that checks for a non-empty hotel code.
-func RequiredHotelCode[RQ HotelCoded](rq RQ) RuleResult {
-	if rq.HotelCode() == "" {
-		return RuleResult{
-			Errors: []Error{
-				ApplicationError(ErrCodeRequiredField, "missing HotelCode"),
-			},
-		}
-	}
-	return RuleResult{}
-}
-
-// DateRanged is implemented by types that have a date range.
-type DateRanged interface {
-	DateRange() timex.DateRange
-}
-
-// CheckOverlaps checks for overlapping date ranges in a slice.
-// Returns an error describing the first overlap found, or nil if no overlaps.
-func CheckOverlaps[T DateRanged](items []T) error {
-	if len(items) <= 1 {
-		return nil
-	}
-
-	// Sort by start date
-	slices.SortFunc(items, func(a, b T) int {
-		return a.DateRange().Start.Compare(b.DateRange().Start)
-	})
-
-	// Check consecutive ranges for overlap
-	for i := 0; i < len(items)-1; i++ {
-		r1 := items[i].DateRange()
-		r2 := items[i+1].DateRange()
-		if r1.End.After(r2.Start) {
-			return fmt.Errorf("date range overlap: %s-%s and %s-%s",
-				r1.Start, r1.End, r2.Start, r2.End)
-		}
-	}
-	return nil
+	*e = append(*e, Error{Type: ErrTypeApplicationError, Code: code, Message: msg})
 }

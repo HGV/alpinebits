@@ -3,6 +3,8 @@ package alpinebits
 import (
 	"encoding/json"
 	"encoding/xml"
+	"maps"
+	"slices"
 )
 
 // PingRQ is the OTA_Ping request.
@@ -14,7 +16,7 @@ type PingRQ struct {
 
 // EchoData contains capability negotiation JSON.
 type EchoData struct {
-	Message string `xml:",innerxml"`
+	Message string `xml:",chardata"`
 }
 
 // PingRS is the OTA_Ping response.
@@ -26,11 +28,13 @@ type PingRS struct {
 	EchoData EchoData `xml:"EchoData"`
 }
 
-// ActionCapabilities maps action names to their negotiated capabilities.
+// ActionCapabilities maps handshake action names (e.g.
+// "action_OTA_HotelAvailNotif") to capabilities.
 type ActionCapabilities map[string][]Capability
 
-// ClientCapabilities parses and returns the client's declared capabilities from EchoData.
-func (r *PingRQ) ClientCapabilities() ActionCapabilities {
+// ClientCapabilities returns what the client announced in EchoData, keyed by
+// version, or nil if EchoData is not handshake JSON.
+func (r *PingRQ) ClientCapabilities() map[string]ActionCapabilities {
 	caps, err := parseCapabilities(r.EchoData.Message)
 	if err != nil {
 		return nil
@@ -38,110 +42,89 @@ func (r *PingRQ) ClientCapabilities() ActionCapabilities {
 	return caps
 }
 
-// BuildResponse creates a PingRS with the negotiated capabilities.
-func (r *PingRQ) BuildResponse(negotiated ActionCapabilities) PingRS {
-	echoData := EchoData{
-		Message: encodeCapabilities(negotiated),
-	}
+// BuildResponse creates a PingRS announcing negotiated, keyed by version.
+func (r *PingRQ) BuildResponse(negotiated map[string]ActionCapabilities) PingRS {
 	return PingRS{
 		Version: r.Version,
-		Success: Success{},
 		Warnings: Warning{
 			Type:    ErrTypeAdvisory,
 			Status:  StatusHandshake,
-			Message: echoData.Message,
+			Message: encodeCapabilities(negotiated),
 		},
 		EchoData: r.EchoData,
 	}
 }
 
-// capabilitiesJSON represents the JSON structure in EchoData.
-type capabilitiesJSON struct {
-	Versions []versionCapabilities `json:"versions"`
+type handshakeJSON struct {
+	Versions []handshakeVersionJSON `json:"versions"`
 }
 
-type versionCapabilities struct {
-	Version string             `json:"version"`
-	Actions []actionCapability `json:"actions"`
+type handshakeVersionJSON struct {
+	Version string                `json:"version"`
+	Actions []handshakeActionJSON `json:"actions"`
 }
 
-type actionCapability struct {
+type handshakeActionJSON struct {
 	Action   string   `json:"action"`
 	Supports []string `json:"supports,omitempty"`
 }
 
-// parseCapabilities parses ActionCapabilities from EchoData JSON.
-func parseCapabilities(echoJSON string) (ActionCapabilities, error) {
+func parseCapabilities(echoJSON string) (map[string]ActionCapabilities, error) {
+	result := make(map[string]ActionCapabilities)
 	if echoJSON == "" {
-		return make(ActionCapabilities), nil
+		return result, nil
 	}
 
-	var caps capabilitiesJSON
-	if err := json.Unmarshal([]byte(echoJSON), &caps); err != nil {
+	var data handshakeJSON
+	if err := json.Unmarshal([]byte(echoJSON), &data); err != nil {
 		return nil, err
 	}
-
-	result := make(ActionCapabilities)
-	for _, ver := range caps.Versions {
-		for _, act := range ver.Actions {
-			var capabilities []Capability
-			for _, sup := range act.Supports {
-				capabilities = append(capabilities, Capability(sup))
+	for _, v := range data.Versions {
+		actions := make(ActionCapabilities, len(v.Actions))
+		for _, a := range v.Actions {
+			caps := make([]Capability, len(a.Supports))
+			for i, s := range a.Supports {
+				caps[i] = Capability(s)
 			}
-			result[act.Action] = capabilities
+			actions[a.Action] = caps
 		}
+		result[v.Version] = actions
 	}
-
 	return result, nil
 }
 
-// encodeCapabilities encodes ActionCapabilities to EchoData JSON.
-func encodeCapabilities(caps ActionCapabilities) string {
-	if len(caps) == 0 {
-		return ""
-	}
-
-	var actions []actionCapability
-	for action, supports := range caps {
-		var supportsStrs []string
-		for _, cap := range supports {
-			supportsStrs = append(supportsStrs, string(cap))
+// A version without actions is encoded as an empty list (AlpineBits 2024-10
+// §3.2).
+func encodeCapabilities(caps map[string]ActionCapabilities) string {
+	data := handshakeJSON{Versions: []handshakeVersionJSON{}}
+	for _, version := range slices.Backward(slices.Sorted(maps.Keys(caps))) {
+		v := handshakeVersionJSON{Version: version, Actions: []handshakeActionJSON{}}
+		for _, action := range slices.Sorted(maps.Keys(caps[version])) {
+			a := handshakeActionJSON{Action: action}
+			for _, c := range caps[version][action] {
+				a.Supports = append(a.Supports, string(c))
+			}
+			v.Actions = append(v.Actions, a)
 		}
-		actions = append(actions, actionCapability{
-			Action:   action,
-			Supports: supportsStrs,
-		})
+		data.Versions = append(data.Versions, v)
 	}
-
-	// Note: Version should come from the request context
-	capsJSON := capabilitiesJSON{
-		Versions: []versionCapabilities{{
-			Version: "2018-10", // TODO: Get from context
-			Actions: actions,
-		}},
-	}
-
-	data, _ := json.Marshal(capsJSON)
-	return string(data)
+	b, _ := json.Marshal(data)
+	return string(b)
 }
 
-// handshakeAction is the internal action for OTA_Ping.
-var handshakeAction = NewAction[PingRQ, PingRS](
-	"OTA_Ping:Handshaking",
-	"action_OTA_Ping",
-)
+// handshakeAction is shared by all versions, so it has none.
+var handshakeAction = Action[PingRQ, PingRS]{
+	name:          "OTA_Ping:Handshaking",
+	handshakeName: "action_OTA_Ping",
+}
 
-// Intersect calculates the intersection of server and client capabilities.
-// Returns only actions supported by both, with capabilities both support.
+// Intersect returns the actions and capabilities both sides support. Actions
+// without common capabilities are kept.
 func Intersect(server, client ActionCapabilities) ActionCapabilities {
 	result := make(ActionCapabilities)
 	for action, serverCaps := range server {
 		if clientCaps, ok := client[action]; ok {
-			intersection := intersectCaps(serverCaps, clientCaps)
-			if len(intersection) > 0 || len(serverCaps) == 0 {
-				// Include action if caps intersect, or if server has no required caps
-				result[action] = intersection
-			}
+			result[action] = intersectCaps(serverCaps, clientCaps)
 		}
 	}
 	return result

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+     AlpineBits 2020-10
+     https://www.alpinebits.org/
+
+     sample message file
+
+     changelog:
+     v. 2020-10 1.0
+-->
+
+<OTA_HotelInvCountNotifRS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                       xmlns="http://www.opentravel.org/OTA/2003/05"
+                       xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_HotelInvCountNotifRS.xsd"
+                       Version="1.001">
+
+    <Success/>
+
+    <Warnings>
+        <Warning Type="11">
+            last full data set received more than 48 hours ago
+        </Warning>
+    </Warnings>
+
+</OTA_HotelInvCountNotifRS>

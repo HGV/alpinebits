@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+     AlpineBits 2014-04
+     http://www.alpinebits.org/
+
+     sample message file
+
+     changelog:
+     v. 2014-04 1.0
+-->
+
+<OTA_ResRetrieveRS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.opentravel.org/OTA/2003/05"
+                   Version="7.000"
+                   xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_ResRetrieveRS.xsd">
+  <Success/>
+  <ReservationsList/>
+</OTA_ResRetrieveRS>

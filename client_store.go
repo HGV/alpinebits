@@ -1,41 +1,44 @@
 package alpinebits
 
-import "sync"
+import (
+	"context"
+	"sync"
+)
 
-// ClientStore stores negotiated capabilities per client and version.
+// ClientStore keeps the result of each client's last handshake, so the router
+// can hold its later requests to what was negotiated. The router identifies a
+// client by the user of its basic access authentication; a store may instead
+// key by anything ctx carries, such as values set by an authentication
+// middleware.
 type ClientStore interface {
-	Get(clientID, version string) ActionCapabilities
-	Set(clientID, version string, caps ActionCapabilities)
+	// Load returns what the client negotiated, by version; ok is false if it
+	// never did a handshake.
+	Load(ctx context.Context, user string) (negotiated map[string]ActionCapabilities, ok bool, err error)
+	// Save replaces what the client negotiated.
+	Save(ctx context.Context, user string, negotiated map[string]ActionCapabilities) error
 }
 
-// clientKey creates a composite key for clientID + version.
-func clientKey(clientID, version string) string {
-	return clientID + ":" + version
-}
-
-// InMemoryClientStore is a thread-safe in-memory implementation of ClientStore.
+// InMemoryClientStore is a ClientStore for tests and single instance servers:
+// it is lost on restart and not shared between instances.
 type InMemoryClientStore struct {
 	mu   sync.RWMutex
-	data map[string]ActionCapabilities
+	data map[string]map[string]ActionCapabilities
 }
 
-// NewInMemoryClientStore creates a new in-memory client store.
 func NewInMemoryClientStore() *InMemoryClientStore {
-	return &InMemoryClientStore{
-		data: make(map[string]ActionCapabilities),
-	}
+	return &InMemoryClientStore{data: make(map[string]map[string]ActionCapabilities)}
 }
 
-// Get retrieves negotiated capabilities for a client and version.
-func (s *InMemoryClientStore) Get(clientID, version string) ActionCapabilities {
+func (s *InMemoryClientStore) Load(_ context.Context, user string) (map[string]ActionCapabilities, bool, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	return s.data[clientKey(clientID, version)]
+	negotiated, ok := s.data[user]
+	return negotiated, ok, nil
 }
 
-// Set stores negotiated capabilities for a client and version.
-func (s *InMemoryClientStore) Set(clientID, version string, caps ActionCapabilities) {
+func (s *InMemoryClientStore) Save(_ context.Context, user string, negotiated map[string]ActionCapabilities) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.data[clientKey(clientID, version)] = caps
+	s.data[user] = negotiated
+	return nil
 }

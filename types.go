@@ -1,6 +1,7 @@
 package alpinebits
 
 import (
+	"bytes"
 	"fmt"
 	"strconv"
 )
@@ -8,6 +9,20 @@ import (
 // HotelCoded is implemented by request types that contain a hotel code.
 type HotelCoded interface {
 	HotelCode() string
+}
+
+// Decimal is an xs:decimal, such as an amount. Unlike a float64 it is never
+// written in exponent form, which xs:decimal does not allow.
+type Decimal float64
+
+func (d Decimal) MarshalText() ([]byte, error) {
+	return strconv.AppendFloat(nil, float64(d), 'f', -1, 64), nil
+}
+
+func (d *Decimal) UnmarshalText(data []byte) error {
+	f, err := strconv.ParseFloat(string(bytes.TrimSpace(data)), 64)
+	*d = Decimal(f)
+	return err
 }
 
 // Days represents a duration in days (ISO 8601 format PxD).
@@ -64,4 +79,19 @@ func parseDuration(s string, suffix byte) (int, error) {
 		return 0, fmt.Errorf("invalid duration format: %s, expected P<num>%c", s, suffix)
 	}
 	return n, nil
+}
+
+// TextFormat specifies the format of description text.
+type TextFormat string
+
+const (
+	TextFormatPlainText TextFormat = "PlainText"
+	TextFormatHTML      TextFormat = "HTML"
+)
+
+// Text is a text in one language and format.
+type Text struct {
+	TextFormat TextFormat `xml:"TextFormat,attr"`
+	Language   string     `xml:"Language,attr,omitempty"`
+	Value      string     `xml:",chardata"`
 }

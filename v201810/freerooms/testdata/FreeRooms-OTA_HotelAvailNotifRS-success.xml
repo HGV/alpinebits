@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+     AlpineBits 2014-04
+     http://www.alpinebits.org/
+
+     sample message file
+
+     changelog:
+     v. 2014-04 1.0
+-->
+
+<OTA_HotelAvailNotifRS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                       xmlns="http://www.opentravel.org/OTA/2003/05"
+                       xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_HotelAvailNotifRS.xsd"
+                       Version="1.001">
+
+    <Success/>
+
+</OTA_HotelAvailNotifRS>

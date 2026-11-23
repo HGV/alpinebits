@@ -8,6 +8,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"strings"
 )
 
 // Client is an AlpineBits HTTP client.
@@ -53,13 +54,19 @@ func NewClient(baseURL, username, password string, v *Version, opts ...ClientOpt
 }
 
 // Send sends a request and returns the response.
-func Send[RQ, RS any](c *Client, ctx context.Context, a Action[RQ, RS], rq RQ) (*RS, error) {
+func Send[RQ, RS any](ctx context.Context, c *Client, a Action[RQ, RS], rq RQ) (*RS, error) {
+	// The handshake action has no version and is valid for every client.
+	if a.version != nil && a.version != c.version {
+		return nil, fmt.Errorf("alpinebits: action %s is of version %s, client uses version %s",
+			a.name, a.version.Name(), c.version.Name())
+	}
+
 	reqXML, err := xml.Marshal(rq)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
 
-	if err := c.version.Validate(string(reqXML)); err != nil {
+	if err := c.version.Validate(reqXML); err != nil {
 		return nil, fmt.Errorf("validate request: %w", err)
 	}
 
@@ -86,17 +93,16 @@ func Send[RQ, RS any](c *Client, ctx context.Context, a Action[RQ, RS], rq RQ) (
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		respBody, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("server error %d: %s", resp.StatusCode, string(respBody))
-	}
-
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("read response: %w", err)
 	}
+	if resp.StatusCode != http.StatusOK || bytes.HasPrefix(respBody, []byte("ERROR:")) {
+		msg := strings.TrimPrefix(strings.TrimSpace(string(respBody)), "ERROR:")
+		return nil, &ServerError{StatusCode: resp.StatusCode, Message: msg}
+	}
 
-	if err := c.version.Validate(string(respBody)); err != nil {
+	if err := c.version.Validate(respBody); err != nil {
 		return nil, fmt.Errorf("validate response: %w", err)
 	}
 
@@ -108,25 +114,41 @@ func Send[RQ, RS any](c *Client, ctx context.Context, a Action[RQ, RS], rq RQ) (
 	return &rs, nil
 }
 
-// Handshake performs capability negotiation with the server.
+// ServerError is a server's answer that is not an AlpineBits response: an HTTP
+// error status or, with status 200, an "ERROR:" string (AlpineBits §2, §3.4).
+// AlpineBits asks clients to retry on status 500.
+type ServerError struct {
+	StatusCode int
+	Message    string
+}
+
+func (e *ServerError) Error() string {
+	return fmt.Sprintf("alpinebits: server error (status %d): %s", e.StatusCode, e.Message)
+}
+
+// Handshake announces caps (keyed by handshake action name) for the client's
+// version and returns what the server agreed to for that version.
 func (c *Client) Handshake(ctx context.Context, caps ActionCapabilities) (ActionCapabilities, error) {
+	version := c.version.Name()
 	rq := PingRQ{
 		Version:  OTAVersion,
-		EchoData: EchoData{Message: encodeCapabilities(caps)},
+		EchoData: EchoData{Message: encodeCapabilities(map[string]ActionCapabilities{version: caps})},
 	}
 
-	rs, err := Send(c, ctx, handshakeAction, rq)
+	rs, err := Send(ctx, c, handshakeAction, rq)
 	if err != nil {
 		return nil, err
 	}
 
-	// Parse negotiated capabilities from response
 	negotiated, err := parseCapabilities(rs.Warnings.Message)
 	if err != nil {
 		return nil, fmt.Errorf("parse negotiated capabilities: %w", err)
 	}
-
-	return negotiated, nil
+	actions, ok := negotiated[version]
+	if !ok {
+		return nil, fmt.Errorf("alpinebits: server does not support version %s", version)
+	}
+	return actions, nil
 }
 
 func (c *Client) buildMultipartBody(action string, reqXML []byte) (*bytes.Buffer, string, error) {

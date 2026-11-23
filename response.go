@@ -2,8 +2,8 @@ package alpinebits
 
 import (
 	"encoding/xml"
-	"fmt"
 	"strconv"
+	"strings"
 )
 
 // Success is an empty element indicating successful processing.
@@ -19,11 +19,11 @@ const (
 	StatusSendRatePlans Status = "ALPINEBITS_SEND_RATEPLANS"
 )
 
-// ErrType represents OTA error types (EWT list).
+// ErrType represents OTA error types (EWT list). The AlpineBits XSD allows
+// only these two.
 type ErrType int
 
 const (
-	ErrTypeBusinessRule     ErrType = 3
 	ErrTypeAdvisory         ErrType = 11
 	ErrTypeApplicationError ErrType = 13
 )
@@ -97,32 +97,54 @@ func (e *Errors) HasStatus(status Status) bool {
 // OTAVersion is the OTA specification version used in responses.
 const OTAVersion = "1.0"
 
-// NewWarning creates a Warning with a message.
+// NewWarning creates an advisory warning (Type 11).
 func NewWarning(msg string) Warning {
-	return Warning{Message: msg}
+	return Warning{Type: ErrTypeAdvisory, Message: msg}
 }
 
-// NewError creates an Error with code and message.
-func NewError(code ErrCode, msg string) Error {
-	return Error{Code: code, Message: msg}
+// Response is embedded by every response type. Handlers return OK; error
+// responses are built by the router, as the XSD forbids Errors next to
+// Success or Warnings.
+type Response struct {
+	Version  string    `xml:"Version,attr"`
+	Success  *Success  `xml:"Success"`
+	Warnings *Warnings `xml:"Warnings>Warning"`
+	Errors   *Errors   `xml:"Errors>Error"`
 }
 
-// BusinessError creates a business rule error.
-func BusinessError(code ErrCode, msg string) Error {
-	return Error{Type: ErrTypeBusinessRule, Code: code, Message: msg}
+// OK returns a successful Response.
+func OK(warnings ...Warning) Response {
+	r := Response{Version: OTAVersion, Success: &Success{}}
+	if len(warnings) > 0 {
+		w := Warnings(warnings)
+		r.Warnings = &w
+	}
+	return r
 }
 
-// ApplicationError creates an application error.
-func ApplicationError(code ErrCode, msg string) Error {
-	return Error{Type: ErrTypeApplicationError, Code: code, Message: msg}
+// setErrors is required of response types by NewAction.
+func (r *Response) setErrors(errs Errors) {
+	*r = Response{Version: OTAVersion, Errors: &errs}
 }
 
-// BusinessErrorf creates a business rule error with a formatted message.
-func BusinessErrorf(code ErrCode, format string, args ...any) Error {
-	return Error{Type: ErrTypeBusinessRule, Code: code, Message: fmt.Sprintf(format, args...)}
+// Rejection is the error returned by Reject.
+type Rejection struct {
+	Errors Errors
 }
 
-// ApplicationErrorf creates an application error with a formatted message.
-func ApplicationErrorf(code ErrCode, format string, args ...any) Error {
-	return Error{Type: ErrTypeApplicationError, Code: code, Message: fmt.Sprintf(format, args...)}
+func (r *Rejection) Error() string {
+	msgs := make([]string, len(r.Errors))
+	for i, e := range r.Errors {
+		msgs[i] = e.Message
+	}
+	return "alpinebits: request rejected: " + strings.Join(msgs, "; ")
+}
+
+// Reject makes the router answer with errs. It returns nil if errs is empty,
+// so handlers can always end with `return rs, alpinebits.Reject(errs...)`.
+func Reject(errs ...Error) error {
+	if len(errs) == 0 {
+		return nil
+	}
+	return &Rejection{Errors: errs}
 }

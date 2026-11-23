@@ -1,29 +1,27 @@
+// Package alpinebits implements the AlpineBits protocol: a Router that serves
+// its actions over HTTP and a Client that sends them. The versions and their
+// actions are in subpackages, such as v201810.
 package alpinebits
 
-import "github.com/HGV/alpinebits/internal/schema"
+// Validator checks an XML document against a version's schema. It must be
+// safe for concurrent use.
+type Validator interface {
+	Validate(doc []byte) error
+}
 
+// Version is an AlpineBits protocol version.
 type Version struct {
-	name   string
-	schema *schema.Schema
+	name      string
+	validator Validator
 }
 
-// NewVersion creates a new version with the given name and XSD schema.
-func NewVersion(name string, schemaFile []byte) (*Version, error) {
-	s, err := schema.Parse(schemaFile)
-	if err != nil {
-		return nil, err
+// NewVersion creates a version whose documents are checked by v, which must
+// not be nil.
+func NewVersion(name string, v Validator) *Version {
+	if v == nil {
+		panic("alpinebits: NewVersion(" + name + "): nil Validator")
 	}
-	return &Version{name: name, schema: s}, nil
-}
-
-// MustNewVersion is like NewVersion but panics on error.
-// Use this for package-level version initialization.
-func MustNewVersion(name string, schemaFile []byte) *Version {
-	v, err := NewVersion(name, schemaFile)
-	if err != nil {
-		panic("alpinebits: failed to create version " + name + ": " + err.Error())
-	}
-	return v
+	return &Version{name: name, validator: v}
 }
 
 // Name returns the version identifier (e.g., "2018-10").
@@ -31,14 +29,14 @@ func (v *Version) Name() string {
 	return v.name
 }
 
-// Validate validates an XML string against the version's schema.
-func (v *Version) Validate(xml string) error {
-	return v.schema.Validate(xml)
+// Validate checks doc against the version's schema.
+func (v *Version) Validate(doc []byte) error {
+	return v.validator.Validate(doc)
 }
 
-// Free releases the underlying schema resources.
-// For package-level versions, this is typically not needed as they live
-// for the program's lifetime.
-func (v *Version) Free() {
-	v.schema.Free()
+func versionName(v *Version) string {
+	if v == nil {
+		return "<none>"
+	}
+	return v.name
 }

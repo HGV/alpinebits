@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+     AlpineBits 2015-07
+     http://www.alpinebits.org/
+
+     sample message file
+
+     changelog:
+     v. 2015-07 1.0
+-->
+
+<OTA_HotelDescriptiveContentNotifRQ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                                    xmlns="http://www.opentravel.org/OTA/2003/05" 
+                                    xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_HotelDescriptiveContentNotifRQ.xsd" 
+                                    Version="8.000">
+
+  <HotelDescriptiveContents>
+
+    <HotelDescriptiveContent HotelCode="123" HotelName="Frangart Inn">
+
+      <FacilityInfo>
+
+        <GuestRooms>
+
+          <!-- This element defines a category and contains its basic description -->
+
+          <GuestRoom Code="DZ" MaxOccupancy="2" MinOccupancy="1" MaxChildOccupancy="1">
+
+            <!-- RoomClassificationCode = "42" means Room, 13 Apartment, see OTA table GRI -->
+
+            <TypeRoom StandardOccupancy="2" RoomClassificationCode="42"/>
+
+            <Amenities>
+
+              <!-- 26 means Crib, see OTA table RMA -->
+
+              <Amenity RoomAmenityCode="26"/>
+
+            </Amenities>
+
+            <MultimediaDescriptions>
+
+              <MultimediaDescription InfoCode="25">
+
+                <TextItems>
+
+                  <TextItem>
+
+                    <Description TextFormat="PlainText" Language="en">Double room</Description>
+
+                    <Description TextFormat="PlainText" Language="de">Doppelzimmer</Description>
+
+                    <Description TextFormat="PlainText" Language="it">Camera doppia</Description>
+
+                  </TextItem>
+
+                </TextItems>
+
+              </MultimediaDescription>
+
+              <MultimediaDescription InfoCode="1">
+
+                <TextItems>
+
+                  <TextItem>
+
+                    <Description TextFormat="PlainText" Language="en">Description of the double room.</Description>
+
+                    <Description TextFormat="PlainText" Language="de">Doppelzimmer Beschreibung.</Description>
+
+                    <Description TextFormat="PlainText" Language="it">Descrizione della camera doppia.</Description>
+
+                  </TextItem>
+
+                </TextItems>
+
+              </MultimediaDescription>
+
+              <MultimediaDescription InfoCode="23">
+
+                <ImageItems>
+
+                  <!-- 6 means Guest room, see OTA table PIC -->
+
+                  <ImageItem Category="6">
+
+                    <ImageFormat CopyrightNotice="Copyright notice 2015">
+
+                      <URL>http://www.example.com/image.jpg</URL>
+
+                    </ImageFormat>
+
+                    <Description TextFormat="PlainText" Language="en">Picture of the room</Description>
+
+                    <Description TextFormat="PlainText" Language="de">Zimmerbild</Description>
+
+                    <Description TextFormat="PlainText" Language="it">Immagine della stanza</Description>
+
+                  </ImageItem>
+
+                </ImageItems>
+
+              </MultimediaDescription>
+
+            </MultimediaDescriptions>
+
+          </GuestRoom>
+
+          <!-- Following elements define the single Rooms that belong to the Category -->
+
+          <GuestRoom Code="DZ">
+
+            <TypeRoom RoomID="101"/>
+
+          </GuestRoom>
+
+          <GuestRoom Code="DZ">
+
+            <TypeRoom RoomID="102"/>
+
+          </GuestRoom>
+
+          <GuestRoom Code="DZ">
+
+            <TypeRoom RoomID="103"/>
+
+          </GuestRoom>
+
+          <GuestRoom Code="DZ">
+
+            <TypeRoom RoomID="104"/>
+
+          </GuestRoom>
+
+          <GuestRoom Code="DZ">
+
+            <TypeRoom RoomID="105"/>
+
+          </GuestRoom>
+
+        </GuestRooms>
+
+      </FacilityInfo>
+
+    </HotelDescriptiveContent>
+
+  </HotelDescriptiveContents>
+
+</OTA_HotelDescriptiveContentNotifRQ>

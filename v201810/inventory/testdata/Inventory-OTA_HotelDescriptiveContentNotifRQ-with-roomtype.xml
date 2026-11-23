@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+     AlpineBits 2018-10
+     http://www.alpinebits.org/
+
+     sample message file
+
+     changelog:
+     v. 2018-10 1.0
+-->
+
+<OTA_HotelDescriptiveContentNotifRQ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                    xmlns="http://www.opentravel.org/OTA/2003/05"
+                                    xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_HotelDescriptiveContentNotifRQ.xsd"
+                                    Version="8.000">
+
+    <HotelDescriptiveContents>
+
+        <HotelDescriptiveContent HotelCode="123" HotelName="Frangart Inn">
+
+            <FacilityInfo>
+
+                <GuestRooms>
+
+                    <GuestRoom Code="EZ" MinOccupancy="1" MaxOccupancy="1">
+
+                        <!-- RoomType 8 and RoomClassificationCode 5 means "camping ground/pitch" (see section 4.4) -->
+
+                        <TypeRoom StandardOccupancy="1" RoomClassificationCode="5" RoomType="8" />
+
+                        <Amenities>
+                            <Amenity RoomAmenityCode="7"/>
+                            <Amenity RoomAmenityCode="10"/>
+                            <Amenity RoomAmenityCode="16"/>
+                            <Amenity RoomAmenityCode="50"/>
+                            <Amenity RoomAmenityCode="92"/>
+                            <Amenity RoomAmenityCode="203"/>
+                            <Amenity RoomAmenityCode="251"/>
+                            <Amenity RoomAmenityCode="268"/>
+                            <Amenity RoomAmenityCode="276"/>
+                        </Amenities>
+
+                        <MultimediaDescriptions>
+                            <MultimediaDescription InfoCode="25">
+                                <TextItems>
+                                    <TextItem>
+                                        <Description Language="de" TextFormat="PlainText">Zeltplatz</Description>
+                                        <Description Language="en" TextFormat="PlainText">piazzola</Description>
+                                        <Description Language="it" TextFormat="PlainText">pitch</Description>
+                                    </TextItem>
+                                </TextItems>
+                            </MultimediaDescription>
+                        </MultimediaDescriptions>
+
+                    </GuestRoom>
+
+                </GuestRooms>
+
+            </FacilityInfo>
+
+        </HotelDescriptiveContent>
+
+    </HotelDescriptiveContents>
+
+</OTA_HotelDescriptiveContentNotifRQ>
