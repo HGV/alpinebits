@@ -26,12 +26,12 @@ const freeRoomsDoc = `<OTA_HotelInvCountNotifRQ xmlns="http://www.opentravel.org
 </Inventories>
 </OTA_HotelInvCountNotifRQ>`
 
-func replaceOnce(t *testing.T, old, new string) string {
+func replaceOnce(t *testing.T, doc, old, new string) string {
 	t.Helper()
-	if n := strings.Count(freeRoomsDoc, old); n != 1 {
+	if n := strings.Count(doc, old); n != 1 {
 		t.Fatalf("%q occurs %d times", old, n)
 	}
-	return strings.Replace(freeRoomsDoc, old, new, 1)
+	return strings.Replace(doc, old, new, 1)
 }
 
 // freerooms.Validate relies on these being rejected by the XSD.
@@ -67,7 +67,7 @@ func TestXSDEnforcesFreeRoomsRules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := Version.Validate([]byte(replaceOnce(t, tt.old, tt.new))); err == nil {
+			if err := Version.Validate([]byte(replaceOnce(t, freeRoomsDoc, tt.old, tt.new))); err == nil {
 				t.Error("XSD accepted it")
 			}
 		})
@@ -105,7 +105,7 @@ func TestXSDLeavesFreeRoomsRulesToValidate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			errs := validateFreeRooms(t, replaceOnce(t, tt.old, tt.new))
+			errs := validateFreeRooms(t, replaceOnce(t, freeRoomsDoc, tt.old, tt.new))
 			if len(errs) != 1 || errs[0].Message != tt.want {
 				t.Errorf("got %v, want %q", errs, tt.want)
 			}

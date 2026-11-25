@@ -56,3 +56,33 @@ func TestNeedReportsOnce(t *testing.T) {
 		t.Errorf("got %v", got)
 	}
 }
+
+func TestCurrency(t *testing.T) {
+	tests := []struct {
+		code   string
+		amount alpinebits.Decimal
+		want   []string
+	}{
+		{"EUR", 76.8, nil},
+		{"EUR", 76.805, []string{"X: A has more than 2 decimal digits for EUR"}},
+		{"JPY", 100, nil},
+		{"JPY", 100.5, []string{"X: A has more than 0 decimal digits for JPY"}},
+		{"BHD", 1.125, nil},
+		{"eur", 1, []string{"X: CurrencyCode eur is not an ISO 4217 code"}},
+		{"EUX", 1.12345, []string{"X: CurrencyCode EUX is not an ISO 4217 code"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.code, func(t *testing.T) {
+			c := New(nil)
+			c.Currency("X", tt.code)
+			c.Amount("X", "A", tt.amount, tt.code)
+			var got []string
+			for _, e := range c.Errors() {
+				got = append(got, e.Message)
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("got %q, want %q", got, tt.want)
+			}
+		})
+	}
+}

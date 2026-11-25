@@ -5,6 +5,7 @@ go 1.27
 require (
 	github.com/HGV/x v0.0.0-20260225100025-0bf39497adb4
 	github.com/lestrrat-go/libxml2 v0.0.0-20240905100032-c934e3fcb9d3
+	golang.org/x/text v0.34.0
 )
 
 require (

@@ -2,6 +2,7 @@ package rateplans
 
 import "github.com/HGV/alpinebits"
 
+// Capabilities of the OTA_HotelRatePlanNotif:RatePlans action.
 const (
 	CapAcceptArrivalDOW                  alpinebits.Capability = "OTA_HotelRatePlanNotif_accept_ArrivalDOW"
 	CapAcceptDepartureDOW                alpinebits.Capability = "OTA_HotelRatePlanNotif_accept_DepartureDOW"

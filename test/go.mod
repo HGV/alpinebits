@@ -12,6 +12,7 @@ require (
 	github.com/jackc/pgx/v5 v5.8.0 // indirect
 	github.com/lestrrat-go/libxml2 v0.0.0-20240905100032-c934e3fcb9d3 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	golang.org/x/text v0.34.0 // indirect
 )
 
 replace github.com/HGV/alpinebits => ../

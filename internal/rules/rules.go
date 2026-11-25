@@ -3,10 +3,12 @@ package rules
 
 import (
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/HGV/alpinebits"
 	"github.com/HGV/x/timex"
+	"golang.org/x/text/currency"
 )
 
 // Checker collects the errors of a rule function.
@@ -130,6 +132,37 @@ func overlapping(idx []int, period func(int) timex.DateRange) [][2]int {
 		}
 	}
 	return pairs
+}
+
+// Currency requires an ISO 4217 code, which AlpineBits allows since 2020-10
+// (§4).
+func (c *Checker) Currency(at alpinebits.Path, code string) {
+	if _, ok := decimals(code); !ok {
+		c.Invalid(at, "CurrencyCode %s is not an ISO 4217 code", code)
+	}
+}
+
+// Amount requires amount to have no more decimal digits than its currency,
+// given by code, allows. Invalid codes are left to Currency.
+func (c *Checker) Amount(at alpinebits.Path, name string, amount alpinebits.Decimal, code string) {
+	n, ok := decimals(code)
+	if !ok {
+		return
+	}
+	s := strconv.FormatFloat(float64(amount), 'f', -1, 64)
+	if i := strings.IndexByte(s, '.'); i >= 0 && len(s)-i-1 > n {
+		c.Invalid(at, "%s has more than %d decimal digits for %s", name, n, code)
+	}
+}
+
+// decimals returns the decimal digits of the ISO 4217 currency code.
+func decimals(code string) (int, bool) {
+	u, err := currency.ParseISO(code)
+	if err != nil || code != strings.ToUpper(code) {
+		return 0, false
+	}
+	n, _ := currency.Standard.Rounding(u)
+	return n, true
 }
 
 func Blank(s string) bool {

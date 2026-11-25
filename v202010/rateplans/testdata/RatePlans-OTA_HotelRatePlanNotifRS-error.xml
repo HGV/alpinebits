@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+     AlpineBits 2015-07
+     http://www.alpinebits.org/
+
+     sample message file
+
+     changelog:
+     v. 2015-07 1.0
+-->
+
+<OTA_HotelRatePlanNotifRS xmlns="http://www.opentravel.org/OTA/2003/05" 
+                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                          xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_HotelRatePlanNotifRS.xsd" 
+                          Version="3.14">
+
+    <Errors>
+        <Error Type="13" Code="404">
+            Invalid start/end date combination
+        </Error>
+    </Errors>
+
+</OTA_HotelRatePlanNotifRS>

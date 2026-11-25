@@ -5,6 +5,8 @@ import (
 	freerooms202010 "github.com/HGV/alpinebits/v202010/freerooms"
 )
 
+// A server should accept deltas, complete sets or both (AlpineBits 2022-10
+// §4.1).
 const (
 	CapAcceptRooms          = freerooms202010.CapAcceptRooms
 	CapAcceptCategories     = freerooms202010.CapAcceptCategories
