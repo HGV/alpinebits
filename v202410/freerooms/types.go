@@ -1,6 +1,6 @@
-// Package freerooms holds the AlpineBits 2024-10 FreeRooms messages. Their
-// structure is unchanged from 2022-10, so the types are aliases; the stricter
-// value limits are enforced by the XSD. The rules are not implemented yet.
+// Package freerooms holds the AlpineBits 2024-10 FreeRooms messages
+// (OTA_HotelInvCountNotif, §4.1). Their structure is unchanged from 2022-10, so
+// the types are aliases; the stricter value limits are enforced by the XSD.
 package freerooms
 
 import freerooms202210 "github.com/HGV/alpinebits/v202210/freerooms"
@@ -15,6 +15,7 @@ type (
 	Inventory                = freerooms202210.Inventory
 	StatusApplicationControl = freerooms202210.StatusApplicationControl
 	InvCount                 = freerooms202210.InvCount
+	HotelInventory           = freerooms202210.HotelInventory
 	CountType                = freerooms202210.CountType
 )
 

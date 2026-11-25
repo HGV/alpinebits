@@ -9,5 +9,5 @@ var ActionHotelInvCountNotif = alpinebits.NewAction[freerooms.HotelInvCountNotif
 	Version,
 	"OTA_HotelInvCountNotif:FreeRooms",
 	"action_OTA_HotelInvCountNotif",
-	nil, // no rules yet
+	freerooms.Validate,
 )

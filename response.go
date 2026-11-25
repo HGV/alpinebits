@@ -17,6 +17,7 @@ const (
 	StatusSendInventory Status = "ALPINEBITS_SEND_INVENTORY"
 	StatusSendFreeRooms Status = "ALPINEBITS_SEND_FREEROOMS"
 	StatusSendRatePlans Status = "ALPINEBITS_SEND_RATEPLANS"
+	StatusSendHandshake Status = "ALPINEBITS_SEND_HANDSHAKE" // since 2024-10
 )
 
 // ErrType represents OTA error types (EWT list). The AlpineBits XSD allows
