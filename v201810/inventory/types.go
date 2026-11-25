@@ -1,5 +1,5 @@
-// Package inventory holds the AlpineBits 2018-10 Inventory messages
-// (OTA_HotelDescriptiveContentNotif, §4.4).
+// Package inventory holds the AlpineBits 2018-10 Inventory/Basic messages
+// (OTA_HotelDescriptiveContentNotif:Inventory, §4.4.1).
 package inventory
 
 import (
@@ -99,8 +99,11 @@ const (
 	RoomTypeRestingPlace         RoomType = 9 // 42
 )
 
+// Amenity is identified by a code of the OTA list RMA, such as "26", or from
+// 2024-10 also of the AlpineBits list ABR, such as "7.ABR". The XSD of each
+// version enforces the format.
 type Amenity struct {
-	RoomAmenityCode int `xml:"RoomAmenityCode,attr,omitempty"`
+	RoomAmenityCode string `xml:"RoomAmenityCode,attr,omitempty"`
 }
 
 // InfoCode identifies the content of a MultimediaDescription (OTA list INF).

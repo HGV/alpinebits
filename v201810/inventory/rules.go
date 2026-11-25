@@ -11,7 +11,7 @@ import (
 func Validate(rq HotelDescriptiveContentNotifRQ, caps []alpinebits.Capability) alpinebits.Errors {
 	c := checker{rules.New(caps)}
 	content := rq.HotelDescriptiveContent
-	c.Hotel("", content.HotelCode, content.HotelName)
+	c.Hotel("", content.HotelCode)
 	if content.FacilityInfo == nil {
 		c.Required("", "FacilityInfo required")
 		return c.Errors()
@@ -81,7 +81,7 @@ func (c *checker) category(at alpinebits.Path, g GuestRoom) {
 	}
 
 	for k, a := range rules.Items(g.Amenities) {
-		if a.RoomAmenityCode == 0 {
+		if rules.Blank(a.RoomAmenityCode) {
 			c.Required(at.At("Amenity", k), "RoomAmenityCode required")
 		}
 	}

@@ -11,7 +11,7 @@ import (
 // cannot express.
 func ValidateReadRQ(rq ReadRQ, _ []alpinebits.Capability) alpinebits.Errors {
 	c := rules.New(nil)
-	c.Hotel("", rq.ReadRequest.HotelCode, rq.ReadRequest.HotelName)
+	c.Hotel("", rq.ReadRequest.HotelCode)
 	return c.Errors()
 }
 
@@ -263,7 +263,7 @@ func (c *checker) resGlobalInfo(at alpinebits.Path, status ResStatus, g ResGloba
 	if g.CancelPenalty != nil && status == ResStatusRequested {
 		c.Invalid(at, "CancelPenalties not allowed in a quote request")
 	}
-	c.Hotel(at.Field("BasicPropertyInfo"), g.BasicPropertyInfo.HotelCode, g.BasicPropertyInfo.HotelName)
+	c.Hotel(at.Field("BasicPropertyInfo"), g.BasicPropertyInfo.HotelCode)
 }
 
 func (c *checker) listItems(at alpinebits.Path, list []ListItem) {

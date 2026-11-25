@@ -9,7 +9,7 @@ import (
 // express.
 func Validate(rq HotelInvCountNotifRQ, caps []alpinebits.Capability) alpinebits.Errors {
 	c := checker{rules.New(caps)}
-	c.Hotel("", rq.Inventories.HotelCode, rq.Inventories.HotelName)
+	c.Hotel("", rq.Inventories.HotelCode)
 	if !rq.IsCompleteSet() {
 		c.Need("", CapAcceptDeltas, "deltas")
 	}

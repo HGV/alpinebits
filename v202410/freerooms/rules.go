@@ -6,7 +6,7 @@ import (
 )
 
 // Validate checks the rules of AlpineBits 2024-10 §4.1 that the XSD cannot
-// express. They are those of 2022-10; the XSD now requires HotelCode.
+// express. They are those of 2022-10.
 func Validate(rq HotelInvCountNotifRQ, caps []alpinebits.Capability) alpinebits.Errors {
 	return freerooms202210.Validate(rq, caps)
 }

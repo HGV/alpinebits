@@ -13,7 +13,7 @@ import (
 // express.
 func Validate(rq HotelRatePlanNotifRQ, caps []alpinebits.Capability) alpinebits.Errors {
 	c := checker{rules.New(caps)}
-	c.Hotel("", rq.RatePlans.HotelCode, rq.RatePlans.HotelName)
+	c.Hotel("", rq.RatePlans.HotelCode)
 	if rq.IsReset() {
 		return c.Errors()
 	}

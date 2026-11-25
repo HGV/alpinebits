@@ -81,7 +81,7 @@ func TestXSDLeavesFreeRoomsRulesToValidate(t *testing.T) {
 	}
 	room := `<Inventory><StatusApplicationControl Start="2020-08-01" End="2020-08-10" InvTypeCode="DOUBLE" InvCode="101"/>`
 	tests := []struct{ name, old, new, want string }{
-		{"no HotelCode and no HotelName", ` HotelCode="123" HotelName="Frangart Inn"`, ``, "missing HotelCode or HotelName"},
+		{"HotelName only", ` HotelCode="123"`, ``, "HotelCode required"},
 		{"blank InvTypeCode", `InvTypeCode="DOUBLE"`, `InvTypeCode=" "`, "Inventory[1]: InvTypeCode required"},
 		{"InvCode without InvTypeCode", ` InvTypeCode="DOUBLE"`, ``, "Inventory[1]: InvTypeCode required"},
 		{"End before Start", `End="2020-08-10"`, `End="2020-07-31"`, "Inventory[1]: End before Start"},

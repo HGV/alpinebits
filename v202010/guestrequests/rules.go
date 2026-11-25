@@ -276,7 +276,7 @@ func (c *checker) resGlobalInfo(at alpinebits.Path, status ResStatus, g ResGloba
 	if g.CancelPenalty != nil && status == ResStatusRequested {
 		c.Invalid(at, "CancelPenalties not allowed in a quote request")
 	}
-	c.Hotel(at.Field("BasicPropertyInfo"), g.BasicPropertyInfo.HotelCode, g.BasicPropertyInfo.HotelName)
+	c.Hotel(at.Field("BasicPropertyInfo"), g.BasicPropertyInfo.HotelCode)
 }
 
 func (c *checker) listItems(at alpinebits.Path, list []ListItem) {

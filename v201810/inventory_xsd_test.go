@@ -54,6 +54,7 @@ func TestInventoryXSDEnforcesRules(t *testing.T) {
 		{"elements out of order", `<TypeRoom RoomID="101"/>`, `<Amenities><Amenity RoomAmenityCode="26"/></Amenities><TypeRoom RoomID="101"/>`},
 		{"empty Amenities", `<Amenity RoomAmenityCode="26"/>`, ``},
 		{"RoomAmenityCode 0", `RoomAmenityCode="26"`, `RoomAmenityCode="0"`},
+		{"ABR RoomAmenityCode", `RoomAmenityCode="26"`, `RoomAmenityCode="7.ABR"`},
 		{"InfoCode", `InfoCode="25"`, `InfoCode="2"`},
 		{"TextItems and ImageItems", `</TextItems>`, `</TextItems><ImageItems><ImageItem Category="6"><ImageFormat><URL>https://example.com</URL></ImageFormat></ImageItem></ImageItems>`},
 		{"two TextItem", `</TextItem>`, `</TextItem><TextItem><Description TextFormat="PlainText" Language="de">Doppelzimmer</Description></TextItem>`},
@@ -99,7 +100,7 @@ func TestInventoryTypesRoundTrip(t *testing.T) {
 			*images = append(*images, inventory.ImageItem{Category: 17, ImageFormat: inventory.ImageFormat{URL: "https://example.com/map.png"}})
 		}},
 		{"Inventory-OTA_HotelDescriptiveContentNotifRQ-with-roomtype.xml", func(rq *inventory.HotelDescriptiveContentNotifRQ) {
-			rq.HotelDescriptiveContent.HotelCode = ""
+			rq.HotelDescriptiveContent.HotelName = ""
 		}},
 		{"Inventory-OTA_HotelDescriptiveContentNotifRQ-delete-all.xml", nil},
 	}

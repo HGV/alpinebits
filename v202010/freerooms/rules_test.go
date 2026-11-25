@@ -141,9 +141,8 @@ func TestValidateMessage(t *testing.T) {
 		want      []string
 	}{
 		{"reset by Type 35", purge, "123", "", []Inventory{{}}, nil, nil},
-		{"HotelName only", purge, "", "Frangart Inn", []Inventory{{}}, nil, nil},
-		{"no hotel", purge, " ", "", []Inventory{{}}, nil, []string{
-			"missing HotelCode or HotelName",
+		{"HotelName only", purge, " ", "Frangart Inn", []Inventory{{}}, nil, []string{
+			"HotelCode required",
 		}},
 		{"empty Inventory in a delta", nil, "123", "", []Inventory{{}}, nil, []string{
 			"deltas not supported",

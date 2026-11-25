@@ -45,7 +45,7 @@ func TestValidateRequests(t *testing.T) {
 	rq := load[ReadRQ](t, "GuestRequests-OTA_ReadRQ.xml")
 	rulestest.Expect(t, ValidateReadRQ(rq, nil), nil)
 	rq.ReadRequest.HotelCode, rq.ReadRequest.HotelName = " ", ""
-	rulestest.Expect(t, ValidateReadRQ(rq, nil), []string{"missing HotelCode or HotelName"})
+	rulestest.Expect(t, ValidateReadRQ(rq, nil), []string{"HotelCode required"})
 
 	ack := load[NotifReportRQ](t, "GuestRequests-OTA_ReadRQ-ack.xml")
 	rulestest.Expect(t, ValidateNotifReportRQ(ack, nil), nil)

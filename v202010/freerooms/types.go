@@ -17,8 +17,7 @@ type HotelInvCountNotifRQ struct {
 	Inventories Inventories `xml:"Inventories"`
 }
 
-// HotelCode implements alpinebits.HotelCoded. It is empty when the client
-// identifies the hotel by HotelName only, which AlpineBits 2020-10 allows.
+// HotelCode implements alpinebits.HotelCoded.
 func (r HotelInvCountNotifRQ) HotelCode() string {
 	return r.Inventories.HotelCode
 }

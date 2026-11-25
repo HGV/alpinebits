@@ -76,16 +76,13 @@ func TestValidate(t *testing.T) {
 		want   []string
 	}{
 		{"HotelName only", func(rq *HotelAvailNotifRQ, _ []AvailStatusMessage) {
-			rq.AvailStatusMessages.HotelCode = ""
-		}, nil},
+			rq.AvailStatusMessages.HotelCode = " "
+		}, []string{
+			"HotelCode required",
+		}},
 		{"HotelCode only", func(rq *HotelAvailNotifRQ, _ []AvailStatusMessage) {
 			rq.AvailStatusMessages.HotelName = ""
 		}, nil},
-		{"neither HotelCode nor HotelName", func(rq *HotelAvailNotifRQ, _ []AvailStatusMessage) {
-			rq.AvailStatusMessages.HotelCode, rq.AvailStatusMessages.HotelName = " ", ""
-		}, []string{
-			"missing HotelCode or HotelName",
-		}},
 		{"purge", func(rq *HotelAvailNotifRQ, _ []AvailStatusMessage) {
 			rq.UniqueID.Type = UniqueIDTypePurgedMasterReference
 		}, nil},

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+     AlpineBits 2022-10
+     https://www.alpinebits.org/
+
+     Sample message file for an Inventory (Basic and HotelInfo) push response with a success
+
+     Changelog:
+     v. 2015-07 1.0 initial example
+-->
+
+<OTA_HotelDescriptiveContentNotifRS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                    xmlns="http://www.opentravel.org/OTA/2003/05"
+                                    xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_HotelDescriptiveContentNotifRS.xsd"
+                                    Version="3.000">
+
+    <Success/>
+
+</OTA_HotelDescriptiveContentNotifRS>
+

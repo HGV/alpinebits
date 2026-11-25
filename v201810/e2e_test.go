@@ -215,7 +215,7 @@ func TestFailuresReachClient(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if got := messages(rs.Errors); !reflect.DeepEqual(got, []string{"missing HotelCode or HotelName"}) {
+		if got := messages(rs.Errors); !reflect.DeepEqual(got, []string{"HotelCode required"}) {
 			t.Errorf("errors %q", got)
 		}
 	})

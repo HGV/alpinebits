@@ -16,9 +16,7 @@ type HotelAvailNotifRQ struct {
 	AvailStatusMessages AvailStatusMessages `xml:"AvailStatusMessages"`
 }
 
-// HotelCode implements alpinebits.HotelCoded. It is empty if the message
-// identifies the hotel by HotelName only, which AlpineBits 2018-10 §4.1.1
-// allows.
+// HotelCode implements alpinebits.HotelCoded.
 func (r HotelAvailNotifRQ) HotelCode() string {
 	return r.AvailStatusMessages.HotelCode
 }
@@ -59,7 +57,7 @@ type UniqueID struct {
 	Instance Instance     `xml:"Instance,attr"`
 }
 
-// AvailStatusMessages identifies the hotel by HotelCode, HotelName or both.
+// AvailStatusMessages identifies the hotel by HotelCode; HotelName is optional.
 type AvailStatusMessages struct {
 	HotelCode           string               `xml:"HotelCode,attr,omitempty"`
 	HotelName           string               `xml:"HotelName,attr,omitempty"`

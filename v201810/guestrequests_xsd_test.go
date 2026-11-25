@@ -155,7 +155,7 @@ func TestGuestRequestsTypesRoundTrip(t *testing.T) {
 		customer.BirthDate, customer.Telephones, customer.Email, customer.Address = nil, nil, nil, nil
 		(*res.ResGlobalInfo.Comments)[0].ListItems[0].ListItem = 0
 		res.ResGlobalInfo.GlobalProfile.CompanyInfo.AddressInfo = nil
-		res.ResGlobalInfo.BasicPropertyInfo.HotelCode = ""
+		res.ResGlobalInfo.BasicPropertyInfo.HotelName = ""
 		res.ResStatus = guestrequests.ResStatusModify
 		if errs := guestrequests.ValidateResRetrieveRS(rs); len(errs) > 0 {
 			t.Fatalf("%+v", errs)
@@ -219,8 +219,8 @@ func TestGuestRequestsRouter(t *testing.T) {
 		wantReservations  int
 	}{
 		{"nothing found", "OTA_Read:GuestRequests", readRQ(`HotelCode="123"`), nil, nil, 0},
-		{"reservation found", "OTA_Read:GuestRequests", readRQ(`HotelName="Frangart Inn"`), reservations, nil, 1},
-		{"no hotel", "OTA_Read:GuestRequests", readRQ(`HotelCode=" "`), nil, []string{"missing HotelCode or HotelName"}, 0},
+		{"reservation found", "OTA_Read:GuestRequests", readRQ(`HotelCode="123"`), reservations, nil, 1},
+		{"no hotel", "OTA_Read:GuestRequests", readRQ(`HotelCode=" "`), nil, []string{"HotelCode required"}, 0},
 		{"acknowledgement", "OTA_NotifReport:GuestRequests", guestRequestsSample(t, "OTA_ReadRQ-ack"), nil, nil, 0},
 	}
 	for _, tt := range tests {

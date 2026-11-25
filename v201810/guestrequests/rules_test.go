@@ -39,9 +39,8 @@ func TestValidateReadRQ(t *testing.T) {
 		want                 []string
 	}{
 		{"sample", "123", "Frangart Inn", nil},
-		{"HotelName only", "", "Frangart Inn", nil},
+		{"HotelName only", " ", "Frangart Inn", []string{"HotelCode required"}},
 		{"HotelCode only", "123", "", nil},
-		{"neither", " ", "", []string{"missing HotelCode or HotelName"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -226,12 +225,9 @@ func TestValidateReservation(t *testing.T) {
 			"HotelReservation[0].ResGlobalInfo.Comment[0]: included services require ListItem",
 		}},
 		{"BasicPropertyInfo HotelName only", func(res *HotelReservation) {
-			res.ResGlobalInfo.BasicPropertyInfo.HotelCode = ""
-		}, nil},
-		{"BasicPropertyInfo blank", func(res *HotelReservation) {
-			res.ResGlobalInfo.BasicPropertyInfo = BasicPropertyInfo{HotelCode: " "}
+			res.ResGlobalInfo.BasicPropertyInfo.HotelCode = " "
 		}, []string{
-			"HotelReservation[0].ResGlobalInfo.BasicPropertyInfo: missing HotelCode or HotelName",
+			"HotelReservation[0].ResGlobalInfo.BasicPropertyInfo: HotelCode required",
 		}},
 	}
 	for _, tt := range tests {
@@ -357,7 +353,7 @@ func TestValidateCancellation(t *testing.T) {
 		}, []string{
 			"HotelReservation[0].RoomStay[0]: RoomType required",
 			"HotelReservation[0].RoomStay[0].TimeSpan: Start and End required",
-			"HotelReservation[0].ResGlobalInfo.BasicPropertyInfo: missing HotelCode or HotelName",
+			"HotelReservation[0].ResGlobalInfo.BasicPropertyInfo: HotelCode required",
 		}},
 	}
 	for _, tt := range tests {

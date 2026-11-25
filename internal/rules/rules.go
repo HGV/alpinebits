@@ -55,11 +55,12 @@ func (c *Checker) Need(at alpinebits.Path, capability alpinebits.Capability, wha
 	c.Invalid(at, "%s not supported", what)
 }
 
-// Hotel requires HotelCode or HotelName (§4.1.1, which the other sections
-// refer to).
-func (c *Checker) Hotel(at alpinebits.Path, code, name string) {
-	if Blank(code) && Blank(name) {
-		c.Required(at, "missing HotelCode or HotelName")
+// Hotel requires HotelCode in every version. AlpineBits made it mandatory in
+// 2024-10 (§4.1.1, which the other sections refer to); earlier versions also
+// allow HotelName alone, which no implementation is known to use.
+func (c *Checker) Hotel(at alpinebits.Path, code string) {
+	if Blank(code) {
+		c.Required(at, "HotelCode required")
 	}
 }
 

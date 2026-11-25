@@ -46,14 +46,12 @@ type ReadRQ struct {
 	ReadRequest ReadRequest `xml:"ReadRequests>HotelReadRequest"`
 }
 
-// HotelCode implements alpinebits.HotelCoded. It is empty if the request
-// identifies the hotel by HotelName only, which AlpineBits 2018-10 §4.1.1
-// allows.
+// HotelCode implements alpinebits.HotelCoded.
 func (r ReadRQ) HotelCode() string {
 	return r.ReadRequest.HotelCode
 }
 
-// ReadRequest identifies the hotel by HotelCode, HotelName or both.
+// ReadRequest identifies the hotel by HotelCode; HotelName is optional.
 type ReadRequest struct {
 	HotelCode         string             `xml:"HotelCode,attr,omitempty"`
 	HotelName         string             `xml:"HotelName,attr,omitempty"`
@@ -352,7 +350,7 @@ type TelephoneInfo struct {
 	PhoneNumber   string        `xml:"PhoneNumber,attr"`
 }
 
-// BasicPropertyInfo identifies the hotel by HotelCode, HotelName or both.
+// BasicPropertyInfo identifies the hotel by HotelCode; HotelName is optional.
 type BasicPropertyInfo struct {
 	HotelCode string `xml:"HotelCode,attr,omitempty"`
 	HotelName string `xml:"HotelName,attr,omitempty"`

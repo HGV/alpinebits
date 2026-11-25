@@ -356,8 +356,8 @@ func TestCheckInventory(t *testing.T) {
 
 func TestValidateHotel(t *testing.T) {
 	rq := sample(t)
-	rq.RatePlans.HotelCode = ""
+	rq.RatePlans.HotelName = ""
 	rulestest.Expect(t, Validate(rq, allCaps), nil)
-	rq.RatePlans.HotelName = " "
-	rulestest.Expect(t, Validate(rq, allCaps), []string{"missing HotelCode or HotelName"})
+	rq.RatePlans.HotelCode = " "
+	rulestest.Expect(t, Validate(rq, allCaps), []string{"HotelCode required"})
 }

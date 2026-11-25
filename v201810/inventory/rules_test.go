@@ -66,9 +66,8 @@ func TestValidateMessage(t *testing.T) {
 		change func(c *HotelDescriptiveContent)
 		want   []string
 	}{
-		{"HotelName only", func(c *HotelDescriptiveContent) { c.HotelCode = "" }, nil},
-		{"neither HotelCode nor HotelName", func(c *HotelDescriptiveContent) { c.HotelCode, c.HotelName = " ", "" }, []string{
-			"missing HotelCode or HotelName",
+		{"HotelName only", func(c *HotelDescriptiveContent) { c.HotelCode = " " }, []string{
+			"HotelCode required",
 		}},
 		{"no FacilityInfo", func(c *HotelDescriptiveContent) { c.FacilityInfo = nil }, []string{
 			"FacilityInfo required",

@@ -44,7 +44,7 @@ func TestInventoryTypesRoundTrip(t *testing.T) {
 			*images = append(*images, inventory.ImageItem{Category: 17, ImageFormat: inventory.ImageFormat{URL: "https://example.com/map.png"}})
 		}},
 		{"Inventory-OTA_HotelDescriptiveContentNotifRQ-with-roomtype.xml", func(rq *inventory.HotelDescriptiveContentNotifRQ) {
-			rq.HotelDescriptiveContent.HotelCode = ""
+			rq.HotelDescriptiveContent.HotelName = ""
 		}},
 		{"Inventory-OTA_HotelDescriptiveContentNotifRQ-delete-all.xml", nil},
 	}
