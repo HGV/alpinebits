@@ -10,12 +10,12 @@ import (
 )
 
 var ratePlansCaps = []alpinebits.Capability{
-	rateplans.CapAcceptArrivalDOW, rateplans.CapAcceptDepartureDOW,
-	rateplans.CapAcceptRatePlanBookingRule, rateplans.CapAcceptRatePlanRoomTypeBookingRule,
-	rateplans.CapAcceptRatePlanMixedBookingRule, rateplans.CapAcceptSupplements,
-	rateplans.CapAcceptFreeNightsOffers, rateplans.CapAcceptFamilyOffers,
-	rateplans.CapAcceptOverlay, rateplans.CapAcceptRatePlanJoin,
-	rateplans.CapAcceptOfferRuleBookingOffset, rateplans.CapAcceptOfferRuleDOWLOS,
+	rateplans.CapabilityAcceptArrivalDOW, rateplans.CapabilityAcceptDepartureDOW,
+	rateplans.CapabilityAcceptRatePlanBookingRule, rateplans.CapabilityAcceptRatePlanRoomTypeBookingRule,
+	rateplans.CapabilityAcceptRatePlanMixedBookingRule, rateplans.CapabilityAcceptSupplements,
+	rateplans.CapabilityAcceptFreeNightsOffers, rateplans.CapabilityAcceptFamilyOffers,
+	rateplans.CapabilityAcceptOverlay, rateplans.CapabilityAcceptRatePlanJoin,
+	rateplans.CapabilityAcceptOfferRuleBookingOffset, rateplans.CapabilityAcceptOfferRuleDOWLOS,
 }
 
 func readSample[T any](t *testing.T, path string) T {

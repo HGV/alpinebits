@@ -11,7 +11,7 @@ func Validate(rq HotelInvCountNotifRQ, caps []alpinebits.Capability) alpinebits.
 	c := checker{rules.New(caps)}
 	c.Hotel("", rq.Inventories.HotelCode)
 	if !rq.IsCompleteSet() {
-		c.Need("", CapAcceptDeltas, "deltas")
+		c.Need("", CapabilityAcceptDeltas, "deltas")
 	}
 	if rq.IsReset() {
 		return c.Errors()
@@ -76,13 +76,13 @@ func (c *checker) inventory(at alpinebits.Path, inv Inventory) bool {
 			ok = false
 		}
 		if inv.IsRoom() {
-			c.Need(at, CapAcceptRooms, "rooms")
+			c.Need(at, CapabilityAcceptRooms, "rooms")
 			// A room is a single room (§4.1.1).
 			if inv.total() > 1 {
 				c.Invalid(at, "Counts of a room must sum to at most 1")
 			}
 		} else {
-			c.Need(at, CapAcceptCategories, "categories")
+			c.Need(at, CapabilityAcceptCategories, "categories")
 		}
 	}
 	seen := make(map[CountType]bool)
@@ -90,9 +90,9 @@ func (c *checker) inventory(at alpinebits.Path, inv Inventory) bool {
 		nat := at.At("InvCount", k)
 		switch n.CountType {
 		case CountTypeOutOfOrder:
-			c.Need(nat, CapAcceptOutOfOrder, "CountType 6 (out of order)")
+			c.Need(nat, CapabilityAcceptOutOfOrder, "CountType 6 (out of order)")
 		case CountTypeOutOfMarket:
-			c.Need(nat, CapAcceptOutOfMarket, "CountType 9 (out of market)")
+			c.Need(nat, CapabilityAcceptOutOfMarket, "CountType 9 (out of market)")
 		}
 		if seen[n.CountType] {
 			c.Invalid(nat, "duplicate CountType %s", n.CountType)
@@ -107,7 +107,7 @@ func (c *checker) inventory(at alpinebits.Path, inv Inventory) bool {
 // it.
 func (c *checker) closingSeason(at alpinebits.Path, inv Inventory, completeSet, others bool) bool {
 	s := inv.StatusApplicationControl
-	c.Need(at, CapAcceptClosingSeasons, "closing seasons")
+	c.Need(at, CapabilityAcceptClosingSeasons, "closing seasons")
 	if !completeSet {
 		c.Invalid(at, "closing seasons only allowed in a CompleteSet")
 	}

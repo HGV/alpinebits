@@ -7,12 +7,12 @@ import (
 )
 
 // Validate checks the rules of AlpineBits 2022-10 §4.1 that the XSD cannot
-// express: those of 2020-10, and a CompleteSet requires CapAcceptCompleteSet.
+// express: those of 2020-10, and a CompleteSet requires CapabilityAcceptCompleteSet.
 func Validate(rq HotelInvCountNotifRQ, caps []alpinebits.Capability) alpinebits.Errors {
 	errs := freerooms202010.Validate(rq, caps)
 	c := rules.New(caps)
 	if rq.IsCompleteSet() {
-		c.Need("", CapAcceptCompleteSet, "complete sets")
+		c.Need("", CapabilityAcceptCompleteSet, "complete sets")
 	}
 	return append(errs, c.Errors()...)
 }

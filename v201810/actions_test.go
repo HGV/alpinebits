@@ -48,7 +48,7 @@ func TestFreeRoomsAfterHandshake(t *testing.T) {
 			func(context.Context, alpinebits.Request[freerooms.HotelAvailNotifRQ]) (freerooms.HotelAvailNotifRS, error) {
 				return freerooms.HotelAvailNotifRS{Response: alpinebits.OK()}, nil
 			},
-			alpinebits.WithCapabilities(freerooms.CapAcceptRooms, freerooms.CapAcceptDeltas)).
+			alpinebits.WithCapabilities(freerooms.CapabilityAcceptRooms, freerooms.CapabilityAcceptDeltas)).
 		Handle(ActionRead,
 			func(context.Context, alpinebits.Request[guestrequests.ReadRQ]) (guestrequests.ResRetrieveRS, error) {
 				return guestrequests.ResRetrieveRS{Response: alpinebits.OK()}, nil

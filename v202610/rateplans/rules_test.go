@@ -12,10 +12,10 @@ import (
 )
 
 var allCaps = []alpinebits.Capability{
-	CapAcceptArrivalDOW, CapAcceptDepartureDOW,
-	CapAcceptRatePlanBookingRule, CapAcceptRatePlanRoomTypeBookingRule, CapAcceptRatePlanMixedBookingRule,
-	CapAcceptSupplements, CapAcceptFreeNightsOffers, CapAcceptFamilyOffers, CapAcceptOverlay,
-	CapAcceptRatePlanJoin, CapAcceptOfferRuleBookingOffset, CapAcceptOfferRuleDOWLOS, CapAcceptFull,
+	CapabilityAcceptArrivalDOW, CapabilityAcceptDepartureDOW,
+	CapabilityAcceptRatePlanBookingRule, CapabilityAcceptRatePlanRoomTypeBookingRule, CapabilityAcceptRatePlanMixedBookingRule,
+	CapabilityAcceptSupplements, CapabilityAcceptFreeNightsOffers, CapabilityAcceptFamilyOffers, CapabilityAcceptOverlay,
+	CapabilityAcceptRatePlanJoin, CapabilityAcceptOfferRuleBookingOffset, CapabilityAcceptOfferRuleDOWLOS, CapabilityAcceptFull,
 }
 
 func date(s string) *timex.Date {

@@ -10,7 +10,7 @@ import (
 	inventory202410 "github.com/HGV/alpinebits/v202410/inventory"
 )
 
-var allCaps = []alpinebits.Capability{CapUseRooms, CapOccupancyChildren}
+var allCaps = []alpinebits.Capability{CapabilityUseRooms, CapabilityOccupancyChildren}
 
 // The official 2026-10 sample: categories DOUBLE, SUITE and SINGLE with ABR
 // amenities and MaxAdultOccupancy, and their rooms.

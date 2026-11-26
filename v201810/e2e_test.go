@@ -25,18 +25,18 @@ const user, password = "client", "secret"
 
 var (
 	freeRoomsCaps = []alpinebits.Capability{
-		freerooms.CapAcceptRooms, freerooms.CapAcceptCategories,
-		freerooms.CapAcceptDeltas, freerooms.CapAcceptBookingThreshold,
+		freerooms.CapabilityAcceptRooms, freerooms.CapabilityAcceptCategories,
+		freerooms.CapabilityAcceptDeltas, freerooms.CapabilityAcceptBookingThreshold,
 	}
 	ratePlansCaps = []alpinebits.Capability{
-		rateplans.CapAcceptArrivalDOW, rateplans.CapAcceptDepartureDOW,
-		rateplans.CapAcceptRatePlanBookingRule, rateplans.CapAcceptRatePlanRoomTypeBookingRule,
-		rateplans.CapAcceptRatePlanMixedBookingRule, rateplans.CapAcceptSupplements,
-		rateplans.CapAcceptFreeNightsOffers, rateplans.CapAcceptFamilyOffers,
-		rateplans.CapAcceptOverlay, rateplans.CapAcceptRatePlanJoin,
-		rateplans.CapAcceptOfferRuleBookingOffset, rateplans.CapAcceptOfferRuleDOWLOS,
+		rateplans.CapabilityAcceptArrivalDOW, rateplans.CapabilityAcceptDepartureDOW,
+		rateplans.CapabilityAcceptRatePlanBookingRule, rateplans.CapabilityAcceptRatePlanRoomTypeBookingRule,
+		rateplans.CapabilityAcceptRatePlanMixedBookingRule, rateplans.CapabilityAcceptSupplements,
+		rateplans.CapabilityAcceptFreeNightsOffers, rateplans.CapabilityAcceptFamilyOffers,
+		rateplans.CapabilityAcceptOverlay, rateplans.CapabilityAcceptRatePlanJoin,
+		rateplans.CapabilityAcceptOfferRuleBookingOffset, rateplans.CapabilityAcceptOfferRuleDOWLOS,
 	}
-	inventoryCaps = []alpinebits.Capability{inventory.CapUseRooms, inventory.CapOccupancyChildren}
+	inventoryCaps = []alpinebits.Capability{inventory.CapabilityUseRooms, inventory.CapabilityOccupancyChildren}
 )
 
 func sample[T any](t *testing.T, path string) T {
@@ -152,14 +152,14 @@ func TestHandshakeLimitsLaterRequests(t *testing.T) {
 
 	negotiated, err := c.Handshake(t.Context(), alpinebits.ActionCapabilities{
 		"action_OTA_Ping":            nil,
-		"action_OTA_HotelAvailNotif": {freerooms.CapAcceptCategories, freerooms.CapAcceptDeltas},
+		"action_OTA_HotelAvailNotif": {freerooms.CapabilityAcceptCategories, freerooms.CapabilityAcceptDeltas},
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 	want := alpinebits.ActionCapabilities{
 		"action_OTA_Ping":            nil,
-		"action_OTA_HotelAvailNotif": {freerooms.CapAcceptCategories, freerooms.CapAcceptDeltas},
+		"action_OTA_HotelAvailNotif": {freerooms.CapabilityAcceptCategories, freerooms.CapabilityAcceptDeltas},
 	}
 	if !maps.EqualFunc(negotiated, want, slices.Equal) {
 		t.Errorf("negotiated %v, want %v", negotiated, want)

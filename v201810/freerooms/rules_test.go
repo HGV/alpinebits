@@ -10,7 +10,7 @@ import (
 	"github.com/HGV/x/timex"
 )
 
-var allCaps = []alpinebits.Capability{CapAcceptRooms, CapAcceptCategories, CapAcceptDeltas, CapAcceptBookingThreshold}
+var allCaps = []alpinebits.Capability{CapabilityAcceptRooms, CapabilityAcceptCategories, CapabilityAcceptDeltas, CapabilityAcceptBookingThreshold}
 
 func date(s string) timex.Date {
 	d, err := timex.ParseDate(s)
@@ -64,7 +64,7 @@ func TestValidateCapabilities(t *testing.T) {
 		m.StatusApplicationControl.InvCode = ""
 	}
 	rulestest.Expect(t, Validate(rq, allCaps), nil)
-	rulestest.Expect(t, Validate(rq, []alpinebits.Capability{CapAcceptRooms, CapAcceptDeltas, CapAcceptBookingThreshold}), []string{
+	rulestest.Expect(t, Validate(rq, []alpinebits.Capability{CapabilityAcceptRooms, CapabilityAcceptDeltas, CapabilityAcceptBookingThreshold}), []string{
 		"categories not supported",
 	})
 }

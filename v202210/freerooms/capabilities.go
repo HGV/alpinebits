@@ -8,12 +8,12 @@ import (
 // A server should accept deltas, complete sets or both (AlpineBits 2022-10
 // §4.1).
 const (
-	CapAcceptRooms          = freerooms202010.CapAcceptRooms
-	CapAcceptCategories     = freerooms202010.CapAcceptCategories
-	CapAcceptDeltas         = freerooms202010.CapAcceptDeltas
-	CapAcceptOutOfOrder     = freerooms202010.CapAcceptOutOfOrder
-	CapAcceptOutOfMarket    = freerooms202010.CapAcceptOutOfMarket
-	CapAcceptClosingSeasons = freerooms202010.CapAcceptClosingSeasons
+	CapabilityAcceptRooms          = freerooms202010.CapabilityAcceptRooms
+	CapabilityAcceptCategories     = freerooms202010.CapabilityAcceptCategories
+	CapabilityAcceptDeltas         = freerooms202010.CapabilityAcceptDeltas
+	CapabilityAcceptOutOfOrder     = freerooms202010.CapabilityAcceptOutOfOrder
+	CapabilityAcceptOutOfMarket    = freerooms202010.CapabilityAcceptOutOfMarket
+	CapabilityAcceptClosingSeasons = freerooms202010.CapabilityAcceptClosingSeasons
 
-	CapAcceptCompleteSet alpinebits.Capability = "OTA_HotelInvCountNotif_accept_complete_set"
+	CapabilityAcceptCompleteSet alpinebits.Capability = "OTA_HotelInvCountNotif_accept_complete_set"
 )

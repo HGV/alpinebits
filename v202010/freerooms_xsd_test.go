@@ -12,8 +12,8 @@ import (
 )
 
 var freeRoomsCaps = []alpinebits.Capability{
-	freerooms.CapAcceptRooms, freerooms.CapAcceptCategories, freerooms.CapAcceptDeltas,
-	freerooms.CapAcceptOutOfOrder, freerooms.CapAcceptOutOfMarket, freerooms.CapAcceptClosingSeasons,
+	freerooms.CapabilityAcceptRooms, freerooms.CapabilityAcceptCategories, freerooms.CapabilityAcceptDeltas,
+	freerooms.CapabilityAcceptOutOfOrder, freerooms.CapabilityAcceptOutOfMarket, freerooms.CapabilityAcceptClosingSeasons,
 }
 
 const freeRoomsDoc = `<OTA_HotelInvCountNotifRQ xmlns="http://www.opentravel.org/OTA/2003/05" Version="4">

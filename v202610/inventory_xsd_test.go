@@ -17,7 +17,7 @@ const (
 	inventoryRSSamples    = "../v202210/inventory/testdata/"
 )
 
-var inventoryCaps = []alpinebits.Capability{inventory.CapUseRooms, inventory.CapOccupancyChildren}
+var inventoryCaps = []alpinebits.Capability{inventory.CapabilityUseRooms, inventory.CapabilityOccupancyChildren}
 
 // inventoryWithCodes is the official sample with AdditionalCodes and a valid
 // MaxAdultOccupancy for SUITE.

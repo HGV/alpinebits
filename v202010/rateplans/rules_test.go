@@ -10,10 +10,10 @@ import (
 )
 
 var allCaps = []alpinebits.Capability{
-	CapAcceptArrivalDOW, CapAcceptDepartureDOW,
-	CapAcceptRatePlanBookingRule, CapAcceptRatePlanRoomTypeBookingRule, CapAcceptRatePlanMixedBookingRule,
-	CapAcceptSupplements, CapAcceptFreeNightsOffers, CapAcceptFamilyOffers, CapAcceptOverlay,
-	CapAcceptRatePlanJoin, CapAcceptOfferRuleBookingOffset, CapAcceptOfferRuleDOWLOS,
+	CapabilityAcceptArrivalDOW, CapabilityAcceptDepartureDOW,
+	CapabilityAcceptRatePlanBookingRule, CapabilityAcceptRatePlanRoomTypeBookingRule, CapabilityAcceptRatePlanMixedBookingRule,
+	CapabilityAcceptSupplements, CapabilityAcceptFreeNightsOffers, CapabilityAcceptFamilyOffers, CapabilityAcceptOverlay,
+	CapabilityAcceptRatePlanJoin, CapabilityAcceptOfferRuleBookingOffset, CapabilityAcceptOfferRuleDOWLOS,
 }
 
 // sample is the official RatePlans sample, which 2020-10 kept from 2018-10.

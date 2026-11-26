@@ -22,12 +22,12 @@ func TestValidate(t *testing.T) {
 		caps     []alpinebits.Capability
 		want     []string
 	}{
-		{"CompleteSet", completeSet, []Inventory{category}, []alpinebits.Capability{CapAcceptCategories, CapAcceptCompleteSet}, nil},
-		{"CompleteSet not negotiated", completeSet, []Inventory{category}, []alpinebits.Capability{CapAcceptCategories}, []string{
+		{"CompleteSet", completeSet, []Inventory{category}, []alpinebits.Capability{CapabilityAcceptCategories, CapabilityAcceptCompleteSet}, nil},
+		{"CompleteSet not negotiated", completeSet, []Inventory{category}, []alpinebits.Capability{CapabilityAcceptCategories}, []string{
 			"complete sets not supported",
 		}},
 		{"reset not negotiated", completeSet, []Inventory{{}}, nil, []string{"complete sets not supported"}},
-		{"2020-10 rules", nil, []Inventory{category}, []alpinebits.Capability{CapAcceptCategories}, []string{
+		{"2020-10 rules", nil, []Inventory{category}, []alpinebits.Capability{CapabilityAcceptCategories}, []string{
 			"deltas not supported",
 		}},
 	}

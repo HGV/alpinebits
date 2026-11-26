@@ -85,7 +85,7 @@ func TestInventoryXSDEnforcesRules(t *testing.T) {
 // Optional parts must be omitted, not marshalled empty, and absent containers
 // must stay absent.
 func TestInventoryTypesRoundTrip(t *testing.T) {
-	allCaps := []alpinebits.Capability{inventory.CapUseRooms, inventory.CapOccupancyChildren}
+	allCaps := []alpinebits.Capability{inventory.CapabilityUseRooms, inventory.CapabilityOccupancyChildren}
 	tests := []struct {
 		file   string
 		change func(rq *inventory.HotelDescriptiveContentNotifRQ)

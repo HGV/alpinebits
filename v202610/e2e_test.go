@@ -19,9 +19,9 @@ import (
 )
 
 var freeRoomsCaps = []alpinebits.Capability{
-	freerooms.CapAcceptRooms, freerooms.CapAcceptCategories, freerooms.CapAcceptDeltas,
-	freerooms.CapAcceptOutOfOrder, freerooms.CapAcceptOutOfMarket,
-	freerooms.CapAcceptClosingSeasons, freerooms.CapAcceptCompleteSet,
+	freerooms.CapabilityAcceptRooms, freerooms.CapabilityAcceptCategories, freerooms.CapabilityAcceptDeltas,
+	freerooms.CapabilityAcceptOutOfOrder, freerooms.CapabilityAcceptOutOfMarket,
+	freerooms.CapabilityAcceptClosingSeasons, freerooms.CapabilityAcceptCompleteSet,
 }
 
 // request is what the server saw of a request.

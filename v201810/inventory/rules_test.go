@@ -10,7 +10,7 @@ import (
 	"github.com/HGV/alpinebits/internal/rulestest"
 )
 
-var allCaps = []alpinebits.Capability{CapUseRooms, CapOccupancyChildren}
+var allCaps = []alpinebits.Capability{CapabilityUseRooms, CapabilityOccupancyChildren}
 
 // The official AlpineBits 2018-10 Inventory/Basic (push) samples: category DZ
 // with all three MultimediaDescriptions and five rooms; a pitch without rooms;
@@ -50,12 +50,12 @@ func TestValidateCapabilities(t *testing.T) {
 	})
 }
 
-// Without CapUseRooms the server must discard the rooms silently (§4.4.1).
+// Without CapabilityUseRooms the server must discard the rooms silently (§4.4.1).
 func TestValidateIgnoresRoomsWithoutUseRooms(t *testing.T) {
 	rq := sample(t, notifSample)
 	rooms := &rq.HotelDescriptiveContent.FacilityInfo.GuestRooms
 	*rooms = append(*rooms, GuestRoom{Code: "DZ"})
-	rulestest.Expect(t, Validate(rq, []alpinebits.Capability{CapOccupancyChildren}), nil)
+	rulestest.Expect(t, Validate(rq, []alpinebits.Capability{CapabilityOccupancyChildren}), nil)
 	rulestest.Expect(t, Validate(rq, allCaps), []string{"GuestRoom[6].TypeRoom: RoomID required"})
 }
 

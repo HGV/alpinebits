@@ -83,7 +83,7 @@ func (c *checker) ratePlan(at alpinebits.Path, plan RatePlan) {
 		c.Invalid(at, "RatePlanCategory requires RatePlanType 12")
 	}
 	if plan.RatePlanID != "" || plan.RatePlanQualifier != nil {
-		c.Need(at, CapAcceptRatePlanJoin, "joining rate plans")
+		c.Need(at, CapabilityAcceptRatePlanJoin, "joining rate plans")
 		if plan.RatePlanID == "" || plan.RatePlanQualifier == nil {
 			c.Required(at, "RatePlanID and RatePlanQualifier must be given together")
 		}
@@ -101,7 +101,7 @@ func (c *checker) ratePlan(at alpinebits.Path, plan RatePlan) {
 		}
 		return
 	case RatePlanNotifTypeOverlay:
-		c.Need(at, CapAcceptOverlay, "RatePlanNotifType Overlay")
+		c.Need(at, CapabilityAcceptOverlay, "RatePlanNotifType Overlay")
 	}
 
 	c.bookingRules(at, plan)
@@ -142,10 +142,10 @@ func (c *checker) bookingRules(at alpinebits.Path, plan RatePlan) {
 		c.lengthsOfStay(rat, r.LengthsOfStay)
 		if d := r.DOWRestrictions; d != nil {
 			if d.ArrivalDaysOfWeek != nil {
-				c.Need(rat, CapAcceptArrivalDOW, "ArrivalDaysOfWeek")
+				c.Need(rat, CapabilityAcceptArrivalDOW, "ArrivalDaysOfWeek")
 			}
 			if d.DepartureDaysOfWeek != nil {
-				c.Need(rat, CapAcceptDepartureDOW, "DepartureDaysOfWeek")
+				c.Need(rat, CapabilityAcceptDepartureDOW, "DepartureDaysOfWeek")
 			}
 		}
 		if s := r.RestrictionStatus; s != nil && (s.Restriction == "" || s.Status == "") {
@@ -153,13 +153,13 @@ func (c *checker) bookingRules(at alpinebits.Path, plan RatePlan) {
 		}
 	}
 	if generic {
-		c.Need(at, CapAcceptRatePlanBookingRule, "BookingRule without Code")
+		c.Need(at, CapabilityAcceptRatePlanBookingRule, "BookingRule without Code")
 	}
 	if specific {
-		c.Need(at, CapAcceptRatePlanRoomTypeBookingRule, "BookingRule with Code")
+		c.Need(at, CapabilityAcceptRatePlanRoomTypeBookingRule, "BookingRule with Code")
 	}
 	if generic && specific {
-		c.Need(at, CapAcceptRatePlanMixedBookingRule, "BookingRules with and without Code in one RatePlan")
+		c.Need(at, CapabilityAcceptRatePlanMixedBookingRule, "BookingRules with and without Code in one RatePlan")
 	}
 	rules.Overlaps(c.Checker, at, "BookingRule", bookingRules, ranged, func(r BookingRule) string { return r.Code })
 }
@@ -304,7 +304,7 @@ func (c *checker) supplements(at alpinebits.Path, plan RatePlan) {
 	if len(supplements) == 0 {
 		return
 	}
-	c.Need(at, CapAcceptSupplements, "Supplements")
+	c.Need(at, CapabilityAcceptSupplements, "Supplements")
 	isComplete := complete(plan.RatePlanNotifType)
 	static := make(map[string]int)
 	var ranged []int
@@ -405,7 +405,7 @@ func (c *checker) offers(at alpinebits.Path, plan RatePlan) {
 			continue
 		}
 		if guests := rules.Items(o.Guests); len(guests) > 0 {
-			c.Need(oat, CapAcceptFamilyOffers, "family offers")
+			c.Need(oat, CapabilityAcceptFamilyOffers, "family offers")
 			if family {
 				c.Invalid(oat, "at most one family offer allowed")
 			}
@@ -420,7 +420,7 @@ func (c *checker) offers(at alpinebits.Path, plan RatePlan) {
 			}
 			continue
 		}
-		c.Need(oat, CapAcceptFreeNightsOffers, "free nights offers")
+		c.Need(oat, CapabilityAcceptFreeNightsOffers, "free nights offers")
 		if freeNights {
 			c.Invalid(oat, "at most one free nights offer allowed")
 		}
@@ -443,10 +443,10 @@ func (c *checker) offers(at alpinebits.Path, plan RatePlan) {
 
 func (c *checker) offerRuleCapabilities(at alpinebits.Path, r OfferRule) {
 	if r.MinAdvancedBookingOffset != "" || r.MaxAdvancedBookingOffset != "" {
-		c.Need(at, CapAcceptOfferRuleBookingOffset, "MinAdvancedBookingOffset and MaxAdvancedBookingOffset")
+		c.Need(at, CapabilityAcceptOfferRuleBookingOffset, "MinAdvancedBookingOffset and MaxAdvancedBookingOffset")
 	}
 	if len(rules.Items(r.LengthsOfStay)) > 0 || r.DOWRestrictions != nil {
-		c.Need(at, CapAcceptOfferRuleDOWLOS, "DOW and LOS restrictions in OfferRule")
+		c.Need(at, CapabilityAcceptOfferRuleDOWLOS, "DOW and LOS restrictions in OfferRule")
 	}
 }
 

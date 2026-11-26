@@ -24,7 +24,7 @@ Each version is a package (`v201810` … `v202610`) holding its `Version` and ac
 ```go
 r := alpinebits.NewRouter(alpinebits.WithClientStore(alpinebits.NewInMemoryClientStore())).
 	Handle(v202410.ActionHotelInvCountNotif, pushFreeRooms,
-		alpinebits.WithCapabilities(freerooms.CapAcceptRooms, freerooms.CapAcceptDeltas)).
+		alpinebits.WithCapabilities(freerooms.CapabilityAcceptRooms, freerooms.CapabilityAcceptDeltas)).
 	Handle(v202410.ActionRead, pullGuestRequests).
 	Handle(v202410.ActionNotifReport, ackGuestRequests)
 
@@ -65,7 +65,7 @@ func pushFreeRooms(ctx context.Context, r alpinebits.Request[freerooms.HotelInvC
 c := alpinebits.NewClient("https://example.com/alpinebits", "user", "secret", v202410.Version)
 
 negotiated, err := c.Handshake(ctx, alpinebits.ActionCapabilities{
-	v202410.ActionHotelInvCountNotif.HandshakeName(): {freerooms.CapAcceptRooms, freerooms.CapAcceptDeltas},
+	v202410.ActionHotelInvCountNotif.HandshakeName(): {freerooms.CapabilityAcceptRooms, freerooms.CapabilityAcceptDeltas},
 })
 
 // Send checks only the XSD, so check the rules first.

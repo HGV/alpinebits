@@ -11,13 +11,13 @@ func Validate(rq HotelAvailNotifRQ, caps []alpinebits.Capability) alpinebits.Err
 	c := rules.New(caps)
 	c.Hotel("", rq.AvailStatusMessages.HotelCode)
 	if !rq.IsCompleteSet() {
-		c.Need("", CapAcceptDeltas, "deltas")
+		c.Need("", CapabilityAcceptDeltas, "deltas")
 	}
 	if rq.IsReset() {
 		return c.Errors()
 	}
 
-	threshold := c.Has(CapAcceptBookingThreshold)
+	threshold := c.Has(CapabilityAcceptBookingThreshold)
 	msgs := rq.AvailStatusMessages.AvailStatusMessages
 	var rooms, categories bool
 	var ranged []int
@@ -36,7 +36,7 @@ func Validate(rq HotelAvailNotifRQ, caps []alpinebits.Capability) alpinebits.Err
 				c.Required(at, "BookingThreshold required")
 			}
 		} else {
-			c.Need(at, CapAcceptBookingThreshold, "BookingThreshold")
+			c.Need(at, CapabilityAcceptBookingThreshold, "BookingThreshold")
 			if m.BookingLimit != nil && *m.BookingThreshold > *m.BookingLimit {
 				c.Invalid(at, "BookingThreshold exceeds BookingLimit")
 			}
@@ -66,9 +66,9 @@ func Validate(rq HotelAvailNotifRQ, caps []alpinebits.Capability) alpinebits.Err
 	switch {
 	case rooms && categories:
 		c.Invalid("", "rooms and categories must not be mixed")
-	case rooms && !c.Has(CapAcceptRooms):
+	case rooms && !c.Has(CapabilityAcceptRooms):
 		c.Invalid("", "rooms not supported")
-	case categories && !c.Has(CapAcceptCategories):
+	case categories && !c.Has(CapabilityAcceptCategories):
 		c.Invalid("", "categories not supported")
 	}
 	rules.Overlaps(c, "", "AvailStatusMessage", msgs, ranged, func(m AvailStatusMessage) [2]string {

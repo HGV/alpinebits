@@ -11,8 +11,8 @@ import (
 )
 
 var allCaps = []alpinebits.Capability{
-	CapAcceptRooms, CapAcceptCategories, CapAcceptDeltas,
-	CapAcceptOutOfOrder, CapAcceptOutOfMarket, CapAcceptClosingSeasons,
+	CapabilityAcceptRooms, CapabilityAcceptCategories, CapabilityAcceptDeltas,
+	CapabilityAcceptOutOfOrder, CapabilityAcceptOutOfMarket, CapabilityAcceptClosingSeasons,
 }
 
 // The official AlpineBits 2020-10 samples. completeSet holds three periods of

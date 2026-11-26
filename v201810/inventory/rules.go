@@ -6,7 +6,7 @@ import (
 )
 
 // Validate checks the rules of AlpineBits 2018-10 §4.4.1 that the XSD cannot
-// express. Rooms are only checked if CapUseRooms is negotiated: otherwise the
+// express. Rooms are only checked if CapabilityUseRooms is negotiated: otherwise the
 // server must discard them silently.
 func Validate(rq HotelDescriptiveContentNotifRQ, caps []alpinebits.Capability) alpinebits.Errors {
 	c := checker{rules.New(caps)}
@@ -29,7 +29,7 @@ func Validate(rq HotelDescriptiveContentNotifRQ, caps []alpinebits.Capability) a
 		return c.Errors()
 	}
 
-	useRooms := c.Has(CapUseRooms)
+	useRooms := c.Has(CapabilityUseRooms)
 	roomIDs := make(map[string]map[string]bool)
 	for i, g := range rooms {
 		at := alpinebits.At("GuestRoom", i)
@@ -54,7 +54,7 @@ func (c *checker) category(at alpinebits.Path, g GuestRoom) {
 		c.Required(at, "MaxOccupancy required")
 	}
 	if g.MaxChildOccupancy != 0 {
-		c.Need(at, CapOccupancyChildren, "MaxChildOccupancy")
+		c.Need(at, CapabilityOccupancyChildren, "MaxChildOccupancy")
 	}
 	t := g.TypeRoom
 	if t.StandardOccupancy == 0 {

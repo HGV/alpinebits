@@ -76,7 +76,7 @@ type AvailStatusMessage struct {
 	BookingLimit            *int                    `xml:"BookingLimit,attr,omitempty"`
 	BookingLimitMessageType BookingLimitMessageType `xml:"BookingLimitMessageType,attr,omitempty"`
 	// BookingThreshold is the number of free rooms that are not bookable. It
-	// is sent if and only if CapAcceptBookingThreshold was negotiated.
+	// is sent if and only if CapabilityAcceptBookingThreshold was negotiated.
 	BookingThreshold         *int                      `xml:"BookingThreshold,attr,omitempty"`
 	StatusApplicationControl *StatusApplicationControl `xml:"StatusApplicationControl,omitempty"`
 }

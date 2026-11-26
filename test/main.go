@@ -27,9 +27,9 @@ func main() {
 
 	ab := alpinebits.NewRouter(alpinebits.WithClientStore(alpinebits.NewInMemoryClientStore())).
 		Handle(v201810.ActionHotelAvailNotif, pushFreeRooms,
-			alpinebits.WithCapabilities(freerooms.CapAcceptRooms, freerooms.CapAcceptDeltas)).
+			alpinebits.WithCapabilities(freerooms.CapabilityAcceptRooms, freerooms.CapabilityAcceptDeltas)).
 		Handle(v201810.ActionHotelRatePlanNotif, pushRatePlans,
-			alpinebits.WithCapabilities(rateplans.CapAcceptRatePlanBookingRule, rateplans.CapAcceptSupplements)).
+			alpinebits.WithCapabilities(rateplans.CapabilityAcceptRatePlanBookingRule, rateplans.CapabilityAcceptSupplements)).
 		Handle(v201810.ActionRead, pullGuestRequests)
 
 	r := chi.NewRouter()
