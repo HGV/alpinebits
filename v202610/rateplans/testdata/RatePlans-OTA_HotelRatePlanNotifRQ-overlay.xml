@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    AlpineBits 2026-10
+    https://www.alpinebits.org/
+
+    Sample message file for a RatePlans delta: RatePlanNotifType is set to
+    Overlay, so the message only carries what changes and the server leaves
+    everything it does not receive untouched. Requires the capability
+    OTA_HotelRatePlanNotif_accept_overlay.
+
+    Two points worth noting, both from section 4.4.3:
+
+    - the static rate is repeated for control purposes only; the server compares
+      the price type with the one it stored and rejects the message on mismatch
+    - an empty date-dependent element deletes what the server holds, which is how
+      the second rate plan drops a period and a booking rule
+
+    Offers cannot be changed with an Overlay message; updating them means sending
+    the whole rate plan again with RatePlanNotifType set to New.
+
+    Changelog:
+    v. 2026-10 1.0 initial example
+-->
+
+<OTA_HotelRatePlanNotifRQ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                          xmlns="http://www.opentravel.org/OTA/2003/05"
+                          xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_HotelRatePlanNotifRQ.xsd"
+                          Version="7.001">
+
+    <RatePlans HotelCode="123" HotelName="AlpineBits Hotel">
+
+        <!-- first rate plan: new prices for one period, plus a stricter booking rule -->
+        <RatePlan RatePlanNotifType="Overlay" CurrencyCode="EUR" RatePlanCode="STD-FB">
+
+            <BookingRules>
+                <BookingRule Start="2027-07-03" End="2027-08-28">
+                    <LengthsOfStay>
+                        <!--
+                        the forward restrictions apply to the days of the stay rather
+                        than to the arrival day: a stay touching this period lasts
+                        between four and fourteen nights
+                        -->
+                        <LengthOfStay Time="4"  TimeUnit="Day" MinMaxMessageType="SetForwardMinStay"/>
+                        <LengthOfStay Time="14" TimeUnit="Day" MinMaxMessageType="SetForwardMaxStay"/>
+                    </LengthsOfStay>
+                    <RestrictionStatus Restriction="Master" Status="Open"/>
+                </BookingRule>
+            </BookingRules>
+
+            <Rates>
+
+                <!-- repeated for control only: it must match what the server already stored -->
+                <Rate RateTimeUnit="Day" UnitMultiplier="1">
+                    <BaseByGuestAmts>
+                        <BaseByGuestAmt Type="7"/>
+                    </BaseByGuestAmts>
+                    <!-- Code 10 -> full board -->
+                    <MealsIncluded MealPlanIndicator="true" MealPlanCodes="10"/>
+                </Rate>
+
+                <!-- the actual update -->
+                <Rate InvTypeCode="DOUBLE" Start="2027-07-03" End="2027-08-28">
+                    <BaseByGuestAmts>
+                        <BaseByGuestAmt NumberOfGuests="1" AgeQualifyingCode="10" AmountAfterTax="165"/>
+                        <BaseByGuestAmt NumberOfGuests="2" AgeQualifyingCode="10" AmountAfterTax="145"/>
+                    </BaseByGuestAmts>
+                </Rate>
+
+            </Rates>
+
+            <Supplements>
+                <!-- only date-dependent supplement data may travel in an Overlay message -->
+                <Supplement InvType="EXTRA" InvCode="0x539" Amount="25" Start="2027-07-03" End="2027-08-28"/>
+            </Supplements>
+
+        </RatePlan>
+
+        <!-- second rate plan: updates to more than one rate plan may be bundled in an Overlay -->
+        <RatePlan RatePlanNotifType="Overlay" CurrencyCode="EUR" RatePlanCode="STD-HB">
+
+            <!-- an empty BookingRule deletes the rule the server holds for that period -->
+            <BookingRules>
+                <BookingRule Start="2027-09-01" End="2027-09-30"/>
+            </BookingRules>
+
+            <Rates>
+
+                <Rate RateTimeUnit="Day" UnitMultiplier="1">
+                    <BaseByGuestAmts>
+                        <BaseByGuestAmt Type="7"/>
+                    </BaseByGuestAmts>
+                    <!-- Code 12 -> half board -->
+                    <MealsIncluded MealPlanIndicator="true" MealPlanCodes="12"/>
+                </Rate>
+
+                <!-- an empty date-dependent Rate deletes the prices stored for that period -->
+                <Rate InvTypeCode="DOUBLE" Start="2027-09-01" End="2027-09-30"/>
+
+            </Rates>
+
+        </RatePlan>
+
+    </RatePlans>
+
+</OTA_HotelRatePlanNotifRQ>

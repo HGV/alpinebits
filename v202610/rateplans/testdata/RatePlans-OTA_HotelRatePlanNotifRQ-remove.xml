@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    AlpineBits 2026-10
+    https://www.alpinebits.org/
+
+    Sample message file that deletes a rate plan: RatePlanNotifType is set to
+    Remove and the RatePlan element must be empty, with no child elements. The
+    server deletes the rate plan identified by RatePlanCode; if it holds none
+    with that code it must still accept the message and may answer with an
+    advisory.
+
+    Changelog:
+    v. 2026-10 1.0 initial example
+-->
+
+<OTA_HotelRatePlanNotifRQ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                          xmlns="http://www.opentravel.org/OTA/2003/05"
+                          xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_HotelRatePlanNotifRQ.xsd"
+                          Version="7.001">
+
+    <RatePlans HotelCode="123" HotelName="AlpineBits Hotel">
+
+        <RatePlan RatePlanNotifType="Remove" CurrencyCode="EUR" RatePlanCode="EARLYBIRD-2027"/>
+
+    </RatePlans>
+
+</OTA_HotelRatePlanNotifRQ>

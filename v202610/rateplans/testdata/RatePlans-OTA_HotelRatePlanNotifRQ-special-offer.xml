@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    AlpineBits 2026-10
+    https://www.alpinebits.org/
+
+    Sample message file for a RatePlans request carrying two special offers.
+
+    A special offer presented by the hotel itself sets RatePlanType to 12
+    (Promotional) and must not set RatePlanCategory. An offer campaigned by a
+    third party the hotel takes part in sets RatePlanType to 12 as well and
+    additionally sets RatePlanCategory to a value defined by that third party.
+
+    Changelog:
+    v. 2026-10 1.1 added supplements covering ChargeTypeCode 21 and 24 and a day-of-week prerequisite
+    v. 2026-10 1.0 initial example
+-->
+
+<OTA_HotelRatePlanNotifRQ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                          xmlns="http://www.opentravel.org/OTA/2003/05"
+                          xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_HotelRatePlanNotifRQ.xsd"
+                          Version="7.001">
+
+    <RatePlans HotelCode="123" HotelName="AlpineBits Hotel">
+
+        <!-- the hotel's own promotion: RatePlanType is set, RatePlanCategory is not -->
+        <RatePlan RatePlanNotifType="New" CurrencyCode="EUR" RatePlanCode="EARLYBIRD-2027"
+                  RatePlanType="12">
+
+            <BookingRules>
+                <BookingRule Start="2027-06-01" End="2027-09-30">
+                    <RestrictionStatus Restriction="Master" Status="Open"/>
+                </BookingRule>
+            </BookingRules>
+
+            <Rates>
+                <Rate RateTimeUnit="Day" UnitMultiplier="1">
+                    <BaseByGuestAmts>
+                        <BaseByGuestAmt Type="7"/>
+                    </BaseByGuestAmts>
+                    <!-- Code 12 -> half board -->
+                    <MealsIncluded MealPlanIndicator="true" MealPlanCodes="12"/>
+                </Rate>
+                <Rate InvTypeCode="DOUBLE" Start="2027-06-01" End="2027-09-30">
+                    <BaseByGuestAmts>
+                        <BaseByGuestAmt NumberOfGuests="2" AgeQualifyingCode="10" AmountAfterTax="99"/>
+                    </BaseByGuestAmts>
+                </Rate>
+            </Rates>
+
+            <Offers>
+                <Offer>
+                    <OfferRules>
+                        <!-- bookable only at least 90 days before arrival -->
+                        <OfferRule MinAdvancedBookingOffset="P90D">
+                            <Occupancy AgeQualifyingCode="10" MinAge="16"/>
+                            <Occupancy AgeQualifyingCode="8"/>
+                        </OfferRule>
+                    </OfferRules>
+                </Offer>
+            </Offers>
+
+            <Description Name="title">
+                <Text TextFormat="PlainText" Language="en">Early bird summer 2027</Text>
+                <Text TextFormat="PlainText" Language="it">Prenota prima estate 2027</Text>
+            </Description>
+
+        </RatePlan>
+
+        <!-- campaigned by a tourist organisation: the category value is defined by them -->
+        <RatePlan RatePlanNotifType="New" CurrencyCode="EUR" RatePlanCode="BIKEWEEKS-2027"
+                  RatePlanType="12" RatePlanCategory="SUEDTIROL-BIKE-HOTELS">
+
+            <Rates>
+                <Rate RateTimeUnit="Day" UnitMultiplier="1">
+                    <BaseByGuestAmts>
+                        <BaseByGuestAmt Type="7"/>
+                    </BaseByGuestAmts>
+                    <!-- Code 12 -> half board -->
+                    <MealsIncluded MealPlanIndicator="true" MealPlanCodes="12"/>
+                </Rate>
+                <Rate InvTypeCode="DOUBLE" Start="2027-05-08" End="2027-06-19">
+                    <BaseByGuestAmts>
+                        <BaseByGuestAmt NumberOfGuests="2" AgeQualifyingCode="10" AmountAfterTax="115"/>
+                    </BaseByGuestAmts>
+                </Rate>
+            </Rates>
+
+            <Supplements>
+
+                <!-- static data: ChargeTypeCode 21 is per person per night -->
+                <Supplement InvType="EXTRA" InvCode="bikeguide" AddToBasicRateIndicator="true"
+                            MandatoryIndicator="false" ChargeTypeCode="21">
+                    <Description Name="title">
+                        <Text TextFormat="PlainText" Language="en">Guided tour</Text>
+                        <Text TextFormat="PlainText" Language="it">Tour guidato</Text>
+                    </Description>
+                </Supplement>
+
+                <!-- date-dependent data for the same supplement -->
+                <!--
+                the guided tour only runs on Tuesday and Thursday: PrerequisiteInventory
+                with InvType ALPINEBITSDOW carries seven binary digits, Monday first
+                -->
+                <Supplement InvType="EXTRA" InvCode="bikeguide" Amount="35" Start="2027-05-08" End="2027-06-19">
+                    <PrerequisiteInventory InvType="ALPINEBITSDOW" InvCode="0101000"/>
+                </Supplement>
+
+                <!-- static data: ChargeTypeCode 24 is an item charged per stay -->
+                <Supplement InvType="EXTRA" InvCode="bikerental" AddToBasicRateIndicator="1"
+                            MandatoryIndicator="false" ChargeTypeCode="24">
+                    <Description Name="title">
+                        <Text TextFormat="PlainText" Language="en">E-bike rental</Text>
+                        <Text TextFormat="PlainText" Language="it">Noleggio e-bike</Text>
+                    </Description>
+                </Supplement>
+
+                <Supplement InvType="EXTRA" InvCode="bikerental" Amount="120" Start="2027-05-08" End="2027-06-19"/>
+
+            </Supplements>
+
+            <Offers>
+                <Offer>
+                    <OfferRules>
+                        <OfferRule>
+                            <Occupancy AgeQualifyingCode="10" MinAge="16"/>
+                            <Occupancy AgeQualifyingCode="8"/>
+                        </OfferRule>
+                    </OfferRules>
+                </Offer>
+            </Offers>
+
+            <Description Name="title">
+                <Text TextFormat="PlainText" Language="en">Bike weeks 2027</Text>
+                <Text TextFormat="PlainText" Language="it">Settimane della bici 2027</Text>
+            </Description>
+
+        </RatePlan>
+
+    </RatePlans>
+
+</OTA_HotelRatePlanNotifRQ>

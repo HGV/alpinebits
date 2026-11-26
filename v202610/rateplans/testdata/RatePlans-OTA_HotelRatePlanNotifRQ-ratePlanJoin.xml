@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    AlpineBits 2026-10
+    https://www.alpinebits.org/
+
+    Sample message file for a RatePlans request that joins two rate plans:
+    the same stay offered with half board and with bed and breakfast.
+
+    Both rate plans share the RatePlanID; the master carries RatePlanQualifier
+    set to true and holds the descriptive content, the static rate information
+    and the offers, while the alternative version carries the booking rules and
+    the date-dependent rates. Requires the capability
+    OTA_HotelRatePlanNotif_accept_RatePlanJoin.
+
+    The message is announced as a complete set through the UniqueID element.
+
+    Changelog:
+    v. 2026-10 1.0 initial example
+-->
+
+<OTA_HotelRatePlanNotifRQ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                          xmlns="http://www.opentravel.org/OTA/2003/05"
+                          xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_HotelRatePlanNotifRQ.xsd"
+                          Version="7.001">
+
+    <!-- Type 16 -> the message carries the complete set of rate plans -->
+    <UniqueID Type="16" ID="1" Instance="CompleteSet"/>
+
+    <RatePlans HotelCode="123" HotelName="AlpineBits Hotel">
+
+        <!-- the master: exactly one rate plan per RatePlanID has RatePlanQualifier="true" -->
+        <RatePlan RatePlanNotifType="New" CurrencyCode="EUR" RatePlanCode="STD-HB"
+                  RatePlanID="STD-2027" RatePlanQualifier="true">
+
+            <BookingRules>
+                <BookingRule Start="2027-01-09" End="2027-03-27">
+                    <LengthsOfStay>
+                        <LengthOfStay Time="3" TimeUnit="Day" MinMaxMessageType="SetMinLOS"/>
+                    </LengthsOfStay>
+                    <RestrictionStatus Restriction="Master" Status="Open"/>
+                </BookingRule>
+            </BookingRules>
+
+            <Rates>
+
+                <!-- the static rate: MealsIncluded is the one component the server does not inherit -->
+                <Rate RateTimeUnit="Day" UnitMultiplier="1">
+                    <BaseByGuestAmts>
+                        <BaseByGuestAmt Type="7"/>
+                    </BaseByGuestAmts>
+                    <!-- Code 12 -> half board -->
+                    <MealsIncluded MealPlanIndicator="true" MealPlanCodes="12"/>
+                </Rate>
+
+                <Rate InvTypeCode="DOUBLE" Start="2027-01-09" End="2027-03-27">
+                    <BaseByGuestAmts>
+                        <BaseByGuestAmt NumberOfGuests="1" AgeQualifyingCode="10" AmountAfterTax="130"/>
+                        <BaseByGuestAmt NumberOfGuests="2" AgeQualifyingCode="10" AmountAfterTax="110"/>
+                    </BaseByGuestAmts>
+                </Rate>
+
+            </Rates>
+
+            <Offers>
+
+                <!--
+                the first Offer carries the mandatory OfferRule; here it also restricts
+                the rate plan to stays of three to seven nights arriving on a Saturday
+                (capability OTA_HotelRatePlanNotif_accept_OfferRule_DOWLOS)
+                -->
+                <Offer>
+                    <OfferRules>
+                        <OfferRule>
+                            <LengthsOfStay>
+                                <LengthOfStay Time="3" TimeUnit="Day" MinMaxMessageType="SetMinLOS"/>
+                                <LengthOfStay Time="7" TimeUnit="Day" MinMaxMessageType="SetMaxLOS"/>
+                            </LengthsOfStay>
+                            <DOW_Restrictions>
+                                <ArrivalDaysOfWeek   Mon="0" Tue="0" Weds="0" Thur="0" Fri="0" Sat="1" Sun="0"/>
+                                <DepartureDaysOfWeek Mon="0" Tue="0" Weds="0" Thur="0" Fri="0" Sat="1" Sun="0"/>
+                            </DOW_Restrictions>
+                            <Occupancy AgeQualifyingCode="10" MinAge="16"/>
+                            <Occupancy AgeQualifyingCode="8"/>
+                        </OfferRule>
+                    </OfferRules>
+                </Offer>
+
+                <!-- stay seven nights, pay six -->
+                <Offer>
+                    <Discount Percent="100" NightsRequired="7" NightsDiscounted="1"/>
+                </Offer>
+
+            </Offers>
+
+            <Description Name="title">
+                <Text TextFormat="PlainText" Language="en">Winter week, half board</Text>
+                <Text TextFormat="PlainText" Language="it">Settimana bianca, mezza pensione</Text>
+            </Description>
+
+            <Description Name="intro">
+                <Text TextFormat="PlainText" Language="en">Lorem ipsum dolor sit amet.</Text>
+                <Text TextFormat="PlainText" Language="it">Lorem ipsum dolor sit amet.</Text>
+            </Description>
+
+        </RatePlan>
+
+        <!--
+        the alternative version: same RatePlanID, RatePlanQualifier="false".
+        It repeats the booking rules and the date-dependent rates, and carries its
+        own MealsIncluded; everything else is taken from the master.
+        -->
+        <RatePlan RatePlanNotifType="New" CurrencyCode="EUR" RatePlanCode="STD-BB"
+                  RatePlanID="STD-2027" RatePlanQualifier="false">
+
+            <BookingRules>
+                <BookingRule Start="2027-01-09" End="2027-03-27">
+                    <LengthsOfStay>
+                        <LengthOfStay Time="3" TimeUnit="Day" MinMaxMessageType="SetMinLOS"/>
+                    </LengthsOfStay>
+                    <RestrictionStatus Restriction="Master" Status="Open"/>
+                </BookingRule>
+            </BookingRules>
+
+            <Rates>
+
+                <Rate RateTimeUnit="Day" UnitMultiplier="1">
+                    <BaseByGuestAmts>
+                        <BaseByGuestAmt Type="7"/>
+                    </BaseByGuestAmts>
+                    <!-- Code 3 -> bed and breakfast -->
+                    <MealsIncluded MealPlanIndicator="true" MealPlanCodes="3"/>
+                </Rate>
+
+                <Rate InvTypeCode="DOUBLE" Start="2027-01-09" End="2027-03-27">
+                    <BaseByGuestAmts>
+                        <BaseByGuestAmt NumberOfGuests="1" AgeQualifyingCode="10" AmountAfterTax="105"/>
+                        <BaseByGuestAmt NumberOfGuests="2" AgeQualifyingCode="10" AmountAfterTax="85"/>
+                    </BaseByGuestAmts>
+                </Rate>
+
+            </Rates>
+
+            <!--
+            every rate plan carries the mandatory OfferRule; on joining, the server
+            takes the offers from the master, so no further restriction is repeated here
+            -->
+            <Offers>
+                <Offer>
+                    <OfferRules>
+                        <OfferRule>
+                            <Occupancy AgeQualifyingCode="10" MinAge="16"/>
+                            <Occupancy AgeQualifyingCode="8"/>
+                        </OfferRule>
+                    </OfferRules>
+                </Offer>
+            </Offers>
+
+        </RatePlan>
+
+    </RatePlans>
+
+</OTA_HotelRatePlanNotifRQ>

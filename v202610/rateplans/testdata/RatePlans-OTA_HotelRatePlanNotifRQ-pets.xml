@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    AlpineBits 2026-10
+    https://www.alpinebits.org/
+
+    Sample message file for a RatePlans request that prices pets.
+
+    Pets are expressed by two dedicated constructs, both recognised by the
+    value ALPINEBITS-PETS:
+
+    - a BookingRule with CodeContext ALPINEBITS-PETS and the fixed Code
+      ANY states, for a period, whether the rate plan accepts pets at all. It
+      applies to the whole rate plan and to every category in it, and carries
+      nothing but a RestrictionStatus element;
+    - a Supplement with InvType ALPINEBITS-PETS carries the price, and is
+      only meaningful within the Open periods of those BookingRules.
+
+    Following the best practice given in the specification, the rate plan below
+    is dedicated to the categories that host pets.
+
+    Changelog:
+    v. 2026-10 1.0 initial example
+-->
+
+<OTA_HotelRatePlanNotifRQ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                          xmlns="http://www.opentravel.org/OTA/2003/05"
+                          xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_HotelRatePlanNotifRQ.xsd"
+                          Version="8.000">
+
+    <RatePlans HotelCode="123" HotelName="AlpineBits Hotel">
+
+        <RatePlan RatePlanNotifType="New" CurrencyCode="EUR" RatePlanCode="PETS-2027">
+
+            <BookingRules>
+
+                <!-- the rate plan itself is bookable for the whole autumn and winter -->
+                <BookingRule Start="2027-09-09" End="2027-12-31">
+                    <RestrictionStatus Restriction="Master" Status="Open"/>
+                </BookingRule>
+
+                <!-- pets are accepted in autumn ... -->
+                <BookingRule Start="2027-09-09" End="2027-11-30"
+                             CodeContext="ALPINEBITS-PETS" Code="ANY">
+                    <RestrictionStatus Restriction="Master" Status="Open"/>
+                </BookingRule>
+
+                <!--
+                ... and not accepted during the Christmas period. Periods of
+                distinct pets' BookingRules must not overlap.
+                -->
+                <BookingRule Start="2027-12-01" End="2027-12-31"
+                             CodeContext="ALPINEBITS-PETS" Code="ANY">
+                    <RestrictionStatus Restriction="Master" Status="Close"/>
+                </BookingRule>
+
+            </BookingRules>
+
+            <Rates>
+                <Rate RateTimeUnit="Day" UnitMultiplier="1">
+                    <BaseByGuestAmts>
+                        <BaseByGuestAmt Type="7"/>
+                    </BaseByGuestAmts>
+                    <!-- Code 12 -> half board -->
+                    <MealsIncluded MealPlanIndicator="true" MealPlanCodes="12"/>
+                </Rate>
+                <Rate InvTypeCode="DOUBLE" Start="2027-09-09" End="2027-12-31">
+                    <BaseByGuestAmts>
+                        <BaseByGuestAmt NumberOfGuests="2" AgeQualifyingCode="10" AmountAfterTax="105"/>
+                    </BaseByGuestAmts>
+                </Rate>
+            </Rates>
+
+            <Supplements>
+
+                <!--
+                static data of the pets' supplement. ChargeTypeCode 1 is daily:
+                since MandatoryIndicator is false, the total is obtained by
+                asking the guest how many animals are brought along.
+                -->
+                <Supplement InvType="ALPINEBITS-PETS" InvCode="pet" AddToBasicRateIndicator="true"
+                            MandatoryIndicator="false" ChargeTypeCode="1">
+                    <Description Name="title">
+                        <Text TextFormat="PlainText" Language="en">Pet surcharge</Text>
+                        <Text TextFormat="PlainText" Language="de">Zuschlag für Haustiere</Text>
+                        <Text TextFormat="PlainText" Language="it">Supplemento animali al seguito</Text>
+                    </Description>
+                </Supplement>
+
+                <!--
+                date-dependent data. Both periods fall inside the Open period of
+                the pets' BookingRule above; the Christmas period, where pets are
+                not accepted, carries no price at all.
+                -->
+                <Supplement InvType="ALPINEBITS-PETS" InvCode="pet" Amount="15"
+                            Start="2027-09-09" End="2027-11-15"/>
+
+                <!-- the same pet costs more in the double rooms during high season -->
+                <Supplement InvType="ALPINEBITS-PETS" InvCode="pet" Amount="20"
+                            Start="2027-11-16" End="2027-11-30">
+                    <PrerequisiteInventory InvType="ROOMTYPE" InvCode="DOUBLE"/>
+                </Supplement>
+
+            </Supplements>
+
+            <Offers>
+                <Offer>
+                    <OfferRules>
+                        <OfferRule>
+                            <Occupancy AgeQualifyingCode="10"/>
+                        </OfferRule>
+                    </OfferRules>
+                </Offer>
+            </Offers>
+
+            <Description Name="title">
+                <Text TextFormat="PlainText" Language="en">Autumn with your pet</Text>
+                <Text TextFormat="PlainText" Language="de">Herbst mit Haustier</Text>
+                <Text TextFormat="PlainText" Language="it">Autunno con il tuo animale</Text>
+            </Description>
+
+        </RatePlan>
+
+    </RatePlans>
+
+</OTA_HotelRatePlanNotifRQ>
