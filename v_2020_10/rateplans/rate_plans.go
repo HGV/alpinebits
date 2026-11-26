@@ -21,6 +21,15 @@ func (r HotelRatePlanNotifRQ) IsReset() bool {
 	return r.UniqueID != nil && r.UniqueID.Instance == InstanceCompleteSet
 }
 
+// IsPurge reports whether the request is a CompleteSet containing a single
+// empty RatePlan element, which asks the server to delete all rate plans of
+// the hotel.
+func (r HotelRatePlanNotifRQ) IsPurge() bool {
+	return r.IsReset() &&
+		len(r.RatePlans.RatePlans) == 1 &&
+		r.RatePlans.RatePlans[0].isZero()
+}
+
 var _ version.HotelCodeProvider = (*HotelRatePlanNotifRQ)(nil)
 
 func (h HotelRatePlanNotifRQ) HotelCode() string {
@@ -73,6 +82,20 @@ type RatePlan struct {
 	Supplements       []Supplement        `xml:"Supplements>Supplement"`
 	Offers            []Offer             `xml:"Offers>Offer"`
 	Descriptions      RatePlanDescription `xml:"Description"`
+}
+
+func (r RatePlan) isZero() bool {
+	return r.RatePlanNotifType == "" &&
+		r.RatePlanType == 0 &&
+		r.CurrencyCode == "" &&
+		r.RatePlanCode == "" &&
+		r.RatePlanID == "" &&
+		r.RatePlanQualifier == nil &&
+		len(r.BookingRules) == 0 &&
+		len(r.Rates) == 0 &&
+		len(r.Supplements) == 0 &&
+		len(r.Offers) == 0 &&
+		r.Descriptions.isZero()
 }
 
 func (r RatePlan) IsMaster() bool {

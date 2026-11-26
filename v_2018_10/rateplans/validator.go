@@ -160,6 +160,10 @@ func (v *HotelRatePlanNotifValidator) Validate(r HotelRatePlanNotifRQ) error {
 		return err
 	}
 
+	if r.IsPurge() {
+		return nil
+	}
+
 	if r.IsReset() {
 		if err := v.validateRatePlansReset(r.RatePlans.RatePlans); err != nil {
 			return err
