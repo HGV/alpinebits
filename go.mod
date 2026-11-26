@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/HGV/x v0.0.0-20260403061232-252f0a0953ef
 	github.com/juliangruber/go-intersect/v2 v2.0.1
-	github.com/lestrrat-go/libxml2 v0.0.0-20260304224138-bb3877930cf7
+	github.com/lestrrat-go/libxml2 v0.0.0-20260709020957-3f0f7bd60b63
 	github.com/stretchr/testify v1.11.1
 )
 
