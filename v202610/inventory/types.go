@@ -46,7 +46,7 @@ type HotelDescriptiveContentNotifRQ struct {
 	HotelDescriptiveContent HotelDescriptiveContent `xml:"HotelDescriptiveContents>HotelDescriptiveContent"`
 }
 
-// HotelCode implements alpinebits.HotelCoded.
+// HotelCode returns the code of the hotel the request is for.
 func (r HotelDescriptiveContentNotifRQ) HotelCode() string {
 	return r.HotelDescriptiveContent.HotelCode
 }

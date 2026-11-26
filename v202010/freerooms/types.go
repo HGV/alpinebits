@@ -17,7 +17,7 @@ type HotelInvCountNotifRQ struct {
 	Inventories Inventories `xml:"Inventories"`
 }
 
-// HotelCode implements alpinebits.HotelCoded.
+// HotelCode returns the code of the hotel the request is for.
 func (r HotelInvCountNotifRQ) HotelCode() string {
 	return r.Inventories.HotelCode
 }

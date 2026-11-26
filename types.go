@@ -6,11 +6,6 @@ import (
 	"strconv"
 )
 
-// HotelCoded is implemented by request types that contain a hotel code.
-type HotelCoded interface {
-	HotelCode() string
-}
-
 // Decimal is an xs:decimal, such as an amount. Unlike a float64 it is never
 // written in exponent form, which xs:decimal does not allow.
 type Decimal float64

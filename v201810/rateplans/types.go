@@ -47,7 +47,7 @@ type UniqueID struct {
 	Instance Instance     `xml:"Instance,attr"`
 }
 
-// HotelCode implements alpinebits.HotelCoded.
+// HotelCode returns the code of the hotel the request is for.
 func (r HotelRatePlanNotifRQ) HotelCode() string {
 	return r.RatePlans.HotelCode
 }

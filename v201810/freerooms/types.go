@@ -16,7 +16,7 @@ type HotelAvailNotifRQ struct {
 	AvailStatusMessages AvailStatusMessages `xml:"AvailStatusMessages"`
 }
 
-// HotelCode implements alpinebits.HotelCoded.
+// HotelCode returns the code of the hotel the request is for.
 func (r HotelAvailNotifRQ) HotelCode() string {
 	return r.AvailStatusMessages.HotelCode
 }

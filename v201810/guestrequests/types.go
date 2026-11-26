@@ -46,7 +46,7 @@ type ReadRQ struct {
 	ReadRequest ReadRequest `xml:"ReadRequests>HotelReadRequest"`
 }
 
-// HotelCode implements alpinebits.HotelCoded.
+// HotelCode returns the code of the hotel the request is for.
 func (r ReadRQ) HotelCode() string {
 	return r.ReadRequest.HotelCode
 }
