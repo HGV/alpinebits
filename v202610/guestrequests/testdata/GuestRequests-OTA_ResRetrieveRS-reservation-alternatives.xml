@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    AlpineBits 2026-10
+    https://www.alpinebits.org/
+
+    Sample message file for a GuestRequests response that uses the alternative
+    form of two elements which allow a choice:
+
+    - Commission carries a CommissionPayableAmount sub-element instead of the
+      Percent attribute
+    - CardNumber is sent encrypted, through the attributes EncryptedValue and
+      EncryptionMethod, instead of as PlainText
+
+    See the reservation sample for the more common form of both.
+
+    Changelog:
+    v. 2026-10 1.0 initial example
+-->
+
+<OTA_ResRetrieveRS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.opentravel.org/OTA/2003/05"
+                   xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_ResRetrieveRS.xsd"
+                   Version="7.000">
+
+    <Success/>
+
+    <ReservationsList>
+
+        <HotelReservation CreateDateTime="2026-11-21T12:00:00+01:00" ResStatus="Reserved" RoomStayReservation="true">
+
+            <!-- Type 14 -> Reservation -->
+            <UniqueID Type="14" ID="8f21ac03be55d194"/>
+
+            <RoomStays>
+
+                <RoomStay>
+
+                    <RoomTypes>
+                        <RoomType RoomTypeCode="DOUBLE" RoomClassificationCode="42"/>
+                    </RoomTypes>
+
+                    <RatePlans>
+                        <RatePlan RatePlanCode="STD-HB">
+                            <!-- the commission as an amount; the alternative is the Percent attribute -->
+                            <Commission>
+                                <CommissionPayableAmount Amount="82.50" CurrencyCode="EUR"/>
+                            </Commission>
+                            <!-- Code 12 -> half board -->
+                            <MealsIncluded MealPlanIndicator="true" MealPlanCodes="12"/>
+                        </RatePlan>
+                    </RatePlans>
+
+                    <GuestCounts>
+                        <GuestCount Count="2"/>
+                    </GuestCounts>
+
+                    <TimeSpan Start="2027-02-13" End="2027-02-20"/>
+
+                    <Guarantee>
+                        <GuaranteesAccepted>
+                            <GuaranteeAccepted>
+                                <PaymentCard CardCode="VI" ExpireDate="1230">
+                                    <CardHolderName>Otto Mustermann</CardHolderName>
+                                    <!--
+                                    the encrypted form: no sub-elements, the number travels
+                                    in EncryptedValue and the method used is named in EncryptionMethod
+                                    -->
+                                    <CardNumber EncryptedValue="Vk15rP0iQ2xhdWRlU2FtcGxlRW5jcnlwdGVkQ2FyZE51bWJlcg=="
+                                                EncryptionMethod="RSA-PKCSV2.2"/>
+                                </PaymentCard>
+                            </GuaranteeAccepted>
+                        </GuaranteesAccepted>
+                    </Guarantee>
+
+                    <Total AmountAfterTax="550" CurrencyCode="EUR"/>
+
+                </RoomStay>
+
+            </RoomStays>
+
+            <ResGuests>
+                <ResGuest>
+                    <Profiles>
+                        <ProfileInfo>
+                            <Profile>
+                                <Customer Gender="Male" BirthDate="1980-01-01" Language="de">
+                                    <PersonName>
+                                        <NamePrefix>Herr</NamePrefix>
+                                        <GivenName>Otto</GivenName>
+                                        <Surname>Mustermann</Surname>
+                                    </PersonName>
+                                    <Telephone PhoneTechType="1" PhoneNumber="+4934567891"/>
+                                    <Email Remark="newsletter:no">otto.mustermann@example.com</Email>
+                                    <Address>
+                                        <AddressLine>Musterstraße 1</AddressLine>
+                                        <CityName>Musterstadt</CityName>
+                                        <PostalCode>1234</PostalCode>
+                                        <CountryName Code="DE"/>
+                                    </Address>
+                                </Customer>
+                            </Profile>
+                        </ProfileInfo>
+                    </Profiles>
+                </ResGuest>
+            </ResGuests>
+
+            <ResGlobalInfo>
+                <BasicPropertyInfo HotelCode="123" HotelName="AlpineBits Hotel"/>
+            </ResGlobalInfo>
+
+        </HotelReservation>
+
+    </ReservationsList>
+
+</OTA_ResRetrieveRS>

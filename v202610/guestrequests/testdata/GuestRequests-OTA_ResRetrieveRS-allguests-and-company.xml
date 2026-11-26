@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    AlpineBits 2026-10
+    https://www.alpinebits.org/
+
+    Sample message file for a GuestRequests response listing all arriving guests,
+    the booking guest and the booking company
+
+    Changelog:
+    v. 2026-10 1.0 header added, example dates rebased on the 2026-10 release
+-->
+
+<OTA_ResRetrieveRS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.opentravel.org/OTA/2003/05"
+                   xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_ResRetrieveRS.xsd"
+                   Version="7.000">
+    <Success/>
+    <ReservationsList>
+        <HotelReservation CreateDateTime="2026-11-21T15:00:00+01:00" ResStatus="Reserved" RoomStayReservation="true">
+            <UniqueID Type="14" ID="6b34fe24ac2ff810"/>
+            <RoomStays>
+                <RoomStay>
+                    <RoomTypes>
+                        <RoomType RoomTypeCode="DOUBLE" RoomClassificationCode="42"/>
+                    </RoomTypes>
+                    <RatePlans>
+                        <RatePlan RatePlanCode="STD">
+                            <Commission Percent="15"/>
+                            <MealsIncluded MealPlanIndicator="true" MealPlanCodes="1"/>
+                        </RatePlan>
+                    </RatePlans>
+                    <GuestCounts>
+                        <GuestCount Count="2"/>
+                    </GuestCounts>
+                    <TimeSpan Start="2027-01-01" End="2027-01-12"/>
+                    <Total AmountAfterTax="880" CurrencyCode="EUR"/>
+                    <ResGuestRPHs>1 2</ResGuestRPHs>
+                </RoomStay>
+                <RoomStay>
+                    <RoomTypes>
+                        <RoomType RoomTypeCode="SINGLE" RoomClassificationCode="42"/>
+                    </RoomTypes>
+                    <RatePlans>
+                        <RatePlan RatePlanCode="STD">
+                            <MealsIncluded MealPlanIndicator="true" MealPlanCodes="1"/>
+                        </RatePlan>
+                    </RatePlans>
+                    <GuestCounts>
+                        <GuestCount Count="1"/>
+                    </GuestCounts>
+                    <TimeSpan Start="2027-01-01" End="2027-01-12"/>
+                    <Total AmountAfterTax="550" CurrencyCode="EUR"/>
+                    <ResGuestRPHs>3</ResGuestRPHs>
+                </RoomStay>
+            </RoomStays>
+            <ResGuests>
+                <ResGuest ResGuestRPH="1">
+                    <Profiles>
+                        <ProfileInfo>
+                            <Profile>
+                                <Customer Gender="Male" BirthDate="1980-01-01" Language="de">
+                                    <PersonName>
+                                        <NamePrefix>Herr</NamePrefix>
+                                        <GivenName>Otto</GivenName>
+                                        <Surname>Mustermann</Surname>
+                                        <NameTitle>Dr</NameTitle>
+                                    </PersonName>
+                                    <Telephone PhoneTechType="1" PhoneNumber="+4934567891"/>
+                                    <Email Remark="newsletter:no">otto.mustermann@example.com</Email>
+                                    <Address>
+                                        <AddressLine>Musterstraße 1</AddressLine>
+                                        <CityName>Musterstadt</CityName>
+                                        <PostalCode>1234</PostalCode>
+                                        <CountryName Code="DE"/>
+                                    </Address>
+                                </Customer>
+                            </Profile>
+                        </ProfileInfo>
+                    </Profiles>
+                </ResGuest>
+                <ResGuest ResGuestRPH="2">
+                    <Profiles>
+                        <ProfileInfo>
+                            <Profile>
+                                <Customer Gender="Female" BirthDate="1990-01-01" Language="de">
+                                    <PersonName>
+                                        <NamePrefix>Frau</NamePrefix>
+                                        <GivenName>Maria</GivenName>
+                                        <Surname>Mustermann</Surname>
+                                    </PersonName>
+                                    <Telephone PhoneTechType="1" PhoneNumber="+4934567891"/>
+                                    <Email Remark="newsletter:no">roomguest_2@test.com</Email>
+                                    <Address>
+                                        <AddressLine>Musterstraße 1</AddressLine>
+                                        <CityName>Musterstadt</CityName>
+                                        <PostalCode>1234</PostalCode>
+                                        <CountryName Code="DE"/>
+                                    </Address>
+                                </Customer>
+                            </Profile>
+                        </ProfileInfo>
+                    </Profiles>
+                </ResGuest>
+                <ResGuest ResGuestRPH="3">
+                    <Profiles>
+                        <ProfileInfo>
+                            <Profile>
+                                <Customer Gender="Male" BirthDate="2020-01-01" Language="de">
+                                    <PersonName>
+                                        <GivenName>Max</GivenName>
+                                        <Surname>Mustermann</Surname>
+                                    </PersonName>
+                                </Customer>
+                            </Profile>
+                        </ProfileInfo>
+                    </Profiles>
+                </ResGuest>
+            </ResGuests>
+            <ResGlobalInfo>
+                <Profiles> 
+                    <!-- If a guest books the reservation but does not arrive himself, he can be specified here -->
+                    <ProfileInfo>
+                        <!-- ProfileType 1 -> Customer -->
+                        <Profile ProfileType="1">
+                            <Customer Gender="Male" BirthDate="1980-01-01" Language="de">
+                                <PersonName>
+                                    <NamePrefix>Mr</NamePrefix>
+                                    <GivenName>Booker_1</GivenName>
+                                    <Surname>Booker_1</Surname>
+                                    <NameTitle>Dr</NameTitle>
+                                </PersonName>
+                                <Telephone PhoneTechType="1" PhoneNumber="+4934567891"/>
+                                <Email Remark="newsletter:no">Booker_1@example.com</Email>
+                                <Address>
+                                    <AddressLine>Street_Booker_1</AddressLine>
+                                    <CityName>City_Booker_1</CityName>
+                                    <PostalCode>ZipCode_Booker_1</PostalCode>
+                                    <CountryName Code="DE"/>
+                                </Address>
+                            </Customer>
+                        </Profile>
+                    </ProfileInfo>
+
+                    <!-- If a company books the reservation -->
+                    <ProfileInfo>
+                        <!-- ProfileType 3 -> Corporation -->
+                        <Profile ProfileType="3">
+                            <CompanyInfo>
+                                <CompanyName Code="123" CodeContext="ABC">Telekom GmbH</CompanyName>
+                                <AddressInfo>
+                                    <AddressLine>Hauptstr. 1</AddressLine>
+                                    <CityName>Bonn</CityName>
+                                    <PostalCode>53227 </PostalCode>
+                                    <CountryName Code="DE"/>
+                                </AddressInfo>
+                                <TelephoneInfo PhoneTechType="1" PhoneNumber="+49000999999"/>
+                                <Email>info@telekom.de</Email>
+                            </CompanyInfo>
+                        </Profile>
+                    </ProfileInfo>
+
+                    <!--- Booking portal -->
+                    <ProfileInfo>
+                        <!-- ProfileType 4 -> Travel Agent -->
+                        <Profile ProfileType="4">
+                            <CompanyInfo>
+                                <CompanyName Code="123" CodeContext="ABC">ACME Travel Agency</CompanyName>
+                                <!-- Code 1 -> Voice -->
+                                <AddressInfo>
+                                    <AddressLine>Musterstraße 1</AddressLine>
+                                    <CityName>Flaneid</CityName>
+                                    <PostalCode>12345</PostalCode>
+                                    <CountryName Code="IT"/>
+                                </AddressInfo>
+                                <TelephoneInfo PhoneTechType="1" PhoneNumber="+391234567890"/>
+                                <Email>info@example.com</Email>
+                            </CompanyInfo>
+                        </Profile>
+                    </ProfileInfo>
+                </Profiles>
+
+                <BasicPropertyInfo HotelCode="123" HotelName="AlpineBits Hotel"/>
+
+            </ResGlobalInfo>
+        </HotelReservation>
+    </ReservationsList>
+</OTA_ResRetrieveRS>

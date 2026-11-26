@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+    AlpineBits 2022-10
+    https://www.alpinebits.org/
+
+    Sample message file for GuestRequests with a SelectionCriteria
+
+    Changelog:
+    v. 2022-10 1.1 renamed original example to GuestRequests-OTA-ReadRQ-selection-criteria
+    v. 2014-04 1.0 initial example
+-->
+
+<OTA_ReadRQ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://www.opentravel.org/OTA/2003/05"
+            xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_ReadRQ.xsd"
+            Version="1.001">
+
+    <ReadRequests>
+
+        <HotelReadRequest HotelCode="123" HotelName="Frangart Inn">
+           <SelectionCriteria Start="2022-03-21T15:00:00+01:00"></SelectionCriteria>
+       </HotelReadRequest>
+
+    </ReadRequests>
+
+</OTA_ReadRQ>

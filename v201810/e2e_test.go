@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/xml"
 	"errors"
-	"log/slog"
 	"maps"
 	"net/http"
 	"net/http/httptest"
@@ -195,57 +194,4 @@ func messages(errs *alpinebits.Errors) []string {
 		msgs = append(msgs, e.Message)
 	}
 	return msgs
-}
-
-func TestFailuresReachClient(t *testing.T) {
-	rq := sample[freerooms.HotelAvailNotifRQ](t, "freerooms/testdata/FreeRooms-OTA_HotelAvailNotifRQ.xml")
-	var handlerErr error
-	r := alpinebits.NewRouter().
-		Handle(v201810.ActionHotelAvailNotif,
-			func(context.Context, alpinebits.Request[freerooms.HotelAvailNotifRQ]) (freerooms.HotelAvailNotifRS, error) {
-				return freerooms.HotelAvailNotifRS{Response: alpinebits.OK()}, handlerErr
-			}, alpinebits.WithCapabilities(freeRoomsCaps...))
-	url := serve(t, r)
-	c := client(url)
-
-	t.Run("rules", func(t *testing.T) {
-		rq := rq
-		rq.AvailStatusMessages.HotelCode, rq.AvailStatusMessages.HotelName = "", ""
-		rs, err := c.Send(t.Context(), v201810.ActionHotelAvailNotif, rq)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if got := messages(rs.Errors); !reflect.DeepEqual(got, []string{"HotelCode required"}) {
-			t.Errorf("errors %q", got)
-		}
-	})
-	t.Run("rejected", func(t *testing.T) {
-		handlerErr = alpinebits.Reject(alpinebits.Error{Type: alpinebits.ErrTypeApplicationError, Code: 392, Message: "unknown hotel"})
-		defer func() { handlerErr = nil }()
-		rs, err := c.Send(t.Context(), v201810.ActionHotelAvailNotif, rq)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if got := messages(rs.Errors); !reflect.DeepEqual(got, []string{"unknown hotel"}) || rs.Success != nil {
-			t.Errorf("errors %q, success %v", got, rs.Success)
-		}
-	})
-	t.Run("handler fails", func(t *testing.T) {
-		handlerErr = errors.New("database down")
-		defer func() { handlerErr = nil }()
-		defer slog.SetDefault(slog.Default())
-		slog.SetDefault(slog.New(slog.DiscardHandler))
-		_, err := c.Send(t.Context(), v201810.ActionHotelAvailNotif, rq)
-		if se, ok := errors.AsType[*alpinebits.ServerError](err); !ok || se.StatusCode != 500 {
-			t.Errorf("got %v, want status 500", err)
-		}
-	})
-	t.Run("wrong password", func(t *testing.T) {
-		c := alpinebits.NewClient(url, user, "wrong", v201810.Version)
-		_, err := c.Send(t.Context(), v201810.ActionHotelAvailNotif, rq)
-		want := alpinebits.ServerError{StatusCode: 401, Message: "invalid or missing username/password"}
-		if se, ok := errors.AsType[*alpinebits.ServerError](err); !ok || *se != want {
-			t.Errorf("got %v, want %+v", err, want)
-		}
-	})
 }

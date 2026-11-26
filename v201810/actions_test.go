@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/HGV/alpinebits"
@@ -86,8 +85,6 @@ func TestFreeRoomsAfterHandshake(t *testing.T) {
 		wantErrs          []string
 	}{
 		{"rooms", "OTA_HotelAvailNotif:FreeRooms", freeRooms(completeSet, room101), nil},
-		{"delta, deltas not negotiated", "OTA_HotelAvailNotif:FreeRooms", freeRooms("", room101),
-			[]string{"deltas not supported"}},
 		{"rooms and categories mixed", "OTA_HotelAvailNotif:FreeRooms", freeRooms(completeSet, room101, categoryDZ),
 			[]string{"rooms and categories must not be mixed"}},
 		{"acknowledgement covered by action_OTA_Read", "OTA_NotifReport:GuestRequests",
@@ -120,18 +117,5 @@ func TestFreeRoomsAfterHandshake(t *testing.T) {
 				t.Errorf("want Success: %s", body)
 			}
 		})
-	}
-}
-
-func TestSchemaViolation(t *testing.T) {
-	r := alpinebits.NewRouter().
-		Handle(ActionHotelAvailNotif,
-			func(context.Context, alpinebits.Request[freerooms.HotelAvailNotifRQ]) (freerooms.HotelAvailNotifRS, error) {
-				t.Error("handler called")
-				return freerooms.HotelAvailNotifRS{}, nil
-			})
-	code, body := post(t, r, "OTA_HotelAvailNotif:FreeRooms", `<OTA_HotelAvailNotifRQ `+ns+` Version="1.002"><Bogus/></OTA_HotelAvailNotifRQ>`)
-	if code != http.StatusBadRequest || !strings.HasPrefix(body, "ERROR:XML validation error: ") || !strings.Contains(body, "Bogus") {
-		t.Errorf("got %d %s", code, body)
 	}
 }

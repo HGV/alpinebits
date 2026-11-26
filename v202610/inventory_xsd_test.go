@@ -21,7 +21,7 @@ var inventoryCaps = []alpinebits.Capability{inventory.CapUseRooms, inventory.Cap
 
 // inventoryWithCodes is the official sample with AdditionalCodes and a valid
 // MaxAdultOccupancy for SUITE.
-func inventoryWithCodes(t *testing.T) []byte {
+func inventoryWithCodes(t testing.TB) []byte {
 	t.Helper()
 	b, err := os.ReadFile(inventoryBasicSample)
 	if err != nil {
@@ -85,6 +85,7 @@ func TestInventorySamplesRoundTrip(t *testing.T) {
 }
 
 func FuzzInventory(f *testing.F) {
+	f.Add(inventoryWithCodes(f))
 	for _, p := range []string{inventoryBasicSample, inventoryDeleteSample} {
 		b, err := os.ReadFile(p)
 		if err != nil {

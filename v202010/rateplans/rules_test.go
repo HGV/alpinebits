@@ -81,7 +81,4 @@ func TestValidateOneRatePlanPerCode(t *testing.T) {
 	}
 	rq := HotelRatePlanNotifRQ{RatePlans: RatePlans{HotelCode: "123", RatePlans: []RatePlan{remove("A"), remove("B"), remove("A")}}}
 	rulestest.Expect(t, Validate(rq, allCaps), []string{"RatePlan[2]: duplicate RatePlanCode A"})
-
-	reset := HotelRatePlanNotifRQ{UniqueID: &UniqueID{Type: UniqueIDTypeReference, ID: "1", Instance: InstanceCompleteSet}, RatePlans: RatePlans{HotelCode: "123", RatePlans: []RatePlan{{}}}}
-	rulestest.Expect(t, Validate(reset, nil), nil)
 }

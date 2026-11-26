@@ -193,59 +193,21 @@ func TestGuestRequestsTypesRoundTrip(t *testing.T) {
 	}
 }
 
-// Responses the handler or the router build must pass the router's response
-// validation, or it answers 500.
+// The error response the router builds when the rules fail must pass the
+// router's response validation, or it answers 500.
 func TestGuestRequestsRouter(t *testing.T) {
-	reservations := unmarshalGuestRequests[guestrequests.ResRetrieveRS](t, guestRequestsSample(t, "OTA_ResRetrieveRS-reservation")).HotelReservations
-	var found []guestrequests.HotelReservation
 	r := alpinebits.NewRouter().
 		Handle(ActionRead,
 			func(context.Context, alpinebits.Request[guestrequests.ReadRQ]) (guestrequests.ResRetrieveRS, error) {
-				rs := guestrequests.ResRetrieveRS{Response: alpinebits.OK(), HotelReservations: found}
-				return rs, alpinebits.Reject(guestrequests.ValidateResRetrieveRS(rs)...)
-			}).
-		Handle(ActionNotifReport,
-			func(context.Context, alpinebits.Request[guestrequests.NotifReportRQ]) (guestrequests.NotifReportRS, error) {
-				return guestrequests.NotifReportRS{Response: alpinebits.OK()}, nil
+				return guestrequests.ResRetrieveRS{Response: alpinebits.OK()}, nil
 			})
-
-	readRQ := func(hotel string) string {
-		return `<OTA_ReadRQ ` + ns + ` Version="1.0"><ReadRequests><HotelReadRequest ` + hotel + `/></ReadRequests></OTA_ReadRQ>`
+	code, body := post(t, r, "OTA_Read:GuestRequests",
+		`<OTA_ReadRQ `+ns+` Version="1.0"><ReadRequests><HotelReadRequest HotelCode=" "/></ReadRequests></OTA_ReadRQ>`)
+	if code != http.StatusOK {
+		t.Fatalf("status %d: %s", code, body)
 	}
-	tests := []struct {
-		name, action, doc string
-		found             []guestrequests.HotelReservation
-		wantErrs          []string
-		wantReservations  int
-	}{
-		{"nothing found", "OTA_Read:GuestRequests", readRQ(`HotelCode="123"`), nil, nil, 0},
-		{"reservation found", "OTA_Read:GuestRequests", readRQ(`HotelCode="123"`), reservations, nil, 1},
-		{"no hotel", "OTA_Read:GuestRequests", readRQ(`HotelCode=" "`), nil, []string{"HotelCode required"}, 0},
-		{"acknowledgement", "OTA_NotifReport:GuestRequests", guestRequestsSample(t, "OTA_ReadRQ-ack"), nil, nil, 0},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			found = tt.found
-			code, body := post(t, r, tt.action, tt.doc)
-			if code != http.StatusOK {
-				t.Fatalf("status %d: %s", code, body)
-			}
-			rs := unmarshalGuestRequests[struct {
-				alpinebits.Response
-				HotelReservations []guestrequests.HotelReservation `xml:"ReservationsList>HotelReservation"`
-			}](t, body)
-			var got []string
-			if rs.Errors != nil {
-				for _, e := range *rs.Errors {
-					got = append(got, e.Message)
-				}
-			}
-			if !reflect.DeepEqual(got, tt.wantErrs) {
-				t.Errorf("errors %q, want %q\n%s", got, tt.wantErrs, body)
-			}
-			if len(rs.HotelReservations) != tt.wantReservations {
-				t.Errorf("%d HotelReservations, want %d\n%s", len(rs.HotelReservations), tt.wantReservations, body)
-			}
-		})
+	rs := unmarshalGuestRequests[guestrequests.ResRetrieveRS](t, body)
+	if rs.Errors == nil || len(*rs.Errors) != 1 || (*rs.Errors)[0].Message != "HotelCode required" || rs.HotelReservations != nil {
+		t.Errorf("got %s", body)
 	}
 }

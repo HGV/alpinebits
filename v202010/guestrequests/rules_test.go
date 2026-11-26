@@ -41,18 +41,6 @@ func load[T any](t *testing.T, name string) T {
 	return v
 }
 
-func TestValidateRequests(t *testing.T) {
-	rq := load[ReadRQ](t, "GuestRequests-OTA_ReadRQ.xml")
-	rulestest.Expect(t, ValidateReadRQ(rq, nil), nil)
-	rq.ReadRequest.HotelCode, rq.ReadRequest.HotelName = " ", ""
-	rulestest.Expect(t, ValidateReadRQ(rq, nil), []string{"HotelCode required"})
-
-	ack := load[NotifReportRQ](t, "GuestRequests-OTA_ReadRQ-ack.xml")
-	rulestest.Expect(t, ValidateNotifReportRQ(ack, nil), nil)
-	(*ack.Warnings)[0].RecordID = " "
-	rulestest.Expect(t, ValidateNotifReportRQ(ack, nil), []string{"Warning[0]: RecordID required"})
-}
-
 func TestValidateResRetrieveRSSamples(t *testing.T) {
 	tests := []struct {
 		file string

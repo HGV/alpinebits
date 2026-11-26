@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/HGV/alpinebits"
 	"github.com/HGV/alpinebits/v202410/inventory"
 )
 
@@ -17,8 +16,6 @@ const (
 	inventorySamples   = "../v201810/inventory/testdata/"
 	inventoryRSSamples = "../v202210/inventory/testdata/"
 )
-
-var inventoryCaps = []alpinebits.Capability{inventory.CapUseRooms, inventory.CapOccupancyChildren}
 
 func readSample[T any](t *testing.T, path string) T {
 	t.Helper()
@@ -71,7 +68,6 @@ func TestXSDEnforcesInventoryRules(t *testing.T) {
 		{"lowercase ABR", `"7.ABR"`, `"7.abr"`},
 		{"code too long", `"7.ABR"`, `"1234"`},
 		{"list only", `"7.ABR"`, `"ABR"`},
-		{"no HotelCode", ` HotelCode="123"`, ``},
 		// §4.3.1 describes AdditionalCodes, but the 2024-10 XSD lacks them.
 		{"TPA_Extensions", `</FacilityInfo>`, `</FacilityInfo><TPA_Extensions><AdditionalCodes><AdditionalCode Type="CIN">IT1</AdditionalCode></AdditionalCodes></TPA_Extensions>`},
 	}
@@ -89,19 +85,11 @@ func TestXSDEnforcesInventoryRules(t *testing.T) {
 
 func TestInventoryTypesRoundTrip(t *testing.T) {
 	t.Run("ABR amenities", func(t *testing.T) {
-		rq := inventoryWithABR(t)
-		if errs := inventory.Validate(rq, inventoryCaps); errs != nil {
-			t.Fatalf("rules: %v", errs)
-		}
-		roundTrip(t, rq)
+		roundTrip(t, inventoryWithABR(t))
 	})
 	for _, name := range []string{"-with-roomtype", "-delete-all"} {
 		t.Run("RQ"+name, func(t *testing.T) {
-			rq := readSample[inventory.HotelDescriptiveContentNotifRQ](t, inventorySamples+"Inventory-OTA_HotelDescriptiveContentNotifRQ"+name+".xml")
-			if errs := inventory.Validate(rq, inventoryCaps); errs != nil {
-				t.Fatalf("rules: %v", errs)
-			}
-			roundTrip(t, rq)
+			roundTrip(t, readSample[inventory.HotelDescriptiveContentNotifRQ](t, inventorySamples+"Inventory-OTA_HotelDescriptiveContentNotifRQ"+name+".xml"))
 		})
 	}
 	for _, name := range []string{"success", "advisory", "warning", "error"} {

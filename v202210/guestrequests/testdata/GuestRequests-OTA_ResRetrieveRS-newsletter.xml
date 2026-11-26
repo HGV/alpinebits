@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+    AlpineBits 2022-10
+    https://www.alpinebits.org/
+
+    Sample message file for GuestRequests response with a newsletter registration
+
+    Changelog:
+    v. 2022-10 1.0 initial example
+-->
+
+<OTA_ResRetrieveRS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.opentravel.org/OTA/2003/05"
+                   xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_ResRetrieveRS.xsd"
+                   Version="7.000">
+
+    <Success/>
+
+    <ReservationsList>
+
+        <HotelReservation CreateDateTime="2022-09-03T19:47:50" ResStatus="Requested" RoomStayReservation="false">
+
+            <UniqueID Type="14" ID="6b34fe24ac2ff811"/>
+
+            <ResGuests>
+                <ResGuest>
+                    <Profiles>
+                        <ProfileInfo>
+                            <Profile>
+                                <Customer Language="de" Gender="Unknown">
+                                    <PersonName>
+                                        <GivenName>Otto</GivenName>
+                                        <Surname>Mustermann</Surname>
+                                    </PersonName>
+                                    <Email Remark="newsletter:yes">info@example.com</Email>
+                                </Customer>
+                            </Profile>
+                        </ProfileInfo>
+                    </Profiles>
+                </ResGuest>
+            </ResGuests>
+
+            <ResGlobalInfo>
+                <HotelReservationIDs>
+                    <HotelReservationID ResID_Type="13" ResID_SourceContext="cnt" ResID_Value="res" ResID_Source="www.example.com"/>
+                </HotelReservationIDs>
+                <BasicPropertyInfo HotelCode="123" HotelName="Frangart Inn"/>
+            </ResGlobalInfo>
+
+        </HotelReservation>
+
+    </ReservationsList>
+
+</OTA_ResRetrieveRS>

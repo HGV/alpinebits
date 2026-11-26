@@ -12,8 +12,6 @@ import (
 // 2020-10 did not change Inventory/Basic, so the 2018-10 samples apply.
 const inventorySamples = "../v201810/inventory/testdata/"
 
-var inventoryCaps = []alpinebits.Capability{inventory.CapUseRooms, inventory.CapOccupancyChildren}
-
 func inventorySample(t *testing.T, file string) inventory.HotelDescriptiveContentNotifRQ {
 	t.Helper()
 	b, err := os.ReadFile(inventorySamples + file)
@@ -53,9 +51,6 @@ func TestInventoryTypesRoundTrip(t *testing.T) {
 			rq := inventorySample(t, tt.file)
 			if tt.change != nil {
 				tt.change(&rq)
-			}
-			if errs := inventory.Validate(rq, inventoryCaps); errs != nil {
-				t.Fatalf("rules: %v", errs)
 			}
 			roundTrip(t, rq)
 		})

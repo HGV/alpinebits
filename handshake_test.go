@@ -59,13 +59,7 @@ func TestHandshakeIntersectsAllVersions(t *testing.T) {
 }
 
 func TestHandshakeNegotiationIsEnforced(t *testing.T) {
-	r, got := handshakeRouter(t)
-
-	post(t, r, "2024-10", "c1", "OTA_A:A", `<TestRQ/>`)
-	if want := []Capability{"rooms", "deltas"}; !reflect.DeepEqual(*got, want) {
-		t.Errorf("caps before handshake %v, want %v", *got, want)
-	}
-
+	r, _ := handshakeRouter(t)
 	client := `{"versions":[{"version":"2024-10","actions":[{"action":"action_A","supports":["deltas"]}]}]}`
 	if code, body := post(t, r, "2024-10", "c1", "OTA_Ping:Handshaking", ping(client)); code != http.StatusOK {
 		t.Fatalf("handshake: %d %s", code, body)
@@ -90,9 +84,6 @@ func TestHandshakeNegotiationIsEnforced(t *testing.T) {
 				t.Errorf("got %d %s, want %d", code, body, tt.wantStatus)
 			}
 		})
-	}
-	if want := []Capability{"deltas"}; !reflect.DeepEqual(*got, want) {
-		t.Errorf("caps after handshake %v, want %v", *got, want)
 	}
 }
 

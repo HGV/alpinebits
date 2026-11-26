@@ -9,7 +9,6 @@ import (
 
 	"github.com/HGV/alpinebits"
 	"github.com/HGV/alpinebits/v202010/freerooms"
-	"github.com/HGV/x/timex"
 )
 
 var freeRoomsCaps = []alpinebits.Capability{
@@ -201,22 +200,5 @@ func TestFreeRoomsTypesRoundTrip(t *testing.T) {
 		t.Run("RS "+name, func(t *testing.T) {
 			roundTrip(t, freeRoomsSample[freerooms.HotelInvCountNotifRS](t, "OTA_HotelInvCountNotifRS-"+name))
 		})
-	}
-}
-
-func TestFreeRoomsDeltaMarshalsValidXML(t *testing.T) {
-	day, err := timex.ParseDate("2020-08-01")
-	if err != nil {
-		t.Fatal(err)
-	}
-	rq := freerooms.HotelInvCountNotifRQ{Version: "4", Inventories: freerooms.Inventories{HotelCode: "123", Inventories: []freerooms.Inventory{
-		{StatusApplicationControl: &freerooms.StatusApplicationControl{Start: day, End: day, InvTypeCode: "DOUBLE"}},
-	}}}
-	out, err := xml.Marshal(rq)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := Version.Validate(out); err != nil {
-		t.Errorf("XSD: %v\n%s", err, out)
 	}
 }

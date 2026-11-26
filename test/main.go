@@ -4,8 +4,8 @@ import (
 	"context"
 	"crypto/subtle"
 	"flag"
-	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/HGV/alpinebits"
@@ -77,11 +77,15 @@ func pushRatePlans(_ context.Context, r alpinebits.Request[rateplans.HotelRatePl
 }
 
 // The router checks responses against the XSD only.
-func pullGuestRequests(_ context.Context, r alpinebits.Request[guestrequests.ReadRQ]) (guestrequests.ResRetrieveRS, error) {
+func pullGuestRequests(ctx context.Context, r alpinebits.Request[guestrequests.ReadRQ]) (guestrequests.ResRetrieveRS, error) {
+	var loaded []guestrequests.HotelReservation // ... of r.Data.ReadRequest.HotelCode ...
 	rs := guestrequests.ResRetrieveRS{Response: alpinebits.OK()}
-	// ... load the guest requests of r.Data.ReadRequest.HotelCode ...
-	if errs := guestrequests.ValidateResRetrieveRS(rs); len(errs) > 0 {
-		return rs, fmt.Errorf("invalid guest requests: %v", errs)
+	for _, res := range loaded {
+		if errs := guestrequests.ValidateHotelReservation(res); len(errs) > 0 {
+			slog.ErrorContext(ctx, "skipping invalid guest request", "id", res.UniqueID.ID, "errors", errs)
+			continue
+		}
+		rs.HotelReservations = append(rs.HotelReservations, res)
 	}
 	return rs, nil
 }

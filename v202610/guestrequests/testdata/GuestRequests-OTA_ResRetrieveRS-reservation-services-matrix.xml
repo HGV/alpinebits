@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    AlpineBits 2026-10
+    https://www.alpinebits.org/
+
+    Sample message file for a GuestRequests response illustrating the
+    Service/ServiceDetails/TimeSpan rules.
+
+    Each Service shows a different valid combination of the optional
+    TimeSpan element and its Start / End attributes:
+
+      1. Welcome package   - no TimeSpan
+      2. Bike rental       - TimeSpan with full date-time, Start and End,
+                             including a timezone offset (the End instant
+                             is exclusive: the bike is returned at 17:00)
+      3. Babyphone         - TimeSpan with a date range, Start and End,
+                             where End is the departure date (exclusive),
+                             so the device covers the seven nights from
+                             2026-05-01 through 2026-05-07
+      4. Fruit basket      - TimeSpan with Start only (single day)
+      5. Couple massage    - TimeSpan with full date-time, Start and End,
+                             including a timezone offset
+      6. City tax          - no TimeSpan
+      7. Ski lessons       - the same daily service encoded as one Service
+                             per occurrence (TimeSpan with Start only),
+                             equivalent to a single Service with Start
+                             and End
+
+    Changelog:
+    v. 2026-10 1.0 initial example
+-->
+
+<OTA_ResRetrieveRS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.opentravel.org/OTA/2003/05"
+                   xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_ResRetrieveRS.xsd"
+                   Version="7.000">
+
+    <Success/>
+
+    <ReservationsList>
+
+        <HotelReservation CreateDateTime="2026-04-15T10:00:00+02:00" ResStatus="Reserved" RoomStayReservation="true">
+
+            <!-- Type 14 -> Reservation -->
+            <UniqueID Type="14" ID="6b34fe24ac2ff812"/>
+
+            <RoomStays>
+
+                <RoomStay>
+
+                    <RoomTypes>
+                        <RoomType RoomTypeCode="bigsuite" RoomClassificationCode="42"/>
+                    </RoomTypes>
+
+                    <RatePlans>
+                        <RatePlan RatePlanCode="standard"/>
+                    </RatePlans>
+
+                    <!-- 2 adults -->
+                    <GuestCounts>
+                        <GuestCount Count="2"/>
+                    </GuestCounts>
+
+                    <!-- 7-night stay; End is the departure date and is exclusive -->
+                    <TimeSpan Start="2026-05-01" End="2026-05-08"/>
+
+                    <Total AmountAfterTax="700" CurrencyCode="EUR"/>
+
+                    <ServiceRPHs>
+                        <ServiceRPH RPH="1"/>
+                        <ServiceRPH RPH="2"/>
+                        <ServiceRPH RPH="3"/>
+                        <ServiceRPH RPH="4"/>
+                        <ServiceRPH RPH="5"/>
+                        <ServiceRPH RPH="6"/>
+                        <ServiceRPH RPH="7"/>
+                    </ServiceRPHs>
+
+                </RoomStay>
+
+            </RoomStays>
+
+            <Services>
+
+                <!-- 1) Per stay welcome package, no TimeSpan -->
+                <Service Inclusive="false" Quantity="1" ServiceRPH="1" ServicePricingType="Per stay"
+                         ServiceCategoryCode="OTHER" ServiceInventoryCode="welcome_pkg" ID="OTHER_welcome_pkg" Type="16">
+                    <ServiceDetails>
+                        <Total AmountAfterTax="30" CurrencyCode="EUR"/>
+                        <ServiceDescription>
+                            <Text TextFormat="PlainText">Welcome package</Text>
+                        </ServiceDescription>
+                    </ServiceDetails>
+                </Service>
+
+                <!-- 2) Per use bike rental, TimeSpan with full date-time and timezone offset;
+                        End is exclusive (the bike is returned at 17:00 local time) -->
+                <Service Inclusive="false" Quantity="1" ServiceRPH="2" ServicePricingType="Per use"
+                         ServiceCategoryCode="OTHER" ServiceInventoryCode="bicycle" ID="OTHER_bicycle" Type="16">
+                    <ServiceDetails>
+                        <TimeSpan Start="2026-05-02T09:00:00+02:00" End="2026-05-02T17:00:00+02:00"/>
+                        <Total AmountAfterTax="25" CurrencyCode="EUR"/>
+                        <ServiceDescription>
+                            <Text TextFormat="PlainText">Bicycle</Text>
+                        </ServiceDescription>
+                    </ServiceDetails>
+                </Service>
+
+                <!-- 3) Per night babyphone, TimeSpan with date range; End = departure date (exclusive),
+                        so the device covers the seven nights from 2026-05-01 through 2026-05-07 -->
+                <Service Inclusive="false" Quantity="7" ServiceRPH="3" ServicePricingType="Per night"
+                         ServiceCategoryCode="OTHER" ServiceInventoryCode="babyphone" ID="OTHER_babyphone" Type="16">
+                    <ServiceDetails>
+                        <TimeSpan Start="2026-05-01" End="2026-05-08"/>
+                        <Total AmountAfterTax="35" CurrencyCode="EUR"/>
+                        <ServiceDescription>
+                            <Text TextFormat="PlainText">Babyphone</Text>
+                        </ServiceDescription>
+                    </ServiceDetails>
+                </Service>
+
+                <!-- 4) Per stay fruit basket, TimeSpan with Start only (delivered on 2026-05-03) -->
+                <Service Inclusive="false" Quantity="1" ServiceRPH="4" ServicePricingType="Per stay"
+                         ServiceCategoryCode="FOOD" ServiceInventoryCode="fruit_basket" ID="FOOD_fruit_basket" Type="16">
+                    <ServiceDetails>
+                        <TimeSpan Start="2026-05-03"/>
+                        <Total AmountAfterTax="20" CurrencyCode="EUR"/>
+                        <ServiceDescription>
+                            <Text TextFormat="PlainText">Fruit basket</Text>
+                        </ServiceDescription>
+                    </ServiceDetails>
+                </Service>
+
+                <!-- 5) Per use couple massage, TimeSpan with full date-time and timezone offset -->
+                <Service Inclusive="false" Quantity="1" ServiceRPH="5" ServicePricingType="Per use"
+                         ServiceCategoryCode="ACTIVITY" ServiceInventoryCode="massage_couple" ID="ACTIVITY_massage_couple" Type="16">
+                    <ServiceDetails>
+                        <GuestCounts>
+                            <GuestCount Count="2"/>
+                        </GuestCounts>
+                        <TimeSpan Start="2026-05-04T15:00:00+02:00" End="2026-05-04T16:30:00+02:00"/>
+                        <Total AmountAfterTax="90" CurrencyCode="EUR"/>
+                        <ServiceDescription>
+                            <Text TextFormat="PlainText">Couple massage</Text>
+                        </ServiceDescription>
+                    </ServiceDetails>
+                </Service>
+
+                <!-- 6) Per person per night city tax, no TimeSpan (Quantity = 2 guests * 7 nights) -->
+                <Service Inclusive="false" Quantity="14" ServiceRPH="6" ServicePricingType="Per person per night"
+                         ServiceCategoryCode="TOURISTTAX" ServiceInventoryCode="city_tax" ID="TOURISTTAX_city_tax" Type="16">
+                    <ServiceDetails>
+                        <Total AmountAfterTax="14" CurrencyCode="EUR"/>
+                        <ServiceDescription>
+                            <Text TextFormat="PlainText">City tax</Text>
+                        </ServiceDescription>
+                    </ServiceDetails>
+                </Service>
+
+                <!-- 7) Per use ski lessons, three consecutive days encoded as one Service per occurrence
+                        (each TimeSpan has only Start); equivalent to a single Service with Start and End -->
+                <Service Inclusive="false" Quantity="1" ServiceRPH="7" ServicePricingType="Per use"
+                         ServiceCategoryCode="ACTIVITY" ServiceInventoryCode="ski_lesson" ID="ACTIVITY_ski_lesson" Type="16">
+                    <ServiceDetails>
+                        <TimeSpan Start="2026-05-05"/>
+                        <Total AmountAfterTax="60" CurrencyCode="EUR"/>
+                        <ServiceDescription>
+                            <Text TextFormat="PlainText">Ski lesson</Text>
+                        </ServiceDescription>
+                    </ServiceDetails>
+                </Service>
+                <Service Inclusive="false" Quantity="1" ServiceRPH="7" ServicePricingType="Per use"
+                         ServiceCategoryCode="ACTIVITY" ServiceInventoryCode="ski_lesson" ID="ACTIVITY_ski_lesson" Type="16">
+                    <ServiceDetails>
+                        <TimeSpan Start="2026-05-06"/>
+                        <Total AmountAfterTax="60" CurrencyCode="EUR"/>
+                        <ServiceDescription>
+                            <Text TextFormat="PlainText">Ski lesson</Text>
+                        </ServiceDescription>
+                    </ServiceDetails>
+                </Service>
+                <Service Inclusive="false" Quantity="1" ServiceRPH="7" ServicePricingType="Per use"
+                         ServiceCategoryCode="ACTIVITY" ServiceInventoryCode="ski_lesson" ID="ACTIVITY_ski_lesson" Type="16">
+                    <ServiceDetails>
+                        <TimeSpan Start="2026-05-07"/>
+                        <Total AmountAfterTax="60" CurrencyCode="EUR"/>
+                        <ServiceDescription>
+                            <Text TextFormat="PlainText">Ski lesson</Text>
+                        </ServiceDescription>
+                    </ServiceDetails>
+                </Service>
+
+            </Services>
+
+            <ResGuests>
+                <ResGuest>
+                    <Profiles>
+                        <ProfileInfo>
+                            <Profile>
+                                <Customer Gender="Female" Language="de">
+                                    <PersonName>
+                                        <GivenName>Laura</GivenName>
+                                        <Surname>Sample</Surname>
+                                    </PersonName>
+                                    <Address>
+                                        <AddressLine>Via Bolzano 12</AddressLine>
+                                        <CityName>Merano</CityName>
+                                        <PostalCode>39012</PostalCode>
+                                        <CountryName Code="IT"/>
+                                    </Address>
+                                </Customer>
+                            </Profile>
+                        </ProfileInfo>
+                    </Profiles>
+                </ResGuest>
+            </ResGuests>
+
+            <ResGlobalInfo>
+                <HotelReservationIDs>
+                    <HotelReservationID ResID_Type="14" ResID_Value="ABC-987654" ResID_Source="www.example.com"/>
+                </HotelReservationIDs>
+                <BasicPropertyInfo HotelCode="123" HotelName="Frangart Inn"/>
+            </ResGlobalInfo>
+
+        </HotelReservation>
+
+    </ReservationsList>
+
+</OTA_ResRetrieveRS>

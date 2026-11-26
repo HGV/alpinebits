@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+    AlpineBits 2026-10
+    https://www.alpinebits.org/
+
+    Sample message file for GuestRequests/Acknowledgements with a warning
+
+    Changelog:
+    v. 2026-10 1.0 added mandatory HotelCode in the ack
+    v. 2022-10 1.0 created dedicated sample file for warning message
+    v. 2015-07 1.0 reformatting
+    v. 2014-04 1.0 initial example
+-->
+
+<OTA_NotifReportRQ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                   xmlns="http://www.opentravel.org/OTA/2003/05" 
+                   xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_NotifReportRQ.xsd" 
+                   Version="4.000">
+
+    <Success/>
+
+    <Warnings>
+        <!-- refuse reservation with ID=f054bbd2f5ebab9 -->
+        <Warning Type="3" Code="450" RecordID="f054bbd2f5ebab9">Unable to process reservation</Warning>
+    </Warnings>
+
+    <NotifDetails>
+        <HotelNotifReport>
+            <HotelReservations>
+
+                <HotelReservation>
+                    <!-- ACK reservation with ID="6b34fe24ac2ff810" -->
+                    <UniqueID Type="14" ID="6b34fe24ac2ff810"/>
+                    <ResGlobalInfo>
+                       <BasicPropertyInfo HotelCode="123"/>
+                    </ResGlobalInfo>                    
+                </HotelReservation>
+
+                <HotelReservation>
+                    <!-- ACK cancellation with ID="c24e8b15ca469388" -->
+                    <UniqueID Type="15" ID="c24e8b15ca469388"/>
+                    <ResGlobalInfo>
+                       <BasicPropertyInfo HotelCode="123"/>
+                    </ResGlobalInfo>                    
+                </HotelReservation>
+
+                <HotelReservation>
+                    <!-- ACK quote request with ID="1000000000000001" -->
+                    <UniqueID Type="14" ID="1000000000000001"/>
+                    <ResGlobalInfo>
+                       <BasicPropertyInfo HotelCode="123"/>
+                    </ResGlobalInfo>                    
+                </HotelReservation>
+
+            </HotelReservations>
+        </HotelNotifReport>
+    </NotifDetails>
+
+</OTA_NotifReportRQ>

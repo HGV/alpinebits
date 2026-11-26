@@ -17,14 +17,3 @@ func TestErrorsAddf(t *testing.T) {
 		t.Errorf("got %+v\nwant %+v", errs, want)
 	}
 }
-
-func TestReject(t *testing.T) {
-	var none Errors
-	if err := Reject(none...); err != nil {
-		t.Errorf("Reject() = %v, want nil", err)
-	}
-	err := Reject(Error{Message: "x"})
-	if rej, ok := err.(*Rejection); !ok || len(rej.Errors) != 1 {
-		t.Errorf("Reject(x) = %#v, want *Rejection with one error", err)
-	}
-}

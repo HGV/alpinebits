@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+    AlpineBits 2022-10
+    https://www.alpinebits.org/
+
+    Sample message file for GuestRequests
+
+    Changelog:
+    v. 2022-10 1.1 SelectionCriteria moved to another example
+    v. 2014-04 1.0 initial example
+-->
+
+<OTA_ReadRQ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://www.opentravel.org/OTA/2003/05"
+            xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_ReadRQ.xsd"
+            Version="1.001">
+
+    <ReadRequests>
+
+        <HotelReadRequest HotelCode="123" HotelName="Frangart Inn"/>
+
+    </ReadRequests>
+
+</OTA_ReadRQ>

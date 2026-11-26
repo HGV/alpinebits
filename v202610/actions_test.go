@@ -9,15 +9,23 @@ import (
 	v202010 "github.com/HGV/alpinebits/v202010"
 	v202210 "github.com/HGV/alpinebits/v202210"
 	v202410 "github.com/HGV/alpinebits/v202410"
+	"github.com/HGV/alpinebits/v202610/freerooms"
 	"github.com/HGV/alpinebits/v202610/rateplans"
 )
 
 // Stops compiling when a version replaces an alias with its own type.
 func TestHandlersServeEarlierVersions(t *testing.T) {
+	fr := func(context.Context, alpinebits.Request[freerooms.HotelInvCountNotifRQ]) (freerooms.HotelInvCountNotifRS, error) {
+		return freerooms.HotelInvCountNotifRS{}, nil
+	}
 	rp := func(context.Context, alpinebits.Request[rateplans.HotelRatePlanNotifRQ]) (rateplans.HotelRatePlanNotifRS, error) {
 		return rateplans.HotelRatePlanNotifRS{}, nil
 	}
 	_ = alpinebits.NewRouter().
+		Handle(v202010.ActionHotelInvCountNotif, fr).
+		Handle(v202210.ActionHotelInvCountNotif, fr).
+		Handle(v202410.ActionHotelInvCountNotif, fr).
+		Handle(ActionHotelInvCountNotif, fr).
 		Handle(v201810.ActionHotelRatePlanNotif, rp).
 		Handle(v202010.ActionHotelRatePlanNotif, rp).
 		Handle(v202210.ActionHotelRatePlanNotif, rp).

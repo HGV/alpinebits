@@ -248,10 +248,10 @@ const (
 	PhoneTechTypeMobile PhoneTechType = "5"
 )
 
-// Telephone requires PhoneTechType in the XSD, although AlpineBits 2018-10
-// §4.2.2 calls it optional.
+// Telephone requires PhoneTechType in the XSD until 2022-10, although §4.2.2
+// always called it optional.
 type Telephone struct {
-	PhoneTechType PhoneTechType `xml:"PhoneTechType,attr"`
+	PhoneTechType PhoneTechType `xml:"PhoneTechType,attr,omitempty"`
 	PhoneNumber   string        `xml:"PhoneNumber,attr"`
 }
 
@@ -345,8 +345,9 @@ type AddressInfo struct {
 	CountryName CountryName `xml:"CountryName"`
 }
 
+// TelephoneInfo requires PhoneTechType in the XSD until 2022-10.
 type TelephoneInfo struct {
-	PhoneTechType PhoneTechType `xml:"PhoneTechType,attr"`
+	PhoneTechType PhoneTechType `xml:"PhoneTechType,attr,omitempty"`
 	PhoneNumber   string        `xml:"PhoneNumber,attr"`
 }
 

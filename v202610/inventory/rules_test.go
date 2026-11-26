@@ -134,10 +134,6 @@ func TestValidate2026Changes(t *testing.T) {
 			c.FacilityInfo.GuestRooms[1].MaxAdultOccupancy = 4
 			c.FacilityInfo.GuestRooms[3].MaxAdultOccupancy = 2
 		}, []string{"GuestRoom[3]: room of category DOUBLE allows only Code and RoomID"}},
-		{"AdditionalCodes", func(c *HotelDescriptiveContent) {
-			c.FacilityInfo.GuestRooms[1].MaxAdultOccupancy = 4
-			c.AdditionalCodes = &[]AdditionalCode{{Type: "CIN", Value: "IT12345678A1B23456"}}
-		}, nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

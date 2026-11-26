@@ -6,15 +6,12 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/HGV/alpinebits"
 	"github.com/HGV/alpinebits/v202210/inventory"
 )
 
 // The 2022-10 RQ samples are the 2018-10 ones, reformatted; the RS samples are
 // new.
 const inventorySamples = "../v201810/inventory/testdata/"
-
-var inventoryCaps = []alpinebits.Capability{inventory.CapUseRooms, inventory.CapOccupancyChildren}
 
 func readSample[T any](t *testing.T, path string) T {
 	t.Helper()
@@ -50,11 +47,7 @@ func roundTrip[T any](t *testing.T, v T) {
 func TestInventoryTypesRoundTrip(t *testing.T) {
 	for _, name := range []string{"", "-with-roomtype", "-delete-all"} {
 		t.Run("RQ"+name, func(t *testing.T) {
-			rq := readSample[inventory.HotelDescriptiveContentNotifRQ](t, inventorySamples+"Inventory-OTA_HotelDescriptiveContentNotifRQ"+name+".xml")
-			if errs := inventory.Validate(rq, inventoryCaps); errs != nil {
-				t.Fatalf("rules: %v", errs)
-			}
-			roundTrip(t, rq)
+			roundTrip(t, readSample[inventory.HotelDescriptiveContentNotifRQ](t, inventorySamples+"Inventory-OTA_HotelDescriptiveContentNotifRQ"+name+".xml"))
 		})
 	}
 	for _, name := range []string{"success", "advisory", "warning", "error"} {

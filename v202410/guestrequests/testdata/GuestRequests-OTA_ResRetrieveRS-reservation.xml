@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+    AlpineBits 2024-10
+    https://www.alpinebits.org/
+
+    Sample message file for a GuestRequests response
+
+    Changelog:
+    v. 2024-10 1.1 added RoomRates
+    v. 2024-10 1.0 added Services
+    v. 2015-07 1.0 updated to 2015-07
+    v. 2014-04 1.0 initial example
+-->
+
+<OTA_ResRetrieveRS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.opentravel.org/OTA/2003/05"
+                   xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_ResRetrieveRS.xsd"
+                   Version="7.000">
+
+    <Success/>
+
+    <ReservationsList>
+
+        <HotelReservation CreateDateTime="2022-03-21T15:00:00+01:00" ResStatus="Reserved" RoomStayReservation="true">
+
+            <!-- Type 14 -> Reservation -->
+            <UniqueID Type="14" ID="6b34fe24ac2ff810"/>
+
+            <RoomStays>
+
+                <RoomStay>
+
+                    <RoomTypes>
+                        <RoomType RoomTypeCode="bigsuite" RoomClassificationCode="42"/>
+                    </RoomTypes>
+
+                    <RatePlans>
+                        <RatePlan RatePlanCode="123456-xyz">
+                            <Commission Percent="15"/>
+                            <!-- Code 1 -> All inclusive -->
+                            <MealsIncluded MealPlanIndicator="true" MealPlanCodes="1"/>
+                        </RatePlan>
+                    </RatePlans>
+
+                    <RoomRates>
+                        <RoomRate RatePlanCode="123456-xyz" RoomTypeCode="bigsuite">
+                            <Rates>
+                                <Rate EffectiveDate="2022-01-01" ExpireDate="2022-01-07" ExpireDateExclusiveInd="false" RateTimeUnit="Day" UnitMultiplier="1">
+                                    <Base AmountAfterTax="100" CurrencyCode="EUR"/>
+                                </Rate>
+                                <Rate EffectiveDate="2022-01-08" RateTimeUnit="Day">
+                                    <Base AmountAfterTax="115" CurrencyCode="EUR"/>
+                                </Rate>
+                                <Rate EffectiveDate="2022-01-09" RateTimeUnit="Day">
+                                    <Base AmountAfterTax="110" CurrencyCode="EUR"/>
+                                </Rate>
+                                <Rate EffectiveDate="2022-01-10" ExpireDate="2022-01-11" ExpireDateExclusiveInd="false" RateTimeUnit="Day">
+                                    <Base AmountAfterTax="100" CurrencyCode="EUR"/>
+                                </Rate>
+                            </Rates>
+                        </RoomRate>
+                    </RoomRates>
+
+                    <!-- 2 adults + 1 child + 1 child = 4 guests -->
+                    <GuestCounts>
+                        <!-- 2 adults -->
+                        <GuestCount Count="2"/>
+                        <!-- 1 child -->
+                        <GuestCount Count="1" Age="9"/>
+                        <!-- 1 child -->
+                        <GuestCount Count="1" Age="3"/>
+                    </GuestCounts>
+
+                    <TimeSpan Start="2022-01-01" End="2022-01-12"/>
+
+                    <Guarantee>
+                        <GuaranteesAccepted>
+                            <GuaranteeAccepted>
+                                <PaymentCard CardCode="VI" ExpireDate="1226">
+                                    <CardHolderName>Otto Mustermann</CardHolderName>
+                                    <CardNumber>
+                                        <PlainText>4444333322221111
+                                        </PlainText>
+                                    </CardNumber>
+                                </PaymentCard>
+                            </GuaranteeAccepted>
+                        </GuaranteesAccepted>
+                    </Guarantee>
+
+                    <Total AmountAfterTax="1125" CurrencyCode="EUR"/>
+
+                    <ServiceRPHs>
+                        <ServiceRPH RPH="1" />
+                        <ServiceRPH RPH="2" />
+                    </ServiceRPHs>
+
+                </RoomStay>
+
+            </RoomStays>
+
+            <!--- optional booked services / price breakdown-->
+            <Services>
+                <!-- Garage 10 Euro / day -->
+                <Service Inclusive="false" Quantity="11" ServiceRPH="1" ServicePricingType="Per use"
+                         ServiceCategoryCode="OTHER" ServiceInventoryCode="xyz" ID="123" Type="16">
+                    <ServiceDetails>
+                        <Total AmountAfterTax="110" CurrencyCode="EUR"/>
+                        <ServiceDescription>
+                            <Text TextFormat="PlainText">Garage</Text>
+                        </ServiceDescription>
+                    </ServiceDetails>
+                </Service>
+                <!-- Supplement from a rate plan -->
+                <Service Inclusive="true" Quantity="1" ServiceRPH="2" ServicePricingType="Per stay"
+                         ServiceCategoryCode="SUPPLEMENT" ServiceInventoryCode="0x539" ID="456" Type="16">
+                    <ServiceDetails>
+                        <Total AmountAfterTax="50" CurrencyCode="EUR"/>
+                        <ServiceDescription>
+                            <Text TextFormat="PlainText">Final cleaning</Text>
+                        </ServiceDescription>
+                    </ServiceDetails>
+                </Service>
+                <!--  Spa Massage -->
+                <Service Inclusive="false" Quantity="1" ServiceRPH="3" ServicePricingType="Per use"
+                         ServiceCategoryCode="SPA"
+                         ServiceInventoryCode="abc" ID="555" Type="16">
+                    <ServiceDetails>
+                        <!-- optional guest counts -->
+                        <GuestCounts>
+                            <!-- 2 adults -->
+                            <GuestCount Count="2"/>
+                        </GuestCounts>
+                        <!-- optional time span -->
+                        <TimeSpan Start="2022-01-03T15:00:00" End="2022-01-03T17:30:00"/>
+                        <!-- optional guest comment -->
+                        <Comments>
+                            <Comment>
+                                <Text TextFormat="PlainText">A guest comment</Text>
+                            </Comment>
+                        </Comments>
+                        <Total AmountAfterTax="50" CurrencyCode="EUR"/>
+                        <ServiceDescription>
+                            <Text TextFormat="PlainText">couple massage</Text>
+                        </ServiceDescription>
+                    </ServiceDetails>
+                </Service>
+                <!-- Board price -->
+                <Service Inclusive="true" Quantity="33" ServiceRPH="4" ServicePricingType="Per person per night"
+                         ServiceCategoryCode="BOARD" ServiceInventoryCode="HB" ID="789" Type="16">
+                    <ServiceDetails>
+                        <Total AmountAfterTax="330" CurrencyCode="EUR"/>
+                        <ServiceDescription>
+                            <Text TextFormat="PlainText">Halfboard</Text>
+                        </ServiceDescription>
+                    </ServiceDetails>
+                </Service>
+            </Services>
+
+            <ResGuests>
+                <ResGuest>
+                    <Profiles>
+                        <ProfileInfo>
+                            <Profile>
+
+                                <Customer Gender="Male" BirthDate="1980-01-01" Language="de">
+
+                                    <PersonName>
+                                        <NamePrefix>Herr</NamePrefix>
+                                        <GivenName>Otto</GivenName>
+                                        <Surname>Mustermann</Surname>
+                                        <NameTitle>Dr</NameTitle>
+                                    </PersonName>
+
+                                    <!-- Code 1 -> Voice -->
+                                    <Telephone PhoneTechType="1" PhoneNumber="+4934567891"/>
+                                    <!-- Code 3 -> Fax -->
+                                    <Telephone PhoneTechType="3" PhoneNumber="+4934567892"/>
+                                    <!-- Code 5 -> Mobile -->
+                                    <Telephone PhoneTechType="5" PhoneNumber="+4934567893"/>
+
+                                    <Email Remark="newsletter:yes">otto.mustermann@example.com</Email>
+
+                                    <Address Remark="catalog:yes">
+
+                                        <AddressLine>Musterstraße 1</AddressLine>
+                                        <CityName>Musterstadt</CityName>
+                                        <PostalCode>1234</PostalCode>
+                                        <CountryName Code="DE"/>
+
+                                    </Address>
+
+                                </Customer>
+
+                            </Profile>
+                        </ProfileInfo>
+                    </Profiles>
+                </ResGuest>
+            </ResGuests>
+
+            <ResGlobalInfo>
+
+                <Comments>
+
+                    <Comment Name="included services">
+                        <ListItem ListItem="1" Language="de">Parkplatz</ListItem>
+                        <ListItem ListItem="2" Language="de">Schwimmbad</ListItem>
+                        <ListItem ListItem="3" Language="de">Skipass</ListItem>
+                    </Comment>
+
+                    <Comment Name="customer comment">
+                        <Text>
+                            Do you allow pets? sincerely, John Doe
+                        </Text>
+                    </Comment>
+
+                    <Comment Name="additional info">
+                        <Text>
+                            This is a collective request.
+                        </Text>
+                    </Comment>
+
+                </Comments>
+
+                <!--- optional payments done with the booking-->
+                <DepositPayments>
+                  <!-- example online payment -->
+                  <GuaranteePayment Start="2023-07-13T12:51:49" GuaranteeCode="129acd49f7db2fabc317db3d9656525">
+                    <AcceptedPayments>
+                      <AcceptedPayment GuaranteeTypeCode="46" GuaranteeID="PAYPAL" PaymentTransactionTypeCode="charge">
+                        <PaymentCard CardCode="VI" ExpireDate="1124">
+                          <CardHolderName>Laura Sample</CardHolderName>
+                          <CardNumber Mask="XXXXXXXXXXXX1234" Token="39acd49f7db2fabc317db3d969592345" TokenProviderID="PAYPAL" />
+                        </PaymentCard>
+                      </AcceptedPayment>
+                    </AcceptedPayments>
+                    <AmountPercent Amount="100" CurrencyCode="EUR" />
+                  </GuaranteePayment>
+                  <!-- example bank transfer payment -->
+                  <GuaranteePayment Start="2023-07-13T12:51:49" GuaranteeCode="123456">
+                    <AcceptedPayments>
+                      <AcceptedPayment GuaranteeTypeCode="28" GuaranteeID="INTESA">
+                        <BankAcct>
+                          <BankAcctName>Laura Sample</BankAcctName>
+                          <BankAcctNumber Mask="IT12XXXXXXXXXXXXXX7990">
+                            <PlainText>IT12 3456 7890 1234 5678 90</PlainText>
+                          </BankAcctNumber>
+                        </BankAcct>
+                      </AcceptedPayment>
+                    </AcceptedPayments>
+                    <AmountPercent Amount="100" CurrencyCode="EUR" />
+                  </GuaranteePayment>
+                  <!-- example voucher payment -->
+                  <GuaranteePayment Start="2023-07-13T12:51:49" GuaranteeCode="123456">
+                    <AcceptedPayments>
+                      <AcceptedPayment GuaranteeTypeCode="3" GuaranteeID="GETAVO" PaymentTransactionTypeCode="charge">
+                        <Voucher ElectronicIndicator="true" Identifier="XVZ-123-14050" />
+                      </AcceptedPayment>
+                    </AcceptedPayments>
+                    <AmountPercent Amount="100" CurrencyCode="EUR" />
+                  </GuaranteePayment>
+                </DepositPayments>
+                <CancelPenalties>
+                    <CancelPenalty>
+                        <PenaltyDescription>
+                            <Text>
+                                Cancellation is handled by hotel.
+                                Penalty is 50%, if canceled within 3 days before show, 100% otherwise.
+                            </Text>
+                        </PenaltyDescription>
+                    </CancelPenalty>
+                </CancelPenalties>
+
+                <HotelReservationIDs>
+                    <!-- ResID_Type 13 -> Internet Broker -->
+                    <HotelReservationID ResID_Type="13"
+                                        ResID_Value="Slogan"
+                                        ResID_Source="www.example.com"
+                                        ResID_SourceContext="top banner"/>
+                </HotelReservationIDs>
+
+                <Profiles>
+                    <ProfileInfo>
+                        <!-- ProfileType 4 -> Travel Agent -->
+                        <Profile ProfileType="4">
+                            <CompanyInfo>
+                                <CompanyName Code="123" CodeContext="ABC">ACME Travel Agency</CompanyName>
+                                <!-- Code 1 -> Voice -->
+                                <AddressInfo>
+                                    <AddressLine>Musterstraße 1</AddressLine>
+                                    <CityName>Flaneid</CityName>
+                                    <PostalCode>12345</PostalCode>
+                                    <CountryName Code="IT"/>
+                                </AddressInfo>
+                                <TelephoneInfo PhoneTechType="1" PhoneNumber="+391234567890"/>
+                                <Email>info@example.com</Email>
+                            </CompanyInfo>
+                        </Profile>
+                    </ProfileInfo>
+                </Profiles>
+
+                <BasicPropertyInfo HotelCode="123" HotelName="Frangart Inn"/>
+
+            </ResGlobalInfo>
+
+        </HotelReservation>
+
+    </ReservationsList>
+
+</OTA_ResRetrieveRS>
