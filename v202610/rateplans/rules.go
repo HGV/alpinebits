@@ -221,10 +221,9 @@ func isDeletion(r Rate) bool {
 
 func (c *checker) rates(at alpinebits.Path, plan RatePlan) {
 	overlay := plan.RatePlanNotifType == RatePlanNotifTypeOverlay
-	// 2026-10: every message carries the static Rate, an Overlay for control.
-	withStatic := complete(plan.RatePlanNotifType) || overlay
 	rates := rules.Items(plan.Rates)
-	if withStatic && !slices.ContainsFunc(rates, isStaticRate) {
+	// 2026-10: every message carries the static Rate, an Overlay for control.
+	if !slices.ContainsFunc(rates, isStaticRate) {
 		c.Required(at, "static Rate required")
 	}
 	var ranged []int
@@ -233,9 +232,6 @@ func (c *checker) rates(at alpinebits.Path, plan RatePlan) {
 		if isStaticRate(r) {
 			if j > 0 {
 				c.Invalid(rat, "static Rate must be the first Rate")
-			}
-			if !withStatic {
-				c.Invalid(rat, "static Rate only allowed with RatePlanNotifType New")
 			}
 			c.staticRate(rat, r)
 			continue
